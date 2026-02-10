@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { Upload, Printer, Loader2 } from 'lucide-react';
+import { Camera, ImageIcon, Printer, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -13,6 +13,8 @@ export default function ImagePrint() {
   const [contrast, setContrast] = useState(0);
   const [printing, setPrinting] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
   const { connected } = usePrinter();
 
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,7 +36,7 @@ export default function ImagePrint() {
       const ratio = 384 / img.width;
       canvas.width = 384;
       canvas.height = Math.ceil(img.height * ratio);
-      
+
       ctx.filter = `brightness(${100 + brightness}%) contrast(${100 + contrast}%)`;
       ctx.drawImage(img, 0, 0, 384, canvas.height);
       ctx.filter = 'none';
@@ -45,13 +47,11 @@ export default function ImagePrint() {
       const w = canvas.width;
       const h = canvas.height;
 
-      // Convert to grayscale first
       for (let i = 0; i < data.length; i += 4) {
         const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
         data[i] = data[i + 1] = data[i + 2] = gray;
       }
 
-      // Dithering
       for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
           const idx = (y * w + x) * 4;
@@ -66,7 +66,6 @@ export default function ImagePrint() {
           }
           if (y + 1 < h) {
             if (x > 0) {
-              const bl = idx + (w - 1) * 4;
               const actualBl = ((y + 1) * w + (x - 1)) * 4;
               data[actualBl] = data[actualBl + 1] = data[actualBl + 2] = data[actualBl] + error * 3 / 16;
             }
@@ -84,9 +83,6 @@ export default function ImagePrint() {
     img.src = originalImage;
   }, [originalImage, brightness, contrast]);
 
-  // Re-render when settings change
-  useState(() => { renderPreview(); });
-  // Using effect via key trick
   const settingsKey = `${brightness}-${contrast}-${originalImage}`;
 
   const handlePrint = async () => {
@@ -106,17 +102,37 @@ export default function ImagePrint() {
     <div className="p-4 pb-24 max-w-2xl mx-auto space-y-4">
       <h1 className="text-xl font-bold">Görsel Bas</h1>
 
-      <label className="flex flex-col items-center gap-2 border-2 border-dashed border-border rounded-xl p-8 cursor-pointer hover:border-primary/40 transition-colors">
-        <Upload className="h-8 w-8 text-muted-foreground" />
-        <span className="text-sm text-muted-foreground">Görsel seçmek için dokunun</span>
-        <input
-          type="file"
-          accept="image/*"
-          capture="environment"
-          className="hidden"
-          onChange={handleFileChange}
-        />
-      </label>
+      <div className="grid grid-cols-2 gap-3">
+        <button
+          onClick={() => cameraRef.current?.click()}
+          className="flex flex-col items-center gap-2 border-2 border-dashed border-border rounded-xl p-6 cursor-pointer hover:border-primary/40 hover:bg-accent/40 transition-colors"
+        >
+          <Camera className="h-8 w-8 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground font-medium">Kamera</span>
+          <input
+            ref={cameraRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+        </button>
+        <button
+          onClick={() => galleryRef.current?.click()}
+          className="flex flex-col items-center gap-2 border-2 border-dashed border-border rounded-xl p-6 cursor-pointer hover:border-primary/40 hover:bg-accent/40 transition-colors"
+        >
+          <ImageIcon className="h-8 w-8 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground font-medium">Galeri / Dosya</span>
+          <input
+            ref={galleryRef}
+            type="file"
+            accept="image/*,.svg,.png,.jpg,.jpeg,.webp"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+        </button>
+      </div>
 
       {originalImage && (
         <>
@@ -126,9 +142,7 @@ export default function ImagePrint() {
               <Slider
                 value={[brightness]}
                 onValueChange={([v]) => { setBrightness(v); setTimeout(renderPreview, 0); }}
-                min={-50}
-                max={50}
-                step={5}
+                min={-50} max={50} step={5}
               />
             </div>
             <div className="space-y-1">
@@ -136,9 +150,7 @@ export default function ImagePrint() {
               <Slider
                 value={[contrast]}
                 onValueChange={([v]) => { setContrast(v); setTimeout(renderPreview, 0); }}
-                min={-50}
-                max={50}
-                step={5}
+                min={-50} max={50} step={5}
               />
             </div>
           </div>
@@ -153,12 +165,7 @@ export default function ImagePrint() {
                   style={{ width: '384px', imageRendering: 'pixelated' }}
                   className="block"
                 />
-                <img
-                  src={originalImage}
-                  className="hidden"
-                  onLoad={renderPreview}
-                  alt=""
-                />
+                <img src={originalImage} className="hidden" onLoad={renderPreview} alt="" />
               </div>
             </div>
           </div>

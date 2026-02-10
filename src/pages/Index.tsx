@@ -47,7 +47,7 @@ export default function HomePage() {
       ) : (
         <div className="text-center py-6">
           <div className="text-5xl mb-3">🖨️</div>
-          <h1 className="text-2xl font-bold mb-1">TinyPrint</h1>
+          <h1 className="text-2xl font-bold mb-1">SılaPrint</h1>
           <p className="text-muted-foreground text-sm">
             Mini termal yazıcınız için web uygulaması
           </p>

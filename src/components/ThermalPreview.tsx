@@ -5,6 +5,8 @@ interface ThermalPreviewProps {
   fontSize?: number;
   fontWeight?: string;
   textAlign?: CanvasTextAlign;
+  fontFamily?: string;
+  frame?: string;
   imageData?: string | null;
 }
 
@@ -13,7 +15,7 @@ export interface ThermalPreviewHandle {
 }
 
 export const ThermalPreview = forwardRef<ThermalPreviewHandle, ThermalPreviewProps>(
-  ({ text, fontSize = 24, fontWeight = 'normal', textAlign = 'left', imageData }, ref) => {
+  ({ text, fontSize = 24, fontWeight = 'normal', textAlign = 'left', fontFamily = "'JetBrains Mono', monospace", frame = 'none', imageData }, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useImperativeHandle(ref, () => ({
@@ -42,23 +44,32 @@ export const ThermalPreview = forwardRef<ThermalPreviewHandle, ThermalPreviewPro
       }
 
       if (text) {
-        ctx.font = `${fontWeight} ${fontSize}px 'JetBrains Mono', monospace`;
+        const fontStr = `${fontWeight} ${fontSize}px ${fontFamily}`;
+        ctx.font = fontStr;
         ctx.textAlign = textAlign;
         const padding = 16;
-        const maxWidth = 384 - padding * 2;
+        const framePad = frame !== 'none' ? 12 : 0;
+        const innerPad = padding + framePad;
+        const maxWidth = 384 - innerPad * 2;
         const lines = wrapText(ctx, text, maxWidth);
         const lineHeight = fontSize * 1.4;
-        canvas.height = Math.ceil(lines.length * lineHeight + padding * 2);
-        
+        canvas.height = Math.ceil(lines.length * lineHeight + innerPad * 2 + fontSize * 0.4);
+
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Draw frame
+        if (frame !== 'none') {
+          drawFrame(ctx, frame, canvas.width, canvas.height);
+        }
+
         ctx.fillStyle = 'black';
-        ctx.font = `${fontWeight} ${fontSize}px 'JetBrains Mono', monospace`;
+        ctx.font = fontStr;
         ctx.textAlign = textAlign;
 
-        const x = textAlign === 'center' ? 192 : textAlign === 'right' ? 384 - padding : padding;
+        const x = textAlign === 'center' ? 192 : textAlign === 'right' ? 384 - innerPad : innerPad;
         lines.forEach((line, i) => {
-          ctx.fillText(line, x, padding + fontSize + i * lineHeight);
+          ctx.fillText(line, x, innerPad + fontSize + i * lineHeight);
         });
       } else {
         canvas.height = 100;
@@ -69,7 +80,7 @@ export const ThermalPreview = forwardRef<ThermalPreviewHandle, ThermalPreviewPro
         ctx.textAlign = 'center';
         ctx.fillText('Önizleme burada görünecek', 192, 55);
       }
-    }, [text, fontSize, fontWeight, textAlign, imageData]);
+    }, [text, fontSize, fontWeight, textAlign, fontFamily, frame, imageData]);
 
     return (
       <div className="flex justify-center">
@@ -86,6 +97,44 @@ export const ThermalPreview = forwardRef<ThermalPreviewHandle, ThermalPreviewPro
 );
 
 ThermalPreview.displayName = 'ThermalPreview';
+
+function drawFrame(ctx: CanvasRenderingContext2D, frame: string, w: number, h: number) {
+  const m = 8;
+  ctx.strokeStyle = 'black';
+  ctx.lineWidth = 2;
+
+  switch (frame) {
+    case 'solid':
+      ctx.strokeRect(m, m, w - m * 2, h - m * 2);
+      break;
+    case 'dashed':
+      ctx.setLineDash([6, 4]);
+      ctx.strokeRect(m, m, w - m * 2, h - m * 2);
+      ctx.setLineDash([]);
+      break;
+    case 'double':
+      ctx.strokeRect(m, m, w - m * 2, h - m * 2);
+      ctx.strokeRect(m + 4, m + 4, w - m * 2 - 8, h - m * 2 - 8);
+      break;
+    case 'stars': {
+      ctx.font = '14px monospace';
+      ctx.fillStyle = 'black';
+      const star = '★';
+      const stepX = 16;
+      // Top and bottom
+      for (let x = m; x < w - m; x += stepX) {
+        ctx.fillText(star, x, m + 12);
+        ctx.fillText(star, x, h - m);
+      }
+      // Left and right
+      for (let y = m + 24; y < h - m - 4; y += stepX) {
+        ctx.fillText(star, m, y);
+        ctx.fillText(star, w - m - 12, y);
+      }
+      break;
+    }
+  }
+}
 
 function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
   const paragraphs = text.split('\n');

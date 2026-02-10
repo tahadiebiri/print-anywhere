@@ -29,8 +29,15 @@ export async function disconnectPrinter(): Promise<void> {
 
 export async function printCanvas(canvas: HTMLCanvasElement): Promise<void> {
   const printer = getPrinter();
-  // Convert canvas to image data URL and print
-  const dataUrl = canvas.toDataURL('image/png');
+  // Add blank feed lines at the bottom so the output doesn't stay inside the printer
+  const feedCanvas = document.createElement('canvas');
+  feedCanvas.width = canvas.width;
+  feedCanvas.height = canvas.height + 80; // 80px extra blank feed
+  const feedCtx = feedCanvas.getContext('2d')!;
+  feedCtx.fillStyle = 'white';
+  feedCtx.fillRect(0, 0, feedCanvas.width, feedCanvas.height);
+  feedCtx.drawImage(canvas, 0, 0);
+  const dataUrl = feedCanvas.toDataURL('image/png');
   await printer.printImage(dataUrl);
 }
 

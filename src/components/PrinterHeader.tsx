@@ -1,24 +1,29 @@
-import { Bluetooth, BluetoothOff, Loader2 } from 'lucide-react';
+import { Bluetooth, BluetoothOff, Loader2, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePrinter } from '@/hooks/use-printer';
+import { useTheme } from '@/hooks/use-theme';
 import { isWebBluetoothSupported } from '@/lib/printer';
 
 export function PrinterHeader() {
   const { connected, deviceName, connecting, connect, disconnect, error } = usePrinter();
+  const { theme, toggleTheme } = useTheme();
   const supported = isWebBluetoothSupported();
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-md">
       <div className="flex items-center justify-between px-4 py-3 max-w-2xl mx-auto">
         <div className="flex items-center gap-2">
-          <span className="text-lg font-bold tracking-tight">🖨️ TinyPrint</span>
+          <span className="text-lg font-bold tracking-tight">🖨️ SılaPrint</span>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8">
+            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
           {!supported ? (
-            <span className="text-xs text-destructive">Bluetooth desteklenmiyor</span>
+            <span className="text-xs text-destructive">BT yok</span>
           ) : connected ? (
             <>
-              <span className="flex items-center gap-1.5 text-xs font-medium" style={{ color: 'hsl(var(--printer-success))' }}>
+              <span className="flex items-center gap-1.5 text-xs font-medium text-green-500 dark:text-green-400">
                 <Bluetooth className="h-3.5 w-3.5" />
                 {deviceName}
               </span>
