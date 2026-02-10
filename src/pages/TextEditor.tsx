@@ -1,9 +1,10 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { AlignLeft, AlignCenter, AlignRight, Bold, Loader2, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Toggle } from '@/components/ui/toggle';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ThermalPreview, ThermalPreviewHandle } from '@/components/ThermalPreview';
 import { usePrinter } from '@/hooks/use-printer';
 import { printCanvas } from '@/lib/printer';
@@ -15,11 +16,28 @@ const fontSizes = [
   { label: 'Büyük', value: 32 },
 ];
 
+const fonts = [
+  { label: 'JetBrains Mono', value: "'JetBrains Mono', monospace" },
+  { label: 'Inter', value: "'Inter', sans-serif" },
+  { label: 'Serif', value: "Georgia, 'Times New Roman', serif" },
+  { label: 'Cursive', value: "'Segoe Script', 'Comic Sans MS', cursive" },
+];
+
+const frames = [
+  { label: 'Çerçevesiz', value: 'none' },
+  { label: 'Düz Çerçeve', value: 'solid' },
+  { label: 'Kesikli Çerçeve', value: 'dashed' },
+  { label: 'Çift Çerçeve', value: 'double' },
+  { label: 'Yıldızlı', value: 'stars' },
+];
+
 export default function TextEditor() {
   const [text, setText] = useState('');
   const [fontSize, setFontSize] = useState(24);
   const [bold, setBold] = useState(false);
   const [align, setAlign] = useState<CanvasTextAlign>('left');
+  const [font, setFont] = useState(fonts[0].value);
+  const [frame, setFrame] = useState('none');
   const [printing, setPrinting] = useState(false);
   const previewRef = useRef<ThermalPreviewHandle>(null);
   const { connected } = usePrinter();
@@ -52,6 +70,31 @@ export default function TextEditor() {
         />
       </div>
 
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">Font</Label>
+          <Select value={font} onValueChange={setFont}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {fonts.map(f => (
+                <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">Çerçeve</Label>
+          <Select value={frame} onValueChange={setFrame}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {frames.map(f => (
+                <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
       <div className="flex flex-wrap items-center gap-2">
         <Label className="w-full text-xs text-muted-foreground">Font Boyutu</Label>
         {fontSizes.map(fs => (
@@ -70,7 +113,7 @@ export default function TextEditor() {
         <Toggle pressed={bold} onPressedChange={setBold} size="sm" aria-label="Kalın">
           <Bold className="h-4 w-4" />
         </Toggle>
-        <div className="border-l h-6 mx-1" />
+        <div className="border-l border-border h-6 mx-1" />
         <Toggle pressed={align === 'left'} onPressedChange={() => setAlign('left')} size="sm">
           <AlignLeft className="h-4 w-4" />
         </Toggle>
@@ -91,6 +134,8 @@ export default function TextEditor() {
             fontSize={fontSize}
             fontWeight={bold ? 'bold' : 'normal'}
             textAlign={align}
+            fontFamily={font}
+            frame={frame}
           />
         </div>
       </div>
