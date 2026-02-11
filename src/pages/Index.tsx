@@ -1,8 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { Type, Image, QrCode, LayoutTemplate, Bluetooth, AlertTriangle } from 'lucide-react';
+import { Type, Image, QrCode, LayoutTemplate, Bluetooth, AlertTriangle, ChevronsUp, ChevronsDown } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { usePrinter } from '@/hooks/use-printer';
-import { isWebBluetoothSupported } from '@/lib/printer';
+import { isWebBluetoothSupported, feedPaper } from '@/lib/printer';
+import { toast } from 'sonner';
+import { useState } from 'react';
 
 const quickActions = [
   { path: '/text', icon: Type, label: 'Metin Bas', desc: 'Metin yaz ve bas' },
@@ -15,6 +18,19 @@ export default function HomePage() {
   const navigate = useNavigate();
   const { connected, deviceName } = usePrinter();
   const supported = isWebBluetoothSupported();
+  const [feeding, setFeeding] = useState(false);
+
+  const handleFeed = async (direction: 'forward' | 'backward') => {
+    setFeeding(true);
+    try {
+      await feedPaper(direction === 'forward' ? 80 : 40);
+      toast.success(direction === 'forward' ? 'İleri sarıldı' : 'Geri sarıldı');
+    } catch (e: any) {
+      toast.error(e.message || 'Besleme hatası');
+    } finally {
+      setFeeding(false);
+    }
+  };
 
   return (
     <div className="p-4 pb-24 max-w-2xl mx-auto space-y-6">
@@ -54,6 +70,29 @@ export default function HomePage() {
           <p className="text-xs text-muted-foreground mt-2">
             Başlamak için sağ üstten yazıcınıza bağlanın
           </p>
+        </div>
+      )}
+
+      {connected && (
+        <div className="grid grid-cols-2 gap-3">
+          <Button
+            variant="outline"
+            className="gap-2 h-12"
+            disabled={feeding}
+            onClick={() => handleFeed('forward')}
+          >
+            <ChevronsDown className="h-5 w-5" />
+            İleri Sar
+          </Button>
+          <Button
+            variant="outline"
+            className="gap-2 h-12"
+            disabled={feeding}
+            onClick={() => handleFeed('backward')}
+          >
+            <ChevronsUp className="h-5 w-5" />
+            Geri Sar
+          </Button>
         </div>
       )}
 

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ThermalPreview, ThermalPreviewHandle } from '@/components/ThermalPreview';
+import { PageHeader } from '@/components/PageHeader';
 import { usePrinter } from '@/hooks/use-printer';
 import { printCanvas } from '@/lib/printer';
 import { toast } from 'sonner';
@@ -72,7 +73,7 @@ export default function QRCodePage() {
 
   return (
     <div className="p-4 pb-24 max-w-2xl mx-auto space-y-4">
-      <h1 className="text-xl font-bold">QR Kod</h1>
+      <PageHeader title="QR Kod" />
 
       <div className="space-y-2">
         <Label>URL veya Metin</Label>
