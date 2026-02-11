@@ -3,6 +3,7 @@ import { Camera, ImageIcon, Printer, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
+import { PageHeader } from '@/components/PageHeader';
 import { usePrinter } from '@/hooks/use-printer';
 import { printCanvas } from '@/lib/printer';
 import { toast } from 'sonner';
@@ -100,7 +101,7 @@ export default function ImagePrint() {
 
   return (
     <div className="p-4 pb-24 max-w-2xl mx-auto space-y-4">
-      <h1 className="text-xl font-bold">Görsel Bas</h1>
+      <PageHeader title="Görsel Bas" />
 
       <div className="grid grid-cols-2 gap-3">
         <button

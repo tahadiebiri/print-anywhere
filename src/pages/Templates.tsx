@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { ClipboardList, ShoppingCart, StickyNote, Tag, Receipt, Printer, Loader2, ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -253,7 +254,7 @@ export default function Templates() {
   if (!selected) {
     return (
       <div className="p-4 pb-24 max-w-2xl mx-auto space-y-4">
-        <h1 className="text-xl font-bold">Şablonlar</h1>
+        <PageHeader title="Şablonlar" />
         <div className="grid gap-3">
           {templates.map(({ type, icon: Icon, label, desc, color }) => (
             <Card

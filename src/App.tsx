@@ -5,8 +5,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { PrinterProvider } from "@/hooks/use-printer";
 import { ThemeProvider } from "@/hooks/use-theme";
+import { DevModeProvider } from "@/hooks/use-devmode";
 import { PrinterHeader } from "@/components/PrinterHeader";
+import { PrinterDevBridge } from "@/hooks/use-printer";
 import { BottomNav } from "@/components/BottomNav";
+import { DevTerminal } from "@/components/DevTerminal";
 import Index from "./pages/Index";
 import TextEditor from "./pages/TextEditor";
 import ImagePrint from "./pages/ImagePrint";
@@ -23,22 +26,26 @@ const App = () => (
       <Sonner />
       <ThemeProvider>
         <PrinterProvider>
-          <BrowserRouter>
-            <div className="min-h-screen bg-background text-foreground">
+          <DevModeProvider>
+            <BrowserRouter>
+              <div className="min-h-screen bg-background text-foreground">
+              <PrinterDevBridge />
               <PrinterHeader />
-              <main className="pb-16">
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/text" element={<TextEditor />} />
-                  <Route path="/image" element={<ImagePrint />} />
-                  <Route path="/qr" element={<QRCodePage />} />
-                  <Route path="/templates" element={<Templates />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </main>
-              <BottomNav />
-            </div>
-          </BrowserRouter>
+                <main className="pb-16">
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/text" element={<TextEditor />} />
+                    <Route path="/image" element={<ImagePrint />} />
+                    <Route path="/qr" element={<QRCodePage />} />
+                    <Route path="/templates" element={<Templates />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </main>
+                <DevTerminal />
+                <BottomNav />
+              </div>
+            </BrowserRouter>
+          </DevModeProvider>
         </PrinterProvider>
       </ThemeProvider>
     </TooltipProvider>

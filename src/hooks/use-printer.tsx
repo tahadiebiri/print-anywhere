@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { connectPrinter, disconnectPrinter, type AppPrinterState } from '@/lib/printer';
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import { connectPrinter, disconnectPrinter, setDevLogCallback, type AppPrinterState } from '@/lib/printer';
+import { useDevMode } from '@/hooks/use-devmode';
 
 interface PrinterContextType extends AppPrinterState {
   connect: () => Promise<void>;
@@ -17,31 +18,51 @@ export function PrinterProvider({ children }: { children: ReactNode }) {
   });
   const [error, setError] = useState<string | null>(null);
 
-  const connect = useCallback(async () => {
-    setState(s => ({ ...s, connecting: true }));
+  return (
+    <PrinterContext.Provider value={{ ...state, connect: useConnectFn(setState, setError), disconnect: useDisconnectFn(setState), error }}>
+      {children}
+    </PrinterContext.Provider>
+  );
+}
+
+function useConnectFn(setState: any, setError: any) {
+  return useCallback(async () => {
+    setState((s: AppPrinterState) => ({ ...s, connecting: true }));
     setError(null);
     try {
       const name = await connectPrinter();
       setState({ connected: true, deviceName: name, connecting: false });
     } catch (e: any) {
-      setState(s => ({ ...s, connecting: false }));
+      setState((s: AppPrinterState) => ({ ...s, connecting: false }));
       setError(e.message || 'Bağlantı hatası');
     }
-  }, []);
+  }, [setState, setError]);
+}
 
-  const disconnect = useCallback(async () => {
+function useDisconnectFn(setState: any) {
+  return useCallback(async () => {
     try {
       await disconnectPrinter();
     } finally {
       setState({ connected: false, deviceName: null, connecting: false });
     }
-  }, []);
+  }, [setState]);
+}
 
-  return (
-    <PrinterContext.Provider value={{ ...state, connect, disconnect, error }}>
-      {children}
-    </PrinterContext.Provider>
-  );
+// Bridge component to connect devmode logs to printer
+export function PrinterDevBridge() {
+  const { addLog, enabled } = useDevMode();
+
+  useEffect(() => {
+    if (enabled) {
+      setDevLogCallback((log) => addLog(log as any));
+    } else {
+      setDevLogCallback(null);
+    }
+    return () => setDevLogCallback(null);
+  }, [enabled, addLog]);
+
+  return null;
 }
 
 export function usePrinter() {

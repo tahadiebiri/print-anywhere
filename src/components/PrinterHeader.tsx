@@ -1,12 +1,14 @@
-import { Bluetooth, BluetoothOff, Loader2, Sun, Moon } from 'lucide-react';
+import { Bluetooth, BluetoothOff, Loader2, Sun, Moon, Code } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePrinter } from '@/hooks/use-printer';
 import { useTheme } from '@/hooks/use-theme';
+import { useDevMode } from '@/hooks/use-devmode';
 import { isWebBluetoothSupported } from '@/lib/printer';
 
 export function PrinterHeader() {
   const { connected, deviceName, connecting, connect, disconnect, error } = usePrinter();
   const { theme, toggleTheme } = useTheme();
+  const { enabled: devMode, toggle: toggleDev } = useDevMode();
   const supported = isWebBluetoothSupported();
 
   return (
@@ -16,6 +18,15 @@ export function PrinterHeader() {
           <span className="text-lg font-bold tracking-tight">🖨️ SılaPrint</span>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant={devMode ? 'default' : 'ghost'}
+            size="icon"
+            onClick={toggleDev}
+            className="h-8 w-8"
+            title="Developer Mode"
+          >
+            <Code className="h-4 w-4" />
+          </Button>
           <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8">
             {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
