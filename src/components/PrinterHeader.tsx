@@ -9,6 +9,7 @@ export function PrinterHeader() {
   const { connected, deviceName, connecting, connect, disconnect, error } = usePrinter();
   const { theme, toggleTheme } = useTheme();
   const { enabled: devMode, toggle: toggleDev } = useDevMode();
+  const handleDevToggle = () => toggleDev(deviceName);
   const supported = isWebBluetoothSupported();
 
   return (
@@ -21,7 +22,7 @@ export function PrinterHeader() {
           <Button
             variant={devMode ? 'default' : 'ghost'}
             size="icon"
-            onClick={toggleDev}
+            onClick={handleDevToggle}
             className="h-8 w-8"
             title="Developer Mode"
           >

@@ -9,7 +9,7 @@ export interface DevLog {
 
 interface DevModeContextType {
   enabled: boolean;
-  toggle: () => void;
+  toggle: (deviceName?: string | null) => void;
   logs: DevLog[];
   addLog: (log: Omit<DevLog, 'timestamp'>) => void;
   clearLogs: () => void;
@@ -22,7 +22,26 @@ export function DevModeProvider({ children }: { children: ReactNode }) {
   const [enabled, setEnabled] = useState(false);
   const [logs, setLogs] = useState<DevLog[]>([]);
 
-  const toggle = useCallback(() => setEnabled(e => !e), []);
+  const toggle = useCallback((deviceName?: string | null) => {
+    if (enabled) {
+      setEnabled(false);
+      return;
+    }
+    // Require password = connected device BT name
+    if (!deviceName) {
+      const input = prompt('DevMode şifresi (bağlı cihazın Bluetooth adı):');
+      if (!input) return;
+      // Can't verify without device name, deny
+      alert('Yazıcı bağlı değil. Önce yazıcıya bağlanın.');
+      return;
+    }
+    const input = prompt('DevMode şifresi (bağlı cihazın Bluetooth adı):');
+    if (input === deviceName) {
+      setEnabled(true);
+    } else {
+      alert('Yanlış şifre!');
+    }
+  }, [enabled]);
 
   const addLog = useCallback((log: Omit<DevLog, 'timestamp'>) => {
     setLogs(prev => [...prev, { ...log, timestamp: Date.now() }]);

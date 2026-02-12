@@ -58,7 +58,6 @@ export const ThermalPreview = forwardRef<ThermalPreviewHandle, ThermalPreviewPro
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Draw frame
         if (frame !== 'none') {
           drawFrame(ctx, frame, canvas.width, canvas.height);
         }
@@ -119,17 +118,91 @@ function drawFrame(ctx: CanvasRenderingContext2D, frame: string, w: number, h: n
     case 'stars': {
       ctx.font = '14px monospace';
       ctx.fillStyle = 'black';
+      ctx.textAlign = 'left';
       const star = '★';
       const stepX = 16;
-      // Top and bottom
       for (let x = m; x < w - m; x += stepX) {
         ctx.fillText(star, x, m + 12);
         ctx.fillText(star, x, h - m);
       }
-      // Left and right
       for (let y = m + 24; y < h - m - 4; y += stepX) {
         ctx.fillText(star, m, y);
         ctx.fillText(star, w - m - 12, y);
+      }
+      break;
+    }
+    case 'hearts': {
+      ctx.font = '13px monospace';
+      ctx.fillStyle = 'black';
+      ctx.textAlign = 'left';
+      const heart = '♥';
+      const step = 16;
+      for (let x = m; x < w - m; x += step) {
+        ctx.fillText(heart, x, m + 12);
+        ctx.fillText(heart, x, h - m);
+      }
+      for (let y = m + 24; y < h - m - 4; y += step) {
+        ctx.fillText(heart, m, y);
+        ctx.fillText(heart, w - m - 12, y);
+      }
+      break;
+    }
+    case 'dotted':
+      ctx.setLineDash([2, 4]);
+      ctx.strokeRect(m, m, w - m * 2, h - m * 2);
+      ctx.setLineDash([]);
+      break;
+    case 'wave': {
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let x = m; x < w - m; x += 10) {
+        const y1 = m + Math.sin((x - m) / 10 * Math.PI) * 4;
+        ctx.lineTo(x, y1 + 4);
+      }
+      ctx.stroke();
+      ctx.beginPath();
+      for (let x = m; x < w - m; x += 10) {
+        const y1 = h - m + Math.sin((x - m) / 10 * Math.PI) * 4;
+        ctx.lineTo(x, y1 - 4);
+      }
+      ctx.stroke();
+      ctx.beginPath();
+      for (let y = m; y < h - m; y += 10) {
+        const x1 = m + Math.sin((y - m) / 10 * Math.PI) * 4;
+        ctx.lineTo(x1 + 4, y);
+      }
+      ctx.stroke();
+      ctx.beginPath();
+      for (let y = m; y < h - m; y += 10) {
+        const x1 = w - m + Math.sin((y - m) / 10 * Math.PI) * 4;
+        ctx.lineTo(x1 - 4, y);
+      }
+      ctx.stroke();
+      break;
+    }
+    case 'corners': {
+      const c = 30;
+      ctx.lineWidth = 3;
+      // Top-left
+      ctx.beginPath(); ctx.moveTo(m, m + c); ctx.lineTo(m, m); ctx.lineTo(m + c, m); ctx.stroke();
+      // Top-right
+      ctx.beginPath(); ctx.moveTo(w - m - c, m); ctx.lineTo(w - m, m); ctx.lineTo(w - m, m + c); ctx.stroke();
+      // Bottom-left
+      ctx.beginPath(); ctx.moveTo(m, h - m - c); ctx.lineTo(m, h - m); ctx.lineTo(m + c, h - m); ctx.stroke();
+      // Bottom-right
+      ctx.beginPath(); ctx.moveTo(w - m - c, h - m); ctx.lineTo(w - m, h - m); ctx.lineTo(w - m, h - m - c); ctx.stroke();
+      break;
+    }
+    case 'chain': {
+      ctx.lineWidth = 1.5;
+      const size = 10;
+      for (let x = m; x < w - m - size; x += size * 1.5) {
+        ctx.strokeRect(x, m, size, size);
+        ctx.strokeRect(x, h - m - size, size, size);
+      }
+      for (let y = m + size * 1.5; y < h - m - size; y += size * 1.5) {
+        ctx.strokeRect(m, y, size, size);
+        ctx.strokeRect(w - m - size, y, size, size);
       }
       break;
     }
