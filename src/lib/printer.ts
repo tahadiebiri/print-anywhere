@@ -117,8 +117,8 @@ export async function feedPaper(lines: number = 40): Promise<void> {
 
 export async function printCanvas(canvas: HTMLCanvasElement): Promise<void> {
   const printer = getPrinter();
-  const topPad = 60;
-  const bottomPad = 200;
+  const topPad = 40;
+  const bottomPad = 120;
   const feedCanvas = document.createElement('canvas');
   feedCanvas.width = canvas.width;
   feedCanvas.height = canvas.height + topPad + bottomPad;
@@ -130,6 +130,9 @@ export async function printCanvas(canvas: HTMLCanvasElement): Promise<void> {
 
   devLog('info', `Baskı: ${feedCanvas.width}x${feedCanvas.height}px (pad: ${topPad}+${bottomPad})`);
   await printer.printImage(dataUrl);
+  // Kütüphane beyaz alanı kırpıyor olabilir, ekstra feed gönder
+  devLog('info', 'Baskı sonrası kağıt besleme: 120 satır');
+  await (printer as any).feed(120);
   devLog('info', 'Baskı tamamlandı');
 }
 
