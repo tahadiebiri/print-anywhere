@@ -117,8 +117,8 @@ export async function feedPaper(lines: number = 40): Promise<void> {
 
 export async function printCanvas(canvas: HTMLCanvasElement): Promise<void> {
   const printer = getPrinter();
-  const topPad = 40;
-  const bottomPad = 120;
+  const topPad = 60;
+  const bottomPad = 200;
   const feedCanvas = document.createElement('canvas');
   feedCanvas.width = canvas.width;
   feedCanvas.height = canvas.height + topPad + bottomPad;

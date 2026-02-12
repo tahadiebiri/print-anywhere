@@ -23,7 +23,7 @@ export default function HomePage() {
   const handleFeed = async (direction: 'forward' | 'backward') => {
     setFeeding(true);
     try {
-      await feedPaper(direction === 'forward' ? 80 : 40);
+      await feedPaper(direction === 'forward' ? 80 : -40);
       toast.success(direction === 'forward' ? 'İleri sarıldı' : 'Geri sarıldı');
     } catch (e: any) {
       toast.error(e.message || 'Besleme hatası');

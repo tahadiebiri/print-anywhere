@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { AlignLeft, AlignCenter, AlignRight, Bold, Loader2, Printer } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { AlignLeft, AlignCenter, AlignRight, Bold, Italic, Underline, Loader2, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -12,16 +12,22 @@ import { printCanvas } from '@/lib/printer';
 import { toast } from 'sonner';
 
 const fontSizes = [
+  { label: 'Minik', value: 14 },
   { label: 'Küçük', value: 18 },
   { label: 'Orta', value: 24 },
   { label: 'Büyük', value: 32 },
+  { label: 'Dev', value: 48 },
 ];
 
 const fonts = [
   { label: 'JetBrains Mono', value: "'JetBrains Mono', monospace" },
   { label: 'Inter', value: "'Inter', sans-serif" },
-  { label: 'Serif', value: "Georgia, 'Times New Roman', serif" },
+  { label: 'Georgia (Serif)', value: "Georgia, 'Times New Roman', serif" },
+  { label: 'Arial', value: "Arial, Helvetica, sans-serif" },
+  { label: 'Courier', value: "'Courier New', Courier, monospace" },
   { label: 'Cursive', value: "'Segoe Script', 'Comic Sans MS', cursive" },
+  { label: 'Impact', value: "Impact, 'Arial Black', sans-serif" },
+  { label: 'Trebuchet', value: "'Trebuchet MS', sans-serif" },
 ];
 
 const frames = [
@@ -30,6 +36,11 @@ const frames = [
   { label: 'Kesikli Çerçeve', value: 'dashed' },
   { label: 'Çift Çerçeve', value: 'double' },
   { label: 'Yıldızlı', value: 'stars' },
+  { label: 'Kalp', value: 'hearts' },
+  { label: 'Noktalı', value: 'dotted' },
+  { label: 'Dalga', value: 'wave' },
+  { label: 'Köşe Süslemeli', value: 'corners' },
+  { label: 'Zincir', value: 'chain' },
 ];
 
 export default function TextEditor() {
