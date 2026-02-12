@@ -293,29 +293,37 @@ function drawPhotoFrame(ctx: CanvasRenderingContext2D, frame: string, w: number,
   }
 }
 
+function clamp(v: number) { return v < 0 ? 0 : v > 255 ? 255 : v; }
+
 function applyFilter(ctx: CanvasRenderingContext2D, w: number, h: number, filter: FilterType, pad: number, imgW: number, imgH: number) {
   if (filter === 'none') {
-    // Standard Floyd-Steinberg dithering
+    // Floyd-Steinberg dithering with proper clamping
     const imageData = ctx.getImageData(pad, pad, imgW, imgH);
     const data = imageData.data;
-    for (let i = 0; i < data.length; i += 4) {
-      const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-      data[i] = data[i + 1] = data[i + 2] = gray;
+    // Use float buffer to avoid Uint8 clamping during error diffusion
+    const gray = new Float32Array(imgW * imgH);
+    for (let i = 0; i < gray.length; i++) {
+      const idx = i * 4;
+      gray[i] = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
     }
     for (let y = 0; y < imgH; y++) {
       for (let x = 0; x < imgW; x++) {
-        const idx = (y * imgW + x) * 4;
-        const old = data[idx];
+        const i = y * imgW + x;
+        const old = clamp(gray[i]);
         const nw = old > 127 ? 255 : 0;
         const err = old - nw;
-        data[idx] = data[idx + 1] = data[idx + 2] = nw;
-        if (x + 1 < imgW) { const r = idx + 4; data[r] = data[r + 1] = data[r + 2] = data[r] + err * 7 / 16; }
+        gray[i] = nw;
+        if (x + 1 < imgW) gray[i + 1] += err * 7 / 16;
         if (y + 1 < imgH) {
-          if (x > 0) { const bl = ((y + 1) * imgW + (x - 1)) * 4; data[bl] = data[bl + 1] = data[bl + 2] = data[bl] + err * 3 / 16; }
-          const b = ((y + 1) * imgW + x) * 4; data[b] = data[b + 1] = data[b + 2] = data[b] + err * 5 / 16;
-          if (x + 1 < imgW) { const br = ((y + 1) * imgW + (x + 1)) * 4; data[br] = data[br + 1] = data[br + 2] = data[br] + err * 1 / 16; }
+          if (x > 0) gray[i + imgW - 1] += err * 3 / 16;
+          gray[i + imgW] += err * 5 / 16;
+          if (x + 1 < imgW) gray[i + imgW + 1] += err * 1 / 16;
         }
       }
+    }
+    for (let i = 0; i < gray.length; i++) {
+      const idx = i * 4;
+      data[idx] = data[idx + 1] = data[idx + 2] = gray[i];
     }
     ctx.putImageData(imageData, pad, pad);
     return;
