@@ -22,10 +22,21 @@ export function CameraView({ onCapture }: CameraViewProps) {
     }
     setCameraReady(false);
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 960 } },
+      const constraints: MediaStreamConstraints = {
+        video: facing === 'environment'
+          ? { facingMode: { exact: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }
+          : { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } },
         audio: false,
-      });
+      };
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      // Reset zoom to 1x on back camera to avoid wide-angle
+      if (facing === 'environment') {
+        const track = stream.getVideoTracks()[0];
+        const caps = track.getCapabilities?.() as any;
+        if (caps?.zoom) {
+          await track.applyConstraints({ advanced: [{ zoom: caps.zoom.min > 1 ? caps.zoom.min : 1 } as any] });
+        }
+      }
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -76,9 +87,9 @@ export function CameraView({ onCapture }: CameraViewProps) {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)]">
+    <div className="flex flex-col h-[calc(100vh-4rem)]">
       {/* Camera preview */}
-      <div className="flex-1 relative bg-black rounded-xl overflow-hidden mx-2 mt-2">
+      <div className="flex-1 relative bg-black overflow-hidden mx-0 mt-0">
         {cameraError ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center text-white/70 p-6 text-center gap-3">
             <Camera className="h-12 w-12 opacity-50" />
