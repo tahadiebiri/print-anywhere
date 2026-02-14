@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Type, Image, QrCode, LayoutTemplate, Bluetooth, AlertTriangle, ChevronsUp, ChevronsDown } from 'lucide-react';
+import logo from '@/assets/logo.svg';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { usePrinter } from '@/hooks/use-printer';
@@ -9,7 +10,7 @@ import { useState } from 'react';
 
 const quickActions = [
   { path: '/text', icon: Type, label: 'Metin Bas', desc: 'Metin yaz ve bas' },
-  { path: '/image', icon: Image, label: 'Görsel Bas', desc: 'Fotoğraf veya resim bas' },
+  { path: '/image', icon: Image, label: 'Fotoğraf Bas', desc: 'Kamera veya galeriden bas' },
   { path: '/qr', icon: QrCode, label: 'QR Kod', desc: 'QR kod oluştur ve bas' },
   { path: '/templates', icon: LayoutTemplate, label: 'Şablonlar', desc: 'Hazır şablon kullan' },
 ];
@@ -62,7 +63,7 @@ export default function HomePage() {
         </Card>
       ) : (
         <div className="text-center py-6">
-          <div className="text-5xl mb-3">🖨️</div>
+          <img src={logo} alt="SılaPrint" className="h-16 w-auto mx-auto mb-3" />
           <h1 className="text-2xl font-bold mb-1">SılaPrint</h1>
           <p className="text-muted-foreground text-sm">
             Mini termal yazıcınız için web uygulaması

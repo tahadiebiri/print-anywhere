@@ -4,6 +4,7 @@ import { usePrinter } from '@/hooks/use-printer';
 import { useTheme } from '@/hooks/use-theme';
 import { useDevMode } from '@/hooks/use-devmode';
 import { isWebBluetoothSupported } from '@/lib/printer';
+import logo from '@/assets/logo.svg';
 
 export function PrinterHeader() {
   const { connected, deviceName, connecting, connect, disconnect, error } = usePrinter();
@@ -16,7 +17,8 @@ export function PrinterHeader() {
     <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-md">
       <div className="flex items-center justify-between px-4 py-3 max-w-2xl mx-auto">
         <div className="flex items-center gap-2">
-          <span className="text-lg font-bold tracking-tight">🖨️ SılaPrint</span>
+          <img src={logo} alt="SılaPrint" className="h-7 w-auto" />
+          <span className="text-lg font-bold tracking-tight">SılaPrint</span>
         </div>
         <div className="flex items-center gap-2">
           <Button
