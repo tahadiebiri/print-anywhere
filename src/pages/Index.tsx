@@ -76,7 +76,6 @@ export default function HomePage() {
         </Card>
       ) : (
         <div className="text-center py-6">
-          {(() => { const s = getAppSettings(); const displayLogo = s.logoUrl || defaultLogo; const appName = s.appName || 'SılaPrint'; return (<>
           <img src={displayLogo} alt={appName} className="h-16 w-auto mx-auto mb-3" />
           <h1 className="text-2xl font-bold mb-1">{appName}</h1>
           <p className="text-muted-foreground text-sm">
@@ -85,7 +84,6 @@ export default function HomePage() {
           <p className="text-xs text-muted-foreground mt-2">
             Başlamak için sağ üstten yazıcınıza bağlanın
           </p>
-          </>); })()}
         </div>
       )}
 
