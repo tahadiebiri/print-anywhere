@@ -350,8 +350,8 @@ export default function QRCodePage() {
 
         {/* Caption */}
         <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Alt Yazı (isteğe bağlı)</Label>
-          <Input placeholder="QR kod altına yazılacak metin" value={caption} onChange={e => setCaption(e.target.value)} />
+          <Label className="text-xs text-muted-foreground">{t('caption')}</Label>
+          <Input placeholder={t('captionPlaceholder')} value={caption} onChange={e => setCaption(e.target.value)} />
         </div>
       </div>
 
