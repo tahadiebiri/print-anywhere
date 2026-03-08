@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Plus, Trash2, Save, GripVertical, Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Save, GripVertical, Eye, EyeOff, ChevronDown, ChevronUp, Upload, Paintbrush, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { toast } from 'sonner';
 import {
   categories,
   type TemplateDefinition,
@@ -13,7 +14,7 @@ import {
   type TemplateField,
 } from '@/lib/template-data';
 import { renderTemplate } from '@/lib/template-renderer';
-
+import { borderStyles, dividerStyles, svgIcons } from '@/lib/svg-assets';
 const RENDERER_KEYS = [
   'todo', 'shopping', 'checklist', 'note', 'receipt',
   'frame_heart', 'frame_star', 'frame_cute',
