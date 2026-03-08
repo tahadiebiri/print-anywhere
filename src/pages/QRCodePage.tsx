@@ -313,7 +313,7 @@ export default function QRCodePage() {
                 <Input placeholder="+90 555..." value={vcard.phone} onChange={e => setVcard(v => ({ ...v, phone: e.target.value }))} />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">E-posta</Label>
+                <Label className="text-xs">{t('email')}</Label>
                 <Input placeholder="mail@example.com" value={vcard.email} onChange={e => setVcard(v => ({ ...v, email: e.target.value }))} />
               </div>
             </div>
