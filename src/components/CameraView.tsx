@@ -43,7 +43,8 @@ export function CameraView({ onCapture }: CameraViewProps) {
       }
       setCameraError(null);
     } catch {
-      setCameraError('Kamera erişimi reddedildi. Galeri ile devam edebilirsiniz.');
+      setCameraError('cameraError');
+    }
     }
   }, []);
 
