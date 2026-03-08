@@ -95,15 +95,18 @@ export default function QRCodePage() {
 
   const qrContent = getQRContent();
 
+  // Auto-set error correction to H when logo is present
+  const effectiveErrorLevel = logoDataUrl ? 'H' : errorLevel;
+
   useEffect(() => {
     if (!qrContent) { setQrDataUrl(null); return; }
     QRCode.toDataURL(qrContent, {
       width: qrSize,
       margin: 2,
-      errorCorrectionLevel: errorLevel,
+      errorCorrectionLevel: effectiveErrorLevel,
       color: { dark: fgColor, light: bgColor },
     }).then(setQrDataUrl).catch(() => setQrDataUrl(null));
-  }, [qrContent, qrSize, errorLevel, fgColor, bgColor]);
+  }, [qrContent, qrSize, effectiveErrorLevel, fgColor, bgColor]);
 
   // Draw combined QR + frame + caption on hidden canvas, then update preview
   useEffect(() => {
