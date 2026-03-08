@@ -435,6 +435,59 @@ export default function QRCodePage() {
               ))}
             </div>
           </div>
+
+          {/* Logo */}
+          <div className="space-y-2">
+            <Label className="text-xs">Ortaya Logo / İkon</Label>
+            <input
+              ref={logoInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={e => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = ev => setLogoDataUrl(ev.target?.result as string);
+                reader.readAsDataURL(file);
+                e.target.value = '';
+              }}
+            />
+            {logoDataUrl ? (
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg border border-border overflow-hidden bg-white flex items-center justify-center">
+                  <img src={logoDataUrl} alt="Logo" className="w-10 h-10 object-contain" />
+                </div>
+                <div className="flex-1 space-y-1">
+                  <div className="flex justify-between items-center">
+                    <Label className="text-xs">Boyut</Label>
+                    <span className="text-xs text-muted-foreground">{logoSize}px</span>
+                  </div>
+                  <Slider value={[logoSize]} onValueChange={v => setLogoSize(v[0])} min={30} max={100} step={5} />
+                </div>
+                <button
+                  onClick={() => setLogoDataUrl(null)}
+                  className="p-1.5 rounded-md border border-border text-muted-foreground hover:text-destructive hover:border-destructive transition-colors"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 w-full"
+                onClick={() => logoInputRef.current?.click()}
+              >
+                <ImagePlus className="h-3.5 w-3.5" /> Logo Yükle
+              </Button>
+            )}
+            {logoDataUrl && (
+              <p className="text-[10px] text-muted-foreground">
+                Logo eklendiğinde hata düzeltme otomatik olarak Maksimum (H) seviyeye ayarlanır.
+              </p>
+            )}
+          </div>
         </div>
       )}
 
