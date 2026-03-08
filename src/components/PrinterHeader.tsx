@@ -10,7 +10,7 @@ import logo from '@/assets/logo.svg';
 export function PrinterHeader() {
   const { connected, deviceName, connecting, connect, disconnect, error } = usePrinter();
   const { theme, toggleTheme } = useTheme();
-  const { enabled: devMode, toggle: toggleDev } = useDevMode();
+  
   const { registerThemeClick } = useAdminCombo();
 
   const handleThemeToggle = () => {
