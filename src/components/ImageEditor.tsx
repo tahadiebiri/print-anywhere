@@ -538,7 +538,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
             </Button>
           )}
           {textOverlays.length > 0 && (
-            <p className="text-xs text-muted-foreground">💡 Metinleri sürükleyerek taşıyabilirsiniz</p>
+            <p className="text-xs text-muted-foreground">{t('dragTextHint')}</p>
           )}
         </div>
       )}
