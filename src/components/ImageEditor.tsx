@@ -493,7 +493,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
                 <SelectContent>
                   {fontOptions.map(f => (
                     <SelectItem key={f.value} value={f.value} className="text-xs">
-                      <span style={{ fontFamily: f.value }}>{f.label}</span>
+                      <span style={{ fontFamily: f.value }}>{f.label === 'handwriting' ? t('handwriting') : f.label}</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
