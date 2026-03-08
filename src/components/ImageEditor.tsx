@@ -72,6 +72,8 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
   const [textOverlays, setTextOverlays] = useState<TextOverlay[]>([]);
   const [textInput, setTextInput] = useState('');
   const [textFontSize, setTextFontSize] = useState(20);
+  const [textFont, setTextFont] = useState('JetBrains Mono');
+  const [textColor, setTextColor] = useState('#000000');
   const [selectedTextId, setSelectedTextId] = useState<string | null>(null);
   const [draggingText, setDraggingText] = useState<{ id: string; startX: number; startY: number; ox: number; oy: number } | null>(null);
 
