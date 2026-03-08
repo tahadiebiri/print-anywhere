@@ -102,7 +102,7 @@ export default function QRCodePage() {
     }).then(setQrDataUrl).catch(() => setQrDataUrl(null));
   }, [qrContent, qrSize, errorLevel, fgColor, bgColor]);
 
-  // Draw combined QR + frame + caption on hidden canvas
+  // Draw combined QR + frame + caption on hidden canvas, then update preview
   useEffect(() => {
     if (!qrDataUrl || !canvasRef.current) return;
     const canvas = canvasRef.current;
@@ -137,6 +137,9 @@ export default function QRCodePage() {
         ctx.textAlign = 'center';
         ctx.fillText(caption, W / 2, qrY + displaySize + 28, W - pad * 2);
       }
+
+      // Update preview from canvas
+      setPreviewUrl(canvas.toDataURL('image/png'));
     };
     img.src = qrDataUrl;
   }, [qrDataUrl, caption, qrSize, frame]);
