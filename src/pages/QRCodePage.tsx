@@ -446,7 +446,7 @@ export default function QRCodePage() {
 
           {/* Logo */}
           <div className="space-y-2">
-            <Label className="text-xs">Ortaya Logo / İkon</Label>
+            <Label className="text-xs">{t('centerLogo')}</Label>
             <input
               ref={logoInputRef}
               type="file"
