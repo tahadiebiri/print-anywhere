@@ -586,7 +586,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
           </Select>
         </div>
         <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Çerçeve</Label>
+          <Label className="text-xs text-muted-foreground">{t('frame')}</Label>
           <Select value={state.frameType} onValueChange={(v) => update({ frameType: v })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
