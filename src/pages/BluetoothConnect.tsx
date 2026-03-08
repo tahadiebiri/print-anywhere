@@ -10,16 +10,9 @@ import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { usePrinter } from '@/hooks/use-printer';
+import { useLanguage } from '@/hooks/use-language';
 import { isWebBluetoothSupported, getPairedDevices, type PairedDevice } from '@/lib/printer';
 import { toast } from 'sonner';
-
-const supportedPrinters = [
-  { name: 'Cat Printer (GB, GT, YT serisi)', protocol: 'cat_printer' },
-  { name: 'PeriPage (A6, A6+, A8)', protocol: 'peripage' },
-  { name: 'Phomemo (T02, M02, M110)', protocol: 'phomemo' },
-  { name: 'GOOJPRT / MiaoMiaoJi', protocol: 'goojprt' },
-  { name: 'Diğer 203/304 DPI BLE yazıcılar', protocol: 'generic' },
-];
 
 function BatteryIcon({ level }: { level: number }) {
   if (level > 75) return <BatteryFull className="h-4 w-4" />;
@@ -36,17 +29,23 @@ function getBatteryColor(level: number): string {
 
 export default function BluetoothConnect() {
   const { connected, deviceName, connecting, connect, disconnect, error, batteryLevel, refreshBattery, autoReconnect, setAutoReconnect, reconnecting } = usePrinter();
+  const { t } = useLanguage();
   const supported = isWebBluetoothSupported();
   const [showInfo, setShowInfo] = useState(false);
   const [pairedDevices, setPairedDevices] = useState<PairedDevice[]>([]);
   const [loadingPaired, setLoadingPaired] = useState(false);
   const [refreshingBattery, setRefreshingBattery] = useState(false);
 
-  // Load paired devices on mount
+  const supportedPrinters = [
+    { name: 'Cat Printer (GB, GT, YT)', protocol: 'cat_printer' },
+    { name: 'PeriPage (A6, A6+, A8)', protocol: 'peripage' },
+    { name: 'Phomemo (T02, M02, M110)', protocol: 'phomemo' },
+    { name: 'GOOJPRT / MiaoMiaoJi', protocol: 'goojprt' },
+    { name: t('otherPrinters'), protocol: 'generic' },
+  ];
+
   useEffect(() => {
-    if (supported) {
-      loadPairedDevices();
-    }
+    if (supported) loadPairedDevices();
   }, [supported, connected]);
 
   const loadPairedDevices = async () => {
@@ -59,15 +58,13 @@ export default function BluetoothConnect() {
   const handleConnect = async () => {
     try {
       await connect();
-      toast.success('Yazıcı bağlandı!');
-    } catch {
-      // error is handled by the provider
-    }
+      toast.success(t('printerConnectedToast'));
+    } catch {}
   };
 
   const handleDisconnect = async () => {
     await disconnect();
-    toast.info('Yazıcı bağlantısı kesildi');
+    toast.info(t('printerDisconnectedToast'));
   };
 
   const handleRefreshBattery = async () => {
@@ -83,18 +80,14 @@ export default function BluetoothConnect() {
           <div className="mx-auto h-20 w-20 rounded-full bg-destructive/10 flex items-center justify-center">
             <BluetoothOff className="h-10 w-10 text-destructive" />
           </div>
-          <h1 className="text-xl font-bold">Bluetooth Desteklenmiyor</h1>
-          <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-            Tarayıcınız Web Bluetooth API'yi desteklemiyor. Lütfen <strong>Chrome</strong>, <strong>Edge</strong> veya <strong>Opera</strong> kullanın.
-          </p>
+          <h1 className="text-xl font-bold">{t('btNotSupportedPage')}</h1>
+          <p className="text-sm text-muted-foreground max-w-sm mx-auto">{t('btNotSupportedPageDesc')}</p>
           <Card className="border-destructive/30 bg-destructive/5">
             <CardContent className="flex items-start gap-3 p-4 text-left">
               <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
               <div className="text-sm space-y-1">
-                <p className="font-medium text-destructive">Safari ve Firefox desteklenmez</p>
-                <p className="text-muted-foreground text-xs">
-                  iOS cihazlarda <strong>Bluefy</strong> tarayıcısını App Store'dan indirebilirsiniz.
-                </p>
+                <p className="font-medium text-destructive">{t('safariNotSupported')}</p>
+                <p className="text-muted-foreground text-xs">{t('bluefyHint')}</p>
               </div>
             </CardContent>
           </Card>
@@ -108,37 +101,21 @@ export default function BluetoothConnect() {
       {/* Status hero */}
       <div className="text-center py-8 space-y-4">
         <div className={`mx-auto h-24 w-24 rounded-full flex items-center justify-center transition-colors ${
-          reconnecting
-            ? 'bg-yellow-500/10 dark:bg-yellow-500/20 animate-pulse'
-            : connected
-              ? 'bg-green-500/10 dark:bg-green-500/20'
-              : connecting
-                ? 'bg-primary/10 animate-pulse'
-                : 'bg-muted'
+          reconnecting ? 'bg-yellow-500/10 dark:bg-yellow-500/20 animate-pulse'
+            : connected ? 'bg-green-500/10 dark:bg-green-500/20'
+              : connecting ? 'bg-primary/10 animate-pulse' : 'bg-muted'
         }`}>
-          {reconnecting ? (
-            <RotateCw className="h-12 w-12 text-yellow-500 animate-spin" />
-          ) : connecting ? (
-            <BluetoothSearching className="h-12 w-12 text-primary animate-pulse" />
-          ) : connected ? (
-            <Bluetooth className="h-12 w-12 text-green-500" />
-          ) : (
-            <BluetoothOff className="h-12 w-12 text-muted-foreground" />
-          )}
+          {reconnecting ? <RotateCw className="h-12 w-12 text-yellow-500 animate-spin" />
+            : connecting ? <BluetoothSearching className="h-12 w-12 text-primary animate-pulse" />
+              : connected ? <Bluetooth className="h-12 w-12 text-green-500" />
+                : <BluetoothOff className="h-12 w-12 text-muted-foreground" />}
         </div>
-
         <div className="space-y-1">
           <h1 className="text-xl font-bold">
-            {reconnecting ? 'Yeniden Bağlanıyor...' : connecting ? 'Aranıyor...' : connected ? 'Yazıcı Bağlı' : 'Yazıcı Bağlantısı'}
+            {reconnecting ? t('reconnecting') : connecting ? t('searching') : connected ? t('printerConnectedTitle') : t('printerConnection')}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {reconnecting
-              ? 'Bağlantı koptu, otomatik yeniden bağlanılıyor'
-              : connecting
-                ? 'Yakındaki BLE yazıcılar taranıyor'
-                : connected
-                  ? 'Yazdırmaya hazır'
-                  : 'BLE termal yazıcınıza bağlanın'}
+            {reconnecting ? t('reconnectingDesc') : connecting ? t('searchingDesc') : connected ? t('readyToPrint') : t('connectBLE')}
           </p>
         </div>
       </div>
@@ -158,56 +135,45 @@ export default function BluetoothConnect() {
                 </div>
                 <div className="flex items-center gap-3 mt-1">
                   <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Signal className="h-3 w-3" /> BLE Bağlı
+                    <Signal className="h-3 w-3" /> {t('bleConnected')}
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Battery & Signal info */}
             <div className="grid grid-cols-2 gap-3">
-              {/* Battery card */}
               <Card className="bg-background/60 border-border/50">
                 <CardContent className="p-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground font-medium">Pil Seviyesi</span>
-                    <button
-                      onClick={handleRefreshBattery}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                      disabled={refreshingBattery}
-                    >
+                    <span className="text-xs text-muted-foreground font-medium">{t('batteryLevel')}</span>
+                    <button onClick={handleRefreshBattery} className="text-muted-foreground hover:text-foreground transition-colors" disabled={refreshingBattery}>
                       <RefreshCw className={`h-3 w-3 ${refreshingBattery ? 'animate-spin' : ''}`} />
                     </button>
                   </div>
                   {batteryLevel !== null ? (
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2">
-                        <span className={getBatteryColor(batteryLevel)}>
-                          <BatteryIcon level={batteryLevel} />
-                        </span>
-                        <span className={`text-lg font-bold ${getBatteryColor(batteryLevel)}`}>
-                          %{batteryLevel}
-                        </span>
+                        <span className={getBatteryColor(batteryLevel)}><BatteryIcon level={batteryLevel} /></span>
+                        <span className={`text-lg font-bold ${getBatteryColor(batteryLevel)}`}>%{batteryLevel}</span>
                       </div>
                       <Progress value={batteryLevel} className="h-1.5" />
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Battery className="h-4 w-4" />
-                      <span className="text-xs">Bilgi yok</span>
+                      <span className="text-xs">{t('noData')}</span>
                     </div>
                   )}
                 </CardContent>
               </Card>
 
-              {/* Connection info card */}
               <Card className="bg-background/60 border-border/50">
                 <CardContent className="p-3 space-y-2">
-                  <span className="text-xs text-muted-foreground font-medium">Bağlantı</span>
+                  <span className="text-xs text-muted-foreground font-medium">{t('connection')}</span>
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2">
                       <Signal className="h-4 w-4 text-green-500" />
-                      <span className="text-sm font-semibold">Aktif</span>
+                      <span className="text-sm font-semibold">{t('active')}</span>
                     </div>
                     <div className="text-xs text-muted-foreground space-y-0.5">
                       <p>BLE GATT</p>
@@ -218,14 +184,13 @@ export default function BluetoothConnect() {
               </Card>
             </div>
 
-            {/* Device specs */}
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="p-2 rounded-lg bg-background/50">
-                <p className="text-xs text-muted-foreground">Protokol</p>
+                <p className="text-xs text-muted-foreground">{t('protocol')}</p>
                 <p className="text-sm font-semibold mt-0.5">BLE GATT</p>
               </div>
               <div className="p-2 rounded-lg bg-background/50">
-                <p className="text-xs text-muted-foreground">Genişlik</p>
+                <p className="text-xs text-muted-foreground">{t('width')}</p>
                 <p className="text-sm font-semibold mt-0.5">384px</p>
               </div>
               <div className="p-2 rounded-lg bg-background/50">
@@ -234,17 +199,12 @@ export default function BluetoothConnect() {
               </div>
             </div>
 
-            {/* Auto-reconnect toggle */}
             <div className="flex items-center justify-between py-2 px-1">
               <div className="flex items-center gap-2">
                 <RotateCw className="h-4 w-4 text-muted-foreground" />
-                <Label htmlFor="auto-reconnect" className="text-sm cursor-pointer">Otomatik yeniden bağlan</Label>
+                <Label htmlFor="auto-reconnect" className="text-sm cursor-pointer">{t('autoReconnect')}</Label>
               </div>
-              <Switch
-                id="auto-reconnect"
-                checked={autoReconnect}
-                onCheckedChange={setAutoReconnect}
-              />
+              <Switch id="auto-reconnect" checked={autoReconnect} onCheckedChange={setAutoReconnect} />
             </div>
 
             <Button
@@ -252,94 +212,71 @@ export default function BluetoothConnect() {
               className="w-full gap-2 text-destructive hover:text-destructive border-destructive/30 hover:bg-destructive/5"
               onClick={handleDisconnect}
             >
-              <Unplug className="h-4 w-4" />
-              Bağlantıyı Kes
+              <Unplug className="h-4 w-4" /> {t('disconnectBtn')}
             </Button>
           </CardContent>
         </Card>
       )}
 
-      {/* Connect button */}
       {!connected && (
-        <Button
-          size="lg"
-          className="w-full gap-2 h-14 text-base"
-          onClick={handleConnect}
-          disabled={connecting}
-        >
-          {connecting ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
-          ) : (
-            <BluetoothSearching className="h-5 w-5" />
-          )}
-          {connecting ? 'Yazıcı Aranıyor...' : 'Yazıcı Ara ve Bağlan'}
+        <Button size="lg" className="w-full gap-2 h-14 text-base" onClick={handleConnect} disabled={connecting}>
+          {connecting ? <Loader2 className="h-5 w-5 animate-spin" /> : <BluetoothSearching className="h-5 w-5" />}
+          {connecting ? t('searchingPrinter') : t('searchAndConnect')}
         </Button>
       )}
 
-      {/* Error */}
       {error && (
         <Card className="border-destructive/30 bg-destructive/5">
           <CardContent className="flex items-start gap-3 p-4">
             <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
             <div className="text-sm">
-              <p className="font-medium text-destructive">Bağlantı Hatası</p>
+              <p className="font-medium text-destructive">{t('connectionError')}</p>
               <p className="text-muted-foreground mt-1">{error}</p>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Paired / previously connected devices */}
       {!connected && pairedDevices.length > 0 && (
         <Card>
           <CardContent className="p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <History className="h-4 w-4 text-muted-foreground" />
-                <h3 className="font-semibold text-sm">Eşleştirilmiş Cihazlar</h3>
+                <h3 className="font-semibold text-sm">{t('pairedDevices')}</h3>
               </div>
-              <button
-                onClick={loadPairedDevices}
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                disabled={loadingPaired}
-              >
+              <button onClick={loadPairedDevices} className="text-muted-foreground hover:text-foreground transition-colors" disabled={loadingPaired}>
                 <RefreshCw className={`h-3.5 w-3.5 ${loadingPaired ? 'animate-spin' : ''}`} />
               </button>
             </div>
             <div className="space-y-1">
               {pairedDevices.map((device) => (
-                <div
-                  key={device.id}
-                  className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-muted/50 transition-colors border border-border/50"
-                >
+                <div key={device.id} className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-muted/50 transition-colors border border-border/50">
                   <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                     <Printer className="h-4.5 w-4.5 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{device.name}</p>
-                    <p className="text-xs text-muted-foreground">Daha önce eşleştirildi</p>
+                    <p className="text-xs text-muted-foreground">{t('previouslyPaired')}</p>
                   </div>
                   <div className="h-2 w-2 rounded-full bg-muted-foreground/30" />
                 </div>
               ))}
             </div>
-            <p className="text-xs text-muted-foreground">
-              💡 Yeniden bağlanmak için "Yazıcı Ara ve Bağlan" butonunu kullanın
-            </p>
+            <p className="text-xs text-muted-foreground">{t('reconnectHint')}</p>
           </CardContent>
         </Card>
       )}
 
-      {/* How to connect steps */}
       {!connected && (
         <Card>
           <CardContent className="p-4 space-y-3">
-            <h3 className="font-semibold text-sm">Nasıl Bağlanılır?</h3>
+            <h3 className="font-semibold text-sm">{t('howToConnect')}</h3>
             <div className="space-y-3">
               {[
-                { step: '1', text: 'Yazıcınızı açın ve Bluetooth\'un aktif olduğundan emin olun' },
-                { step: '2', text: '"Yazıcı Ara ve Bağlan" butonuna basın' },
-                { step: '3', text: 'Açılan listeden yazıcınızı seçin ve eşleştirin' },
+                { step: '1', text: t('howToStep1') },
+                { step: '2', text: t('howToStep2') },
+                { step: '3', text: t('howToStep3') },
               ].map(({ step, text }) => (
                 <div key={step} className="flex items-start gap-3">
                   <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
@@ -353,15 +290,11 @@ export default function BluetoothConnect() {
         </Card>
       )}
 
-      {/* Supported printers */}
       <Card>
         <CardContent className="p-4 space-y-3">
-          <button
-            onClick={() => setShowInfo(!showInfo)}
-            className="w-full flex items-center justify-between"
-          >
-            <h3 className="font-semibold text-sm">Desteklenen Yazıcılar</h3>
-            <span className="text-xs text-primary">{showInfo ? 'Gizle' : 'Göster'}</span>
+          <button onClick={() => setShowInfo(!showInfo)} className="w-full flex items-center justify-between">
+            <h3 className="font-semibold text-sm">{t('supportedPrinters')}</h3>
+            <span className="text-xs text-primary">{showInfo ? t('hide') : t('show')}</span>
           </button>
           {showInfo && (
             <div className="space-y-2 pt-1">
@@ -371,9 +304,7 @@ export default function BluetoothConnect() {
                   <span className="text-sm">{p.name}</span>
                 </div>
               ))}
-              <p className="text-xs text-muted-foreground pt-1">
-                💡 Çoğu 58mm BLE termal yazıcı desteklenir. Listede olmayan bir model de çalışabilir.
-              </p>
+              <p className="text-xs text-muted-foreground pt-1">{t('supportedPrintersHint')}</p>
             </div>
           )}
         </CardContent>

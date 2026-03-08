@@ -7,6 +7,7 @@ import { PrinterProvider } from "@/hooks/use-printer";
 import { ThemeProvider } from "@/hooks/use-theme";
 import { DevModeProvider } from "@/hooks/use-devmode";
 import { AdminComboProvider } from "@/hooks/use-admin-combo";
+import { LanguageProvider } from "@/hooks/use-language";
 import { PrinterHeader } from "@/components/PrinterHeader";
 import { PrinterDevBridge } from "@/hooks/use-printer";
 import { BottomNav } from "@/components/BottomNav";
@@ -31,34 +32,36 @@ const App = () => (
       <Toaster />
       <Sonner />
       <ThemeProvider>
-        <PrinterProvider>
-          <DevModeProvider>
-            <BrowserRouter>
-              <AdminComboProvider>
-                <div className="min-h-screen bg-background text-foreground">
-                <PrinterDevBridge />
-                <PrinterHeader />
-                  <main className="pb-16">
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/text" element={<TextEditor />} />
-                      <Route path="/image" element={<ImagePrint />} />
-                      <Route path="/qr" element={<QRCodePage />} />
-                      <Route path="/templates" element={<Templates />} />
-                      <Route path="/connect" element={<BluetoothConnect />} />
-                      <Route path="/install" element={<InstallPage />} />
-                      <Route path="/admin" element={<AdminTemplates />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </main>
-                  <AdminPasswordDialog />
-                  <DevTerminal />
-                  <BottomNav />
-                </div>
-              </AdminComboProvider>
-            </BrowserRouter>
-          </DevModeProvider>
-        </PrinterProvider>
+        <LanguageProvider>
+          <PrinterProvider>
+            <DevModeProvider>
+              <BrowserRouter>
+                <AdminComboProvider>
+                  <div className="min-h-screen bg-background text-foreground">
+                  <PrinterDevBridge />
+                  <PrinterHeader />
+                    <main className="pb-16">
+                      <Routes>
+                        <Route path="/" element={<Index />} />
+                        <Route path="/text" element={<TextEditor />} />
+                        <Route path="/image" element={<ImagePrint />} />
+                        <Route path="/qr" element={<QRCodePage />} />
+                        <Route path="/templates" element={<Templates />} />
+                        <Route path="/connect" element={<BluetoothConnect />} />
+                        <Route path="/install" element={<InstallPage />} />
+                        <Route path="/admin" element={<AdminTemplates />} />
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </main>
+                    <AdminPasswordDialog />
+                    <DevTerminal />
+                    <BottomNav />
+                  </div>
+                </AdminComboProvider>
+              </BrowserRouter>
+            </DevModeProvider>
+          </PrinterProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </TooltipProvider>
   </QueryClientProvider>

@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
 import { usePrinter } from '@/hooks/use-printer';
+import { useLanguage } from '@/hooks/use-language';
 import { printCanvas } from '@/lib/printer';
 import { toast } from 'sonner';
 import { FilterType, filters, photoFrames, applyFilter, drawPhotoFrame } from '@/lib/image-filters';
@@ -51,7 +52,7 @@ const fontOptions = [
   { value: 'JetBrains Mono', label: 'JetBrains Mono' },
   { value: 'Inter', label: 'Inter' },
   { value: 'Georgia', label: 'Serif' },
-  { value: 'cursive', label: 'El Yazısı' },
+  { value: 'cursive', label: 'handwriting' },
 ];
 
 const colorPresets = [
@@ -68,6 +69,7 @@ const defaultState: EditorState = {
 };
 
 export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
+  const { t } = useLanguage();
   const [state, setState] = useState<EditorState>(defaultState);
   const [history, setHistory] = useState<EditorState[]>([defaultState]);
   const [historyIdx, setHistoryIdx] = useState(0);
@@ -399,19 +401,19 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
     setPrinting(true);
     try {
       await printCanvas(composite);
-      toast.success('Yazdırıldı!');
+      toast.success(t('printed'));
     } catch (e: any) {
-      toast.error(e.message || 'Yazdırma hatası');
+      toast.error(e.message || t('printError'));
     } finally {
       setPrinting(false);
     }
   };
 
   const toolButtons: { mode: ToolMode; icon: typeof Move; label: string }[] = [
-    { mode: 'move', icon: Move, label: 'Taşı' },
-    { mode: 'pen', icon: Pencil, label: 'Kalem' },
-    { mode: 'eraser', icon: Eraser, label: 'Silgi' },
-    { mode: 'text', icon: Type, label: 'Metin' },
+    { mode: 'move', icon: Move, label: t('move') },
+    { mode: 'pen', icon: Pencil, label: t('pen') },
+    { mode: 'eraser', icon: Eraser, label: t('eraser') },
+    { mode: 'text', icon: Type, label: t('text') },
   ];
 
   return (
@@ -450,7 +452,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
       {(tool === 'pen' || tool === 'eraser') && (
         <div className="flex items-center gap-3">
           <Label className="text-xs text-muted-foreground shrink-0">
-            {tool === 'pen' ? 'Kalem' : 'Silgi'}: {penSize}px
+            {tool === 'pen' ? t('pen') : t('eraser')}: {penSize}px
           </Label>
           <Slider
             value={[penSize]}
@@ -461,7 +463,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
             className="flex-1"
           />
           <Button variant="ghost" size="sm" className="gap-1 text-destructive" onClick={clearDrawing}>
-            <Trash2 className="h-3.5 w-3.5" /> Temizle
+            <Trash2 className="h-3.5 w-3.5" /> {t('clear')}
           </Button>
         </div>
       )}
@@ -473,17 +475,17 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
             <Input
               value={textInput}
               onChange={e => setTextInput(e.target.value)}
-              placeholder="Metin yazın..."
+              placeholder={t('textPlaceholderImg')}
               className="flex-1"
               onKeyDown={e => e.key === 'Enter' && addText()}
             />
-            <Button size="sm" onClick={addText} disabled={!textInput.trim()}>Ekle</Button>
+            <Button size="sm" onClick={addText} disabled={!textInput.trim()}>{t('add')}</Button>
           </div>
 
           {/* Font & Color row */}
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground">Yazı Tipi</Label>
+              <Label className="text-xs text-muted-foreground">{t('font')}</Label>
               <Select value={textFont} onValueChange={setTextFont}>
                 <SelectTrigger className="h-8 text-xs">
                   <SelectValue />
@@ -491,14 +493,14 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
                 <SelectContent>
                   {fontOptions.map(f => (
                     <SelectItem key={f.value} value={f.value} className="text-xs">
-                      <span style={{ fontFamily: f.value }}>{f.label}</span>
+                      <span style={{ fontFamily: f.value }}>{f.label === 'handwriting' ? t('handwriting') : f.label}</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground">Renk</Label>
+              <Label className="text-xs text-muted-foreground">{t('color')}</Label>
               <div className="flex items-center gap-1 flex-wrap">
                 {colorPresets.map(c => (
                   <button
@@ -514,7 +516,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
 
           {/* Size */}
           <div className="flex items-center gap-3">
-            <Label className="text-xs text-muted-foreground shrink-0">Boyut: {textFontSize}px</Label>
+            <Label className="text-xs text-muted-foreground shrink-0">{t('size')}: {textFontSize}px</Label>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setTextFontSize(s => Math.max(8, s - 2))}>
               <Minus className="h-3 w-3" />
             </Button>
@@ -532,18 +534,18 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
           </div>
           {selectedTextId && (
             <Button variant="outline" size="sm" className="gap-1 text-destructive" onClick={deleteSelectedText}>
-              <Trash2 className="h-3.5 w-3.5" /> Seçili metni sil
+              <Trash2 className="h-3.5 w-3.5" /> {t('deleteSelectedText')}
             </Button>
           )}
           {textOverlays.length > 0 && (
-            <p className="text-xs text-muted-foreground">💡 Metinleri sürükleyerek taşıyabilirsiniz</p>
+            <p className="text-xs text-muted-foreground">{t('dragTextHint')}</p>
           )}
         </div>
       )}
 
       {/* Scale */}
       <div className="space-y-1">
-        <Label className="text-xs text-muted-foreground">Boyut: %{state.scale}</Label>
+        <Label className="text-xs text-muted-foreground">{t('size')}: %{state.scale}</Label>
         <Slider value={[state.scale]} onValueChange={([v]) => update({ scale: v })} min={50} max={200} step={5} />
       </div>
 
@@ -573,7 +575,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
       {/* Effect & Frame */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Efekt</Label>
+          <Label className="text-xs text-muted-foreground">{t('effect')}</Label>
           <Select value={state.filter} onValueChange={(v) => update({ filter: v as FilterType })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -584,7 +586,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
           </Select>
         </div>
         <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Çerçeve</Label>
+          <Label className="text-xs text-muted-foreground">{t('frame')}</Label>
           <Select value={state.frameType} onValueChange={(v) => update({ frameType: v })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -599,11 +601,11 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
       {/* Brightness & Contrast */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Parlaklık: {state.brightness}</Label>
+          <Label className="text-xs text-muted-foreground">{t('brightness')}: {state.brightness}</Label>
           <Slider value={[state.brightness]} onValueChange={([v]) => update({ brightness: v })} min={-50} max={50} step={5} />
         </div>
         <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Kontrast: {state.contrast}</Label>
+          <Label className="text-xs text-muted-foreground">{t('contrast')}: {state.contrast}</Label>
           <Slider value={[state.contrast]} onValueChange={([v]) => update({ contrast: v })} min={-50} max={50} step={5} />
         </div>
       </div>
@@ -616,11 +618,11 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
         onClick={handlePrint}
       >
         {printing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
-        {printing ? 'Yazdırılıyor...' : 'Bas'}
+        {printing ? t('printing') : t('print')}
       </Button>
 
       {!connected && (
-        <p className="text-xs text-center text-muted-foreground">Yazdırmak için önce yazıcıya bağlanın</p>
+        <p className="text-xs text-center text-muted-foreground">{t('connectFirst')}</p>
       )}
     </div>
   );

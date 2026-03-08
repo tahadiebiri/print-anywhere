@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/hooks/use-language';
 import {
   categories,
   builtInTemplates,
@@ -26,6 +27,7 @@ export function AdminDashboard({ customTemplates, onSaveAll, onAddNew, onEditTem
   const navigate = useNavigate();
   const [jsonMode, setJsonMode] = useState(false);
   const [jsonText, setJsonText] = useState('');
+  const { t } = useLanguage();
 
   const totalTemplates = builtInTemplates.length + customTemplates.length;
 
@@ -36,7 +38,7 @@ export function AdminDashboard({ customTemplates, onSaveAll, onAddNew, onEditTem
     const a = document.createElement('a');
     a.href = url; a.download = 'silaprint-templates.json'; a.click();
     URL.revokeObjectURL(url);
-    toast.success('Dışa aktarıldı');
+    toast.success(t('exported'));
   };
 
   const importTemplates = () => {
@@ -50,11 +52,11 @@ export function AdminDashboard({ customTemplates, onSaveAll, onAddNew, onEditTem
         const parsed = JSON.parse(text);
         if (Array.isArray(parsed)) {
           onSaveAll([...customTemplates, ...parsed]);
-          toast.success(`${parsed.length} şablon içe aktarıldı`);
+          toast.success(`${parsed.length} ${t('imported')}`);
         } else {
-          toast.error('Geçersiz format');
+          toast.error(t('invalidFormat'));
         }
-      } catch { toast.error('JSON parse hatası'); }
+      } catch { toast.error(t('jsonParseError')); }
     };
     input.click();
   };
@@ -65,11 +67,11 @@ export function AdminDashboard({ customTemplates, onSaveAll, onAddNew, onEditTem
       if (Array.isArray(parsed)) {
         onSaveAll(parsed);
         setJsonMode(false);
-        toast.success('JSON kaydedildi');
+        toast.success(t('jsonSaved'));
       } else {
-        toast.error('JSON bir dizi olmalı');
+        toast.error(t('jsonMustBeArray'));
       }
-    } catch { toast.error('Geçersiz JSON'); }
+    } catch { toast.error(t('invalidJson')); }
   };
 
   return (
@@ -82,13 +84,13 @@ export function AdminDashboard({ customTemplates, onSaveAll, onAddNew, onEditTem
         <div className="flex-1">
           <h1 className="text-xl font-bold flex items-center gap-2">
             <Settings className="h-5 w-5 text-primary" />
-            Şablon Yönetimi
+            {t('templateManagement')}
           </h1>
-          <p className="text-xs text-muted-foreground">Şablonları oluşturun, düzenleyin ve yönetin</p>
+          <p className="text-xs text-muted-foreground">{t('templateManagementDesc')}</p>
         </div>
         {onLogout && (
           <Button variant="outline" size="sm" className="gap-1.5 text-destructive hover:text-destructive" onClick={onLogout}>
-            <LogOut className="h-3.5 w-3.5" /> Çıkış
+            <LogOut className="h-3.5 w-3.5" /> {t('logout')}
           </Button>
         )}
       </div>
@@ -98,19 +100,19 @@ export function AdminDashboard({ customTemplates, onSaveAll, onAddNew, onEditTem
         <Card className="bg-primary/5 border-primary/20">
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-primary">{totalTemplates}</p>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">Toplam</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">{t('total')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold">{builtInTemplates.length}</p>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">Yerleşik</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">{t('builtIn')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold">{customTemplates.length}</p>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">Özel</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">{t('custom')}</p>
           </CardContent>
         </Card>
       </div>
@@ -118,11 +120,11 @@ export function AdminDashboard({ customTemplates, onSaveAll, onAddNew, onEditTem
       {/* Primary actions */}
       <div className="grid grid-cols-2 gap-3">
         <Button className="gap-2 h-12 text-base" onClick={onAddNew}>
-          <Plus className="h-5 w-5" /> Yeni Şablon
+          <Plus className="h-5 w-5" /> {t('newTemplate')}
         </Button>
         {onOpenSettings && (
           <Button variant="outline" className="gap-2 h-12 text-base" onClick={onOpenSettings}>
-            <Settings className="h-5 w-5" /> Sistem Ayarları
+            <Settings className="h-5 w-5" /> {t('systemSettings')}
           </Button>
         )}
       </div>
@@ -133,10 +135,10 @@ export function AdminDashboard({ customTemplates, onSaveAll, onAddNew, onEditTem
           <Code className="h-3.5 w-3.5" /> JSON
         </Button>
         <Button variant="outline" size="sm" className="gap-1.5 h-10" onClick={exportAll}>
-          <Download className="h-3.5 w-3.5" /> Dışa Aktar
+          <Download className="h-3.5 w-3.5" /> {t('exportBtn')}
         </Button>
         <Button variant="outline" size="sm" className="gap-1.5 h-10" onClick={importTemplates}>
-          <Upload className="h-3.5 w-3.5" /> İçe Aktar
+          <Upload className="h-3.5 w-3.5" /> {t('importBtn')}
         </Button>
       </div>
 
@@ -145,21 +147,16 @@ export function AdminDashboard({ customTemplates, onSaveAll, onAddNew, onEditTem
         <Card className="border-primary/30 overflow-hidden">
           <div className="bg-primary/5 px-4 py-2.5 border-b border-primary/10">
             <Label className="text-sm font-semibold flex items-center gap-2">
-              <Code className="h-4 w-4" /> JSON Düzenleyici
+              <Code className="h-4 w-4" /> {t('jsonEditor')}
             </Label>
           </div>
           <CardContent className="p-4 space-y-3">
-            <Textarea
-              value={jsonText}
-              onChange={e => setJsonText(e.target.value)}
-              rows={14}
-              className="font-mono text-xs leading-relaxed"
-            />
+            <Textarea value={jsonText} onChange={e => setJsonText(e.target.value)} rows={14} className="font-mono text-xs leading-relaxed" />
             <div className="flex gap-2">
               <Button className="flex-1 gap-1.5" onClick={handleJsonSave}>
-                <Save className="h-4 w-4" /> Kaydet
+                <Save className="h-4 w-4" /> {t('save')}
               </Button>
-              <Button variant="outline" onClick={() => setJsonMode(false)}>İptal</Button>
+              <Button variant="outline" onClick={() => setJsonMode(false)}>{t('cancel')}</Button>
             </div>
           </CardContent>
         </Card>
@@ -170,9 +167,9 @@ export function AdminDashboard({ customTemplates, onSaveAll, onAddNew, onEditTem
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <Layers className="h-4 w-4 text-muted-foreground" />
-            <Label className="text-sm font-semibold">Özel Şablonlar</Label>
+            <Label className="text-sm font-semibold">{t('customTemplates')}</Label>
             <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full ml-auto">
-              {customTemplates.length} adet
+              {customTemplates.length} {t('items')}
             </span>
           </div>
           {customTemplates.map((tmpl, i) => (
@@ -194,7 +191,7 @@ export function AdminDashboard({ customTemplates, onSaveAll, onAddNew, onEditTem
                     {categories.find(c => c.key === tmpl.category)?.label || tmpl.category}
                   </span>
                   <span className="text-[10px] text-muted-foreground">
-                    {tmpl.fields.length} alan
+                    {tmpl.fields.length} {t('fields')}
                   </span>
                 </div>
               </CardContent>
@@ -209,8 +206,8 @@ export function AdminDashboard({ customTemplates, onSaveAll, onAddNew, onEditTem
             <div className="mx-auto w-14 h-14 rounded-2xl bg-muted flex items-center justify-center text-2xl mb-3">
               📦
             </div>
-            <p className="font-medium text-sm">Henüz özel şablon yok</p>
-            <p className="text-xs text-muted-foreground mt-1">Yukarıdaki butonu kullanarak yeni bir şablon oluşturun</p>
+            <p className="font-medium text-sm">{t('noCustomTemplates')}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('noCustomTemplatesDesc')}</p>
           </CardContent>
         </Card>
       )}
@@ -220,8 +217,8 @@ export function AdminDashboard({ customTemplates, onSaveAll, onAddNew, onEditTem
         <div className="px-4 py-2.5 border-b border-border/50">
           <Label className="text-sm font-semibold flex items-center gap-2">
             <Layers className="h-4 w-4 text-muted-foreground" />
-            Yerleşik Şablonlar
-            <span className="text-xs text-muted-foreground font-normal">(salt okunur)</span>
+            {t('builtInTemplates')}
+            <span className="text-xs text-muted-foreground font-normal">({t('readOnly')})</span>
           </Label>
         </div>
         <CardContent className="p-4">

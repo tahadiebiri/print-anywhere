@@ -3,20 +3,22 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { usePrinter } from '@/hooks/use-printer';
 import { useAdminCombo } from '@/hooks/use-admin-combo';
-
-const navItems = [
-  { path: '/', icon: Home, label: 'Ana Sayfa' },
-  { path: '/text', icon: Type, label: 'Metin' },
-  { path: '/templates', icon: LayoutTemplate, label: 'Şablonlar' },
-  { path: '/qr', icon: QrCode, label: 'QR Kod' },
-  { path: '/connect', icon: Bluetooth, label: 'Bağlantı' },
-];
+import { useLanguage } from '@/hooks/use-language';
 
 export function BottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
   const { connected } = usePrinter();
   const { registerQrClick, registerConnectClick } = useAdminCombo();
+  const { t } = useLanguage();
+
+  const navItems = [
+    { path: '/', icon: Home, label: t('navHome') },
+    { path: '/text', icon: Type, label: t('navText') },
+    { path: '/templates', icon: LayoutTemplate, label: t('navTemplates') },
+    { path: '/qr', icon: QrCode, label: t('navQR') },
+    { path: '/connect', icon: Bluetooth, label: t('navConnect') },
+  ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/80 backdrop-blur-md safe-area-bottom">
