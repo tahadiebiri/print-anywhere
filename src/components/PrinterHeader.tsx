@@ -11,6 +11,12 @@ export function PrinterHeader() {
   const { connected, deviceName, connecting, connect, disconnect, error } = usePrinter();
   const { theme, toggleTheme } = useTheme();
   const { enabled: devMode, toggle: toggleDev } = useDevMode();
+  const { registerThemeClick } = useAdminCombo();
+
+  const handleThemeToggle = () => {
+    registerThemeClick();
+    toggleTheme();
+  };
   const handleDevToggle = () => toggleDev(deviceName);
   const supported = isWebBluetoothSupported();
 
