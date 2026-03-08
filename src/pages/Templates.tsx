@@ -148,7 +148,8 @@ export default function Templates() {
         <Button variant="ghost" size="icon" onClick={() => setSelectedTemplate(null)}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h1 className="text-xl font-bold">{selectedTemplate.icon} {selectedTemplate.name}</h1>
+        <TemplateIcon icon={selectedTemplate.icon} size="md" />
+        <h1 className="text-xl font-bold">{selectedTemplate.name}</h1>
       </div>
 
       {/* Dynamic form */}
