@@ -534,7 +534,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
           </div>
           {selectedTextId && (
             <Button variant="outline" size="sm" className="gap-1 text-destructive" onClick={deleteSelectedText}>
-              <Trash2 className="h-3.5 w-3.5" /> Seçili metni sil
+              <Trash2 className="h-3.5 w-3.5" /> {t('deleteSelectedText')}
             </Button>
           )}
           {textOverlays.length > 0 && (
