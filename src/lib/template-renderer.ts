@@ -168,15 +168,14 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
   },
 
   note(ctx, canvas, d) {
-    // Measure body text height
     const mCtx = createMeasureCtx();
-    mCtx.font = '15px "JetBrains Mono", monospace';
+    mCtx.font = getUserBodyFont(d, 15);
     const bodyLines = d.body ? measureWrapLines(mCtx, d.body, W - 60 - P) : 0;
     const bodyH = bodyLines * 26;
     const h = Math.max(350, 92 + bodyH + 30);
     fillBg(ctx, canvas, h);
     ctx.fillStyle = 'black';
-    ctx.font = 'bold 24px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 24);
     ctx.fillText('📝 ' + (d.title || 'Not'), P, 35);
     ctx.strokeStyle = 'black'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(P, 46); ctx.lineTo(W - P, 46); ctx.stroke();
@@ -187,7 +186,7 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     ctx.strokeStyle = '#cc4444'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(50, 55); ctx.lineTo(50, h - 10); ctx.stroke();
     if (d.body) {
-      ctx.fillStyle = 'black'; ctx.font = '15px "JetBrains Mono", monospace';
+      ctx.fillStyle = 'black'; ctx.font = getUserBodyFont(d, 15);
       wrapText(ctx, d.body, 56, W - 60 - P, 26, 92);
     }
   },
@@ -199,23 +198,23 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     fillBg(ctx, canvas, h);
     ctx.fillStyle = 'black'; ctx.setLineDash([2, 2]); ctx.strokeStyle = 'black';
     ctx.strokeRect(P, P, W - P * 2, h - P * 2); ctx.setLineDash([]);
-    ctx.font = 'bold 26px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.font = getUserTitleFont(d, 26); ctx.textAlign = 'center';
     ctx.fillText(d.title || 'FİŞ', W / 2, 50);
-    ctx.font = '12px "JetBrains Mono", monospace';
+    ctx.font = getUserBodyFont(d, 12);
     ctx.fillText(new Date().toLocaleString('tr-TR'), W / 2, 68);
     ctx.fillText('SılaPrint Terminal', W / 2, 82);
     ctx.fillText('═'.repeat(32), W / 2, 98);
-    ctx.textAlign = 'left'; ctx.font = '16px "JetBrains Mono", monospace';
+    ctx.textAlign = 'left'; ctx.font = getUserBodyFont(d, 16);
     items.forEach((item: any, i: number) => {
       const y = 120 + i * 26;
       ctx.fillText(item.name, P + 8, y);
       ctx.textAlign = 'right'; ctx.fillText(`₺${parseFloat(item.price).toFixed(2)}`, W - P - 8, y); ctx.textAlign = 'left';
     });
     const ty = 120 + items.length * 26 + 10;
-    ctx.textAlign = 'center'; ctx.font = '12px monospace'; ctx.fillText('─'.repeat(32), W / 2, ty);
-    ctx.font = 'bold 22px "JetBrains Mono", monospace'; ctx.textAlign = 'right';
+    ctx.textAlign = 'center'; ctx.font = getUserBodyFont(d, 12); ctx.fillText('─'.repeat(32), W / 2, ty);
+    ctx.font = getUserTitleFont(d, 22); ctx.textAlign = 'right';
     ctx.fillText(`TOPLAM: ₺${total.toFixed(2)}`, W - P - 8, ty + 28);
-    ctx.textAlign = 'center'; ctx.font = '12px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center'; ctx.font = getUserBodyFont(d, 12);
     ctx.fillText('Teşekkür ederiz!', W / 2, ty + 52); ctx.textAlign = 'left';
   },
 
