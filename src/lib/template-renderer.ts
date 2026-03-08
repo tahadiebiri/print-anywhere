@@ -513,11 +513,33 @@ export function renderTemplate(
   ctx: CanvasRenderingContext2D,
   canvas: HTMLCanvasElement,
   renderKey: string,
-  data: Record<string, any>
+  data: Record<string, any>,
+  options?: { border?: string; divider?: string; customSvg?: string }
 ) {
   const fn = renderers[renderKey];
   if (fn) {
     fn(ctx, canvas, data);
+
+    // Apply border overlay if specified
+    if (options?.border && options.border !== 'none') {
+      const border = getBorderById(options.border);
+      if (border) {
+        border.draw(ctx, canvas.width, canvas.height);
+      }
+    }
+
+    // Draw custom SVG watermark if provided
+    if (options?.customSvg) {
+      const img = new Image();
+      img.src = options.customSvg;
+      // Draw in bottom-right corner as a small watermark
+      if (img.complete) {
+        const svgSize = 40;
+        ctx.globalAlpha = 0.7;
+        ctx.drawImage(img, canvas.width - svgSize - 12, canvas.height - svgSize - 12, svgSize, svgSize);
+        ctx.globalAlpha = 1;
+      }
+    }
   } else {
     canvas.width = W; canvas.height = 100;
     ctx.fillStyle = 'white'; ctx.fillRect(0, 0, W, 100);
