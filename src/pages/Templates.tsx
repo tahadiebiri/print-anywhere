@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Printer, Loader2, ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { TemplateIcon } from '@/components/TemplateIcon';
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,7 +48,11 @@ export default function Templates() {
     const timer = setTimeout(() => {
       const canvas = canvasRef.current!;
       const ctx = canvas.getContext('2d')!;
-      renderTemplate(ctx, canvas, selectedTemplate.render, formData);
+      renderTemplate(ctx, canvas, selectedTemplate.render, formData, {
+        border: selectedTemplate.border,
+        divider: selectedTemplate.divider,
+        customSvg: selectedTemplate.customSvg,
+      });
     }, 100);
     return () => clearTimeout(timer);
   }, [selectedTemplate, formData]);
@@ -56,7 +61,11 @@ export default function Templates() {
     if (!canvasRef.current) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d')!;
-    renderTemplate(ctx, canvas, selectedTemplate!.render, formData);
+    renderTemplate(ctx, canvas, selectedTemplate!.render, formData, {
+      border: selectedTemplate!.border,
+      divider: selectedTemplate!.divider,
+      customSvg: selectedTemplate!.customSvg,
+    });
     await new Promise(r => setTimeout(r, 100));
     setPrinting(true);
     try {
@@ -121,7 +130,7 @@ export default function Templates() {
               onClick={() => initForm(tmpl)}
             >
               <CardContent className="p-4 text-center space-y-2">
-                <span className="text-3xl">{tmpl.icon}</span>
+                <TemplateIcon icon={tmpl.icon} size="lg" />
                 <p className="font-semibold text-sm">{tmpl.name}</p>
                 <p className="text-xs text-muted-foreground">{tmpl.description}</p>
               </CardContent>
@@ -139,7 +148,8 @@ export default function Templates() {
         <Button variant="ghost" size="icon" onClick={() => setSelectedTemplate(null)}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h1 className="text-xl font-bold">{selectedTemplate.icon} {selectedTemplate.name}</h1>
+        <TemplateIcon icon={selectedTemplate.icon} size="md" />
+        <h1 className="text-xl font-bold">{selectedTemplate.name}</h1>
       </div>
 
       {/* Dynamic form */}

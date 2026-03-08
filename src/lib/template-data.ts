@@ -7,9 +7,12 @@ export interface TemplateDefinition {
   category: TemplateCategory;
   name: string;
   description: string;
-  icon: string; // emoji
+  icon: string; // emoji or svgIcon key prefixed with "svg:"
   fields: TemplateField[];
   render: string; // renderer function key
+  border?: string; // border style id from svg-assets
+  divider?: string; // divider style id from svg-assets
+  customSvg?: string; // user-uploaded SVG data URL
 }
 
 export interface TemplateField {
