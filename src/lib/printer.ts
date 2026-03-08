@@ -95,6 +95,12 @@ export function getPrinter(): CatPrinter {
   return printerInstance;
 }
 
+let disconnectCallback: (() => void) | null = null;
+
+export function setDisconnectCallback(cb: (() => void) | null) {
+  disconnectCallback = cb;
+}
+
 export async function connectPrinter(): Promise<{ name: string; id: string }> {
   const printer = getPrinter();
   devLog('info', 'BLE bağlantı başlatılıyor... Service UUID: 0xAE30 (44592)');
@@ -103,6 +109,35 @@ export async function connectPrinter(): Promise<{ name: string; id: string }> {
   const name = device?.name || 'Termal Yazıcı';
   const id = device?.id || '';
   devLog('info', `Bağlandı: ${name} | TX: 0xAE01 | RX: 0xAE02`);
+
+  // Listen for unexpected disconnections
+  if (device) {
+    device.addEventListener('gattserverdisconnected', () => {
+      devLog('info', 'GATT bağlantısı beklenmedik şekilde kesildi');
+      disconnectCallback?.();
+    });
+  }
+
+  return { name, id };
+}
+
+export async function reconnectPrinter(): Promise<{ name: string; id: string }> {
+  const printer = getPrinter();
+  const device = (printer as any).device;
+  if (!device) throw new Error('Önceki cihaz bulunamadı');
+  devLog('info', `Yeniden bağlanılıyor: ${device.name}...`);
+  await device.gatt.connect();
+  // Re-setup characteristics
+  await printer.connect();
+  const name = device.name || 'Termal Yazıcı';
+  const id = device.id || '';
+  devLog('info', `Yeniden bağlandı: ${name}`);
+
+  device.addEventListener('gattserverdisconnected', () => {
+    devLog('info', 'GATT bağlantısı beklenmedik şekilde kesildi');
+    disconnectCallback?.();
+  });
+
   return { name, id };
 }
 
