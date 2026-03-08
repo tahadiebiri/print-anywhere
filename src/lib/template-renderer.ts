@@ -487,7 +487,7 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     const h = 60 + days.length * rowH + 10;
     fillBg(ctx, canvas, h);
     ctx.fillStyle = 'black';
-    ctx.font = 'bold 22px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.font = getUserTitleFont(d, 22); ctx.textAlign = 'center';
     ctx.fillText('📆 ' + (d.title || 'Haftalık Plan'), W / 2, 35);
     ctx.textAlign = 'left';
     ctx.strokeStyle = 'black'; ctx.lineWidth = 1;
