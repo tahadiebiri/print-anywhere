@@ -536,7 +536,7 @@ export default function QRCodePage() {
       </div>
 
       {!connected && (
-        <p className="text-xs text-center text-muted-foreground">Yazdırmak için önce yazıcıya bağlanın</p>
+        <p className="text-xs text-center text-muted-foreground">{t('connectFirst')}</p>
       )}
     </div>
   );
