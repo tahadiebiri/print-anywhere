@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
 import { usePrinter } from '@/hooks/use-printer';
+import { useLanguage } from '@/hooks/use-language';
 import { printCanvas } from '@/lib/printer';
 import { toast } from 'sonner';
 import { FilterType, filters, photoFrames, applyFilter, drawPhotoFrame } from '@/lib/image-filters';
