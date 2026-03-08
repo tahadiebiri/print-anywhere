@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import QRCode from 'qrcode';
-import { Printer, Loader2, Wifi, User, Mail, Phone, Link, RotateCcw, Download, Settings2, Zap } from 'lucide-react';
+import { Printer, Loader2, Wifi, User, Mail, Phone, Link, RotateCcw, Download, Settings2, Zap, ImagePlus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
