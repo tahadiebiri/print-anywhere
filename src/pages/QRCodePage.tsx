@@ -372,7 +372,7 @@ export default function QRCodePage() {
           {/* Error Correction */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-xs">Hata Düzeltme</Label>
+              <Label className="text-xs">{t('errorCorrection')}</Label>
               {logoDataUrl && (
                 <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">🔒 Logo için H zorunlu</span>
               )}
