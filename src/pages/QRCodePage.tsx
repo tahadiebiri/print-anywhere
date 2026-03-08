@@ -343,7 +343,7 @@ export default function QRCodePage() {
 
         {contentType === 'phone' && (
           <div className="space-y-1.5">
-            <Label className="text-xs">Telefon Numarası</Label>
+            <Label className="text-xs">{t('phoneNumber')}</Label>
             <Input placeholder="+90 555 123 4567" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} />
           </div>
         )}
