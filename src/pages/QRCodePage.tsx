@@ -411,7 +411,7 @@ export default function QRCodePage() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Arka Plan</Label>
+              <Label className="text-xs">{t('background')}</Label>
               <div className="flex items-center gap-2">
                 <input
                   type="color"
