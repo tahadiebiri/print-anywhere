@@ -125,14 +125,16 @@ export default function BluetoothConnect() {
 
         <div className="space-y-1">
           <h1 className="text-xl font-bold">
-            {connecting ? 'Aranıyor...' : connected ? 'Yazıcı Bağlı' : 'Yazıcı Bağlantısı'}
+            {reconnecting ? 'Yeniden Bağlanıyor...' : connecting ? 'Aranıyor...' : connected ? 'Yazıcı Bağlı' : 'Yazıcı Bağlantısı'}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {connecting
-              ? 'Yakındaki BLE yazıcılar taranıyor'
-              : connected
-                ? 'Yazdırmaya hazır'
-                : 'BLE termal yazıcınıza bağlanın'}
+            {reconnecting
+              ? 'Bağlantı koptu, otomatik yeniden bağlanılıyor'
+              : connecting
+                ? 'Yakındaki BLE yazıcılar taranıyor'
+                : connected
+                  ? 'Yazdırmaya hazır'
+                  : 'BLE termal yazıcınıza bağlanın'}
           </p>
         </div>
       </div>
