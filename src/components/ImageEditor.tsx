@@ -601,7 +601,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
       {/* Brightness & Contrast */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Parlaklık: {state.brightness}</Label>
+          <Label className="text-xs text-muted-foreground">{t('brightness')}: {state.brightness}</Label>
           <Slider value={[state.brightness]} onValueChange={([v]) => update({ brightness: v })} min={-50} max={50} step={5} />
         </div>
         <div className="space-y-1">
