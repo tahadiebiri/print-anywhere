@@ -5,6 +5,40 @@ import { getBorderById, getDividerById, drawSvgIcon, svgIcons } from './svg-asse
 const W = 384;
 const P = 16;
 
+// Font helpers – templates can receive _fontFamily & _fontSize via data
+export type FontPreset = { family: string; label: string };
+export const templateFonts: FontPreset[] = [
+  { family: "'Inter', sans-serif", label: 'Inter' },
+  { family: "'JetBrains Mono', monospace", label: 'JetBrains Mono' },
+  { family: "serif", label: 'Serif' },
+  { family: "cursive", label: 'El Yazısı' },
+  { family: "'Georgia', serif", label: 'Georgia' },
+  { family: "'Courier New', monospace", label: 'Courier' },
+];
+
+export const templateFontSizes = [
+  { value: 'small', label: 'Küçük', scale: 0.85 },
+  { value: 'normal', label: 'Normal', scale: 1 },
+  { value: 'large', label: 'Büyük', scale: 1.2 },
+  { value: 'xlarge', label: 'Çok Büyük', scale: 1.4 },
+];
+
+function getUserFont(d: Record<string, any>, defaultSize: number, weight: string = ''): string {
+  const family = d._fontFamily || "'Inter', sans-serif";
+  const sizePreset = templateFontSizes.find(s => s.value === d._fontSize);
+  const scale = sizePreset?.scale ?? 1;
+  const size = Math.round(defaultSize * scale);
+  return `${weight} ${size}px ${family}`.trim();
+}
+
+function getUserBodyFont(d: Record<string, any>, defaultSize: number): string {
+  return getUserFont(d, defaultSize);
+}
+
+function getUserTitleFont(d: Record<string, any>, defaultSize: number): string {
+  return getUserFont(d, defaultSize, 'bold');
+}
+
 function fillBg(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, h: number) {
   canvas.width = W;
   canvas.height = h;
