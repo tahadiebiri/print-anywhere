@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Type, Image, QrCode, LayoutTemplate, Bluetooth, AlertTriangle, ChevronsUp, ChevronsDown, Download, X } from 'lucide-react';
-import logo from '@/assets/logo.svg';
+import defaultLogo from '@/assets/logo.svg';
+import { getAppSettings } from '@/lib/app-settings';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { usePrinter } from '@/hooks/use-printer';
@@ -19,6 +20,9 @@ export default function HomePage() {
   const navigate = useNavigate();
   const { connected, deviceName } = usePrinter();
   const supported = isWebBluetoothSupported();
+  const settings = getAppSettings();
+  const displayLogo = settings.logoUrl || defaultLogo;
+  const appName = settings.appName || 'SılaPrint';
   const [feeding, setFeeding] = useState(false);
   const [showInstall, setShowInstall] = useState(false);
   const [dismissed, setDismissed] = useState(false);
@@ -72,8 +76,8 @@ export default function HomePage() {
         </Card>
       ) : (
         <div className="text-center py-6">
-          <img src={logo} alt="SılaPrint" className="h-16 w-auto mx-auto mb-3" />
-          <h1 className="text-2xl font-bold mb-1">SılaPrint</h1>
+          <img src={displayLogo} alt={appName} className="h-16 w-auto mx-auto mb-3" />
+          <h1 className="text-2xl font-bold mb-1">{appName}</h1>
           <p className="text-muted-foreground text-sm">
             Mini termal yazıcınız için web uygulaması
           </p>
