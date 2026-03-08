@@ -304,7 +304,7 @@ export default function QRCodePage() {
         {contentType === 'vcard' && (
           <>
             <div className="space-y-1.5">
-              <Label className="text-xs">Ad Soyad</Label>
+              <Label className="text-xs">{t('fullName')}</Label>
               <Input placeholder="Ahmet Yılmaz" value={vcard.name} onChange={e => setVcard(v => ({ ...v, name: e.target.value }))} />
             </div>
             <div className="grid grid-cols-2 gap-2">
