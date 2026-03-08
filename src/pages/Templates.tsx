@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Printer, Loader2, ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { Printer, Loader2, ArrowLeft, Plus, Trash2, Type } from 'lucide-react';
 import { TemplateIcon } from '@/components/TemplateIcon';
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,7 @@ import {
   type TemplateCategory,
   type TemplateDefinition,
 } from '@/lib/template-data';
-import { renderTemplate } from '@/lib/template-renderer';
+import { renderTemplate, templateFonts, templateFontSizes } from '@/lib/template-renderer';
 
 export default function Templates() {
   const [selectedCat, setSelectedCat] = useState<TemplateCategory | null>(null);
