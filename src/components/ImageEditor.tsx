@@ -301,7 +301,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
       if (overlay) {
         const ctx = overlay.getContext('2d')!;
         const clicked = textOverlays.find(t => {
-          ctx.font = `${t.fontSize}px "JetBrains Mono", monospace`;
+          ctx.font = `${t.fontSize}px "${t.fontFamily}", sans-serif`;
           const m = ctx.measureText(t.text);
           return pt.x >= t.x - 2 && pt.x <= t.x + m.width + 2 &&
                  pt.y >= t.y - t.fontSize && pt.y <= t.y + 4;
