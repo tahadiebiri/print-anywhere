@@ -1,5 +1,6 @@
 // Canvas renderers for all template types
 import JsBarcode from 'jsbarcode';
+import { getBorderById, getDividerById, drawSvgIcon, svgIcons } from './svg-assets';
 
 const W = 384;
 const P = 16;
@@ -9,6 +10,16 @@ function fillBg(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, h: num
   canvas.height = h;
   ctx.fillStyle = 'white';
   ctx.fillRect(0, 0, W, h);
+}
+
+// Draw template icon (emoji or SVG) at position
+function drawTemplateIcon(ctx: CanvasRenderingContext2D, icon: string, x: number, y: number, size: number = 24) {
+  if (icon.startsWith('svg:')) {
+    const key = icon.substring(4);
+    drawSvgIcon(ctx, key, x, y - size + 4, size);
+  } else {
+    ctx.fillText(icon + ' ', x, y);
+  }
 }
 
 function wrapText(ctx: CanvasRenderingContext2D, text: string, x: number, maxW: number, lineH: number, startY: number): number {
