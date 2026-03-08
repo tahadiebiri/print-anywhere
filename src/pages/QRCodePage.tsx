@@ -43,6 +43,32 @@ export default function QRCodePage() {
   const [printing, setPrinting] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { connected } = usePrinter();
+  const { t } = useLanguage();
+
+  const contentTypeLabels: Record<ContentType, { label: string; icon: any }> = {
+    url: { label: t('urlText'), icon: Link },
+    wifi: { label: t('wifi'), icon: Wifi },
+    vcard: { label: t('contact'), icon: User },
+    email: { label: t('email'), icon: Mail },
+    phone: { label: t('phone'), icon: Phone },
+  };
+
+  const errorLevels: { value: ErrorLevel; label: string; desc: string }[] = [
+    { value: 'L', label: t('low'), desc: '~7%' },
+    { value: 'M', label: t('mid'), desc: '~15%' },
+    { value: 'Q', label: t('high'), desc: '~25%' },
+    { value: 'H', label: t('max'), desc: '~30%' },
+  ];
+
+  const qrFrames: { value: QRFrame; label: string }[] = [
+    { value: 'none', label: t('qrFrameNone') },
+    { value: 'solid', label: t('qrFrameSolid') },
+    { value: 'rounded', label: t('qrFrameRounded') },
+    { value: 'dashed', label: t('qrFrameDashed') },
+    { value: 'double', label: t('qrFrameDouble') },
+    { value: 'shadow', label: t('qrFrameShadow') },
+    { value: 'badge', label: t('qrFrameBadge') },
+  ];
 
   const getQRContent = (): string => {
     switch (contentType) {
