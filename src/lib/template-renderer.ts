@@ -632,18 +632,16 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     // From
     ctx.fillStyle = 'black'; ctx.font = 'bold 12px "JetBrains Mono", monospace';
     ctx.fillText('GÖNDEREN:', P, 30);
-    ctx.font = 'bold 16px Inter, sans-serif'; ctx.fillText(d.from || '', P, 52);
+    ctx.font = getUserTitleFont(d, 16); ctx.fillText(d.from || '', P, 52);
     let fromEndY = 72;
-    if (d.fromAddr) { ctx.font = '13px Inter, sans-serif'; fromEndY = wrapText(ctx, d.fromAddr, P, W - P * 2, 18, 72); }
-    // Divider
+    if (d.fromAddr) { ctx.font = getUserBodyFont(d, 13); fromEndY = wrapText(ctx, d.fromAddr, P, W - P * 2, 18, 72); }
     const divY = fromEndY + 15;
     ctx.setLineDash([4, 4]); ctx.strokeStyle = 'black';
     ctx.beginPath(); ctx.moveTo(P, divY); ctx.lineTo(W - P, divY); ctx.stroke();
     ctx.setLineDash([]);
-    // To
     ctx.font = 'bold 12px "JetBrains Mono", monospace'; ctx.fillText('ALICI:', P, divY + 25);
-    ctx.font = 'bold 18px Inter, sans-serif'; ctx.fillText(d.to || '', P, divY + 50);
-    if (d.toAddr) { ctx.font = '14px Inter, sans-serif'; wrapText(ctx, d.toAddr, P, W - P * 2, 20, divY + 75); }
+    ctx.font = getUserTitleFont(d, 18); ctx.fillText(d.to || '', P, divY + 50);
+    if (d.toAddr) { ctx.font = getUserBodyFont(d, 14); wrapText(ctx, d.toAddr, P, W - P * 2, 20, divY + 75); }
   },
 };
 
