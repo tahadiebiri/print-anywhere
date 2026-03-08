@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { useAdminCombo } from '@/hooks/use-admin-combo';
+import { getAppSettings } from '@/lib/app-settings';
 
 export function AdminPasswordDialog() {
   const { showPasswordDialog, setShowPasswordDialog } = useAdminCombo();
@@ -20,7 +21,8 @@ export function AdminPasswordDialog() {
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    if (password === 'silaprint2026') {
+    const settings = getAppSettings();
+    if (password === settings.adminPassword) {
       setShowPasswordDialog(false);
       setPassword('');
       sessionStorage.setItem('admin_auth', '1');

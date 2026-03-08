@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { getAppSettings } from '@/lib/app-settings';
 
 interface AdminLoginProps {
   onLogin: () => void;
@@ -16,7 +17,8 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    if (password === 'silaprint2026') {
+    const settings = getAppSettings();
+    if (password === settings.adminPassword) {
       onLogin();
       toast.success('Admin paneli açıldı');
     } else {
