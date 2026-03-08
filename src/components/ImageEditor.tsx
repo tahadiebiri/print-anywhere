@@ -44,7 +44,20 @@ interface TextOverlay {
   y: number;
   fontSize: number;
   color: string;
+  fontFamily: string;
 }
+
+const fontOptions = [
+  { value: 'JetBrains Mono', label: 'JetBrains Mono' },
+  { value: 'Inter', label: 'Inter' },
+  { value: 'Georgia', label: 'Serif' },
+  { value: 'cursive', label: 'El Yazısı' },
+];
+
+const colorPresets = [
+  '#000000', '#FFFFFF', '#EF4444', '#F97316',
+  '#EAB308', '#22C55E', '#3B82F6', '#8B5CF6',
+];
 
 type ToolMode = 'move' | 'pen' | 'eraser' | 'text';
 
@@ -72,6 +85,8 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
   const [textOverlays, setTextOverlays] = useState<TextOverlay[]>([]);
   const [textInput, setTextInput] = useState('');
   const [textFontSize, setTextFontSize] = useState(20);
+  const [textFont, setTextFont] = useState('JetBrains Mono');
+  const [textColor, setTextColor] = useState('#000000');
   const [selectedTextId, setSelectedTextId] = useState<string | null>(null);
   const [draggingText, setDraggingText] = useState<{ id: string; startX: number; startY: number; ox: number; oy: number } | null>(null);
 
@@ -228,7 +243,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
     // Draw text overlays
     for (const t of textOverlays) {
       ctx.save();
-      ctx.font = `${t.fontSize}px "JetBrains Mono", monospace`;
+      ctx.font = `${t.fontSize}px "${t.fontFamily}", sans-serif`;
       ctx.fillStyle = t.color;
       ctx.fillText(t.text, t.x, t.y);
 
@@ -286,7 +301,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
       if (overlay) {
         const ctx = overlay.getContext('2d')!;
         const clicked = textOverlays.find(t => {
-          ctx.font = `${t.fontSize}px "JetBrains Mono", monospace`;
+          ctx.font = `${t.fontSize}px "${t.fontFamily}", sans-serif`;
           const m = ctx.measureText(t.text);
           return pt.x >= t.x - 2 && pt.x <= t.x + m.width + 2 &&
                  pt.y >= t.y - t.fontSize && pt.y <= t.y + 4;
@@ -344,7 +359,8 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
       x: 20,
       y: canvasDims.h / 2,
       fontSize: textFontSize,
-      color: 'black',
+      color: textColor,
+      fontFamily: textFont,
     };
     setTextOverlays(prev => [...prev, newText]);
     setSelectedTextId(newText.id);
@@ -452,7 +468,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
 
       {/* Text tool options */}
       {tool === 'text' && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex gap-2">
             <Input
               value={textInput}
@@ -463,6 +479,40 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
             />
             <Button size="sm" onClick={addText} disabled={!textInput.trim()}>Ekle</Button>
           </div>
+
+          {/* Font & Color row */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">Yazı Tipi</Label>
+              <Select value={textFont} onValueChange={setTextFont}>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {fontOptions.map(f => (
+                    <SelectItem key={f.value} value={f.value} className="text-xs">
+                      <span style={{ fontFamily: f.value }}>{f.label}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">Renk</Label>
+              <div className="flex items-center gap-1 flex-wrap">
+                {colorPresets.map(c => (
+                  <button
+                    key={c}
+                    className={`w-6 h-6 rounded-full border-2 transition-transform ${textColor === c ? 'border-primary scale-110' : 'border-border'}`}
+                    style={{ backgroundColor: c }}
+                    onClick={() => setTextColor(c)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Size */}
           <div className="flex items-center gap-3">
             <Label className="text-xs text-muted-foreground shrink-0">Boyut: {textFontSize}px</Label>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setTextFontSize(s => Math.max(8, s - 2))}>
