@@ -112,11 +112,11 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     const h = 70 + items.length * 32 + 20;
     fillBg(ctx, canvas, h);
     ctx.fillStyle = 'black';
-    ctx.font = 'bold 24px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 24);
     ctx.fillText('☑ ' + (d.title || 'Yapılacaklar'), P, 38);
     ctx.strokeStyle = 'black'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(P, 48); ctx.lineTo(W - P, 48); ctx.stroke();
-    ctx.font = '18px "JetBrains Mono", monospace'; ctx.lineWidth = 1.5;
+    ctx.font = getUserBodyFont(d, 18); ctx.lineWidth = 1.5;
     items.forEach((item: string, i: number) => {
       const y = 75 + i * 32;
       ctx.strokeRect(P, y - 13, 15, 15);
@@ -129,14 +129,14 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     const h = 70 + items.length * 28 + 20;
     fillBg(ctx, canvas, h);
     ctx.fillStyle = 'black';
-    ctx.font = 'bold 22px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 22);
     ctx.textAlign = 'center';
     ctx.fillText('🛒 ' + (d.title || 'Alışveriş Listesi'), W / 2, 35);
     ctx.textAlign = 'left';
     ctx.setLineDash([3, 3]); ctx.strokeStyle = 'black';
     ctx.beginPath(); ctx.moveTo(P, 48); ctx.lineTo(W - P, 48); ctx.stroke();
     ctx.setLineDash([]);
-    ctx.font = '16px "JetBrains Mono", monospace';
+    ctx.font = getUserBodyFont(d, 16);
     items.forEach((item: any, i: number) => {
       const y = 72 + i * 28;
       ctx.fillText(`○ ${item.name}`, P, y);
@@ -149,14 +149,14 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     const h = 90 + items.length * 30 + 20;
     fillBg(ctx, canvas, h);
     ctx.fillStyle = 'black';
-    ctx.font = 'bold 22px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 22);
     ctx.textAlign = 'center';
     ctx.fillText('✅ ' + (d.title || 'Kontrol Listesi'), W / 2, 35);
-    if (d.subtitle) { ctx.font = '14px Inter, sans-serif'; ctx.fillText(d.subtitle, W / 2, 55); }
+    if (d.subtitle) { ctx.font = getUserBodyFont(d, 14); ctx.fillText(d.subtitle, W / 2, 55); }
     ctx.textAlign = 'left';
     ctx.strokeStyle = 'black'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(P, 65); ctx.lineTo(W - P, 65); ctx.stroke();
-    ctx.font = '16px "JetBrains Mono", monospace';
+    ctx.font = getUserBodyFont(d, 16);
     items.forEach((item: string, i: number) => {
       const y = 90 + i * 30;
       ctx.strokeStyle = 'black'; ctx.lineWidth = 1.5;
