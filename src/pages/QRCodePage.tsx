@@ -137,18 +137,39 @@ export default function QRCodePage() {
       const qrY = pad;
       ctx.drawImage(img, qrX, qrY, displaySize, displaySize);
 
-      if (caption) {
-        ctx.fillStyle = 'black';
-        ctx.font = 'bold 18px Inter, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(caption, W / 2, qrY + displaySize + 28, W - pad * 2);
-      }
+      // Draw logo in center
+      const drawLogoAndFinish = () => {
+        if (caption) {
+          ctx.fillStyle = 'black';
+          ctx.font = 'bold 18px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(caption, W / 2, qrY + displaySize + 28, W - pad * 2);
+        }
+        setPreviewUrl(canvas.toDataURL('image/png'));
+      };
 
-      // Update preview from canvas
-      setPreviewUrl(canvas.toDataURL('image/png'));
+      if (logoDataUrl) {
+        const logoImg = new window.Image();
+        logoImg.onload = () => {
+          const lSize = logoSize;
+          const lx = qrX + (displaySize - lSize) / 2;
+          const ly = qrY + (displaySize - lSize) / 2;
+          // White background behind logo
+          const padding = 4;
+          ctx.fillStyle = 'white';
+          ctx.beginPath();
+          ctx.roundRect(lx - padding, ly - padding, lSize + padding * 2, lSize + padding * 2, 8);
+          ctx.fill();
+          ctx.drawImage(logoImg, lx, ly, lSize, lSize);
+          drawLogoAndFinish();
+        };
+        logoImg.src = logoDataUrl;
+      } else {
+        drawLogoAndFinish();
+      }
     };
     img.src = qrDataUrl;
-  }, [qrDataUrl, caption, qrSize, frame]);
+  }, [qrDataUrl, caption, qrSize, frame, logoDataUrl, logoSize]);
 
   const handlePrint = async () => {
     if (!canvasRef.current) return;
