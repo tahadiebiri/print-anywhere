@@ -331,8 +331,8 @@ export default function QRCodePage() {
               <Input placeholder="info@example.com" value={emailData.to} onChange={e => setEmailData(d => ({ ...d, to: e.target.value }))} />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Konu</Label>
-              <Input placeholder="Konu başlığı" value={emailData.subject} onChange={e => setEmailData(d => ({ ...d, subject: e.target.value }))} />
+              <Label className="text-xs">{t('subject')}</Label>
+              <Input placeholder={t('subjectPlaceholder')} value={emailData.subject} onChange={e => setEmailData(d => ({ ...d, subject: e.target.value }))} />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs">Mesaj</Label>
