@@ -47,7 +47,11 @@ export function TemplateEditor({ template, onUpdate, onSave, onDelete, onBack }:
     const timer = setTimeout(() => {
       const canvas = canvasRef.current!;
       const ctx = canvas.getContext('2d')!;
-      renderTemplate(ctx, canvas, template.render, previewData);
+      renderTemplate(ctx, canvas, template.render, previewData, {
+        border: template.border,
+        divider: template.divider,
+        customSvg: template.customSvg,
+      });
     }, 150);
     return () => clearTimeout(timer);
   }, [template, previewData, showPreview]);
