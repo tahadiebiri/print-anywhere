@@ -5,6 +5,40 @@ import { getBorderById, getDividerById, drawSvgIcon, svgIcons } from './svg-asse
 const W = 384;
 const P = 16;
 
+// Font helpers – templates can receive _fontFamily & _fontSize via data
+export type FontPreset = { family: string; label: string };
+export const templateFonts: FontPreset[] = [
+  { family: "'Inter', sans-serif", label: 'Inter' },
+  { family: "'JetBrains Mono', monospace", label: 'JetBrains Mono' },
+  { family: "serif", label: 'Serif' },
+  { family: "cursive", label: 'El Yazısı' },
+  { family: "'Georgia', serif", label: 'Georgia' },
+  { family: "'Courier New', monospace", label: 'Courier' },
+];
+
+export const templateFontSizes = [
+  { value: 'small', label: 'Küçük', scale: 0.85 },
+  { value: 'normal', label: 'Normal', scale: 1 },
+  { value: 'large', label: 'Büyük', scale: 1.2 },
+  { value: 'xlarge', label: 'Çok Büyük', scale: 1.4 },
+];
+
+function getUserFont(d: Record<string, any>, defaultSize: number, weight: string = ''): string {
+  const family = d._fontFamily || "'Inter', sans-serif";
+  const sizePreset = templateFontSizes.find(s => s.value === d._fontSize);
+  const scale = sizePreset?.scale ?? 1;
+  const size = Math.round(defaultSize * scale);
+  return `${weight} ${size}px ${family}`.trim();
+}
+
+function getUserBodyFont(d: Record<string, any>, defaultSize: number): string {
+  return getUserFont(d, defaultSize);
+}
+
+function getUserTitleFont(d: Record<string, any>, defaultSize: number): string {
+  return getUserFont(d, defaultSize, 'bold');
+}
+
 function fillBg(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, h: number) {
   canvas.width = W;
   canvas.height = h;
@@ -78,11 +112,11 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     const h = 70 + items.length * 32 + 20;
     fillBg(ctx, canvas, h);
     ctx.fillStyle = 'black';
-    ctx.font = 'bold 24px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 24);
     ctx.fillText('☑ ' + (d.title || 'Yapılacaklar'), P, 38);
     ctx.strokeStyle = 'black'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(P, 48); ctx.lineTo(W - P, 48); ctx.stroke();
-    ctx.font = '18px "JetBrains Mono", monospace'; ctx.lineWidth = 1.5;
+    ctx.font = getUserBodyFont(d, 18); ctx.lineWidth = 1.5;
     items.forEach((item: string, i: number) => {
       const y = 75 + i * 32;
       ctx.strokeRect(P, y - 13, 15, 15);
@@ -95,14 +129,14 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     const h = 70 + items.length * 28 + 20;
     fillBg(ctx, canvas, h);
     ctx.fillStyle = 'black';
-    ctx.font = 'bold 22px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 22);
     ctx.textAlign = 'center';
     ctx.fillText('🛒 ' + (d.title || 'Alışveriş Listesi'), W / 2, 35);
     ctx.textAlign = 'left';
     ctx.setLineDash([3, 3]); ctx.strokeStyle = 'black';
     ctx.beginPath(); ctx.moveTo(P, 48); ctx.lineTo(W - P, 48); ctx.stroke();
     ctx.setLineDash([]);
-    ctx.font = '16px "JetBrains Mono", monospace';
+    ctx.font = getUserBodyFont(d, 16);
     items.forEach((item: any, i: number) => {
       const y = 72 + i * 28;
       ctx.fillText(`○ ${item.name}`, P, y);
@@ -115,14 +149,14 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     const h = 90 + items.length * 30 + 20;
     fillBg(ctx, canvas, h);
     ctx.fillStyle = 'black';
-    ctx.font = 'bold 22px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 22);
     ctx.textAlign = 'center';
     ctx.fillText('✅ ' + (d.title || 'Kontrol Listesi'), W / 2, 35);
-    if (d.subtitle) { ctx.font = '14px Inter, sans-serif'; ctx.fillText(d.subtitle, W / 2, 55); }
+    if (d.subtitle) { ctx.font = getUserBodyFont(d, 14); ctx.fillText(d.subtitle, W / 2, 55); }
     ctx.textAlign = 'left';
     ctx.strokeStyle = 'black'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(P, 65); ctx.lineTo(W - P, 65); ctx.stroke();
-    ctx.font = '16px "JetBrains Mono", monospace';
+    ctx.font = getUserBodyFont(d, 16);
     items.forEach((item: string, i: number) => {
       const y = 90 + i * 30;
       ctx.strokeStyle = 'black'; ctx.lineWidth = 1.5;
@@ -134,15 +168,14 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
   },
 
   note(ctx, canvas, d) {
-    // Measure body text height
     const mCtx = createMeasureCtx();
-    mCtx.font = '15px "JetBrains Mono", monospace';
+    mCtx.font = getUserBodyFont(d, 15);
     const bodyLines = d.body ? measureWrapLines(mCtx, d.body, W - 60 - P) : 0;
     const bodyH = bodyLines * 26;
     const h = Math.max(350, 92 + bodyH + 30);
     fillBg(ctx, canvas, h);
     ctx.fillStyle = 'black';
-    ctx.font = 'bold 24px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 24);
     ctx.fillText('📝 ' + (d.title || 'Not'), P, 35);
     ctx.strokeStyle = 'black'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(P, 46); ctx.lineTo(W - P, 46); ctx.stroke();
@@ -153,7 +186,7 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     ctx.strokeStyle = '#cc4444'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(50, 55); ctx.lineTo(50, h - 10); ctx.stroke();
     if (d.body) {
-      ctx.fillStyle = 'black'; ctx.font = '15px "JetBrains Mono", monospace';
+      ctx.fillStyle = 'black'; ctx.font = getUserBodyFont(d, 15);
       wrapText(ctx, d.body, 56, W - 60 - P, 26, 92);
     }
   },
@@ -165,23 +198,23 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     fillBg(ctx, canvas, h);
     ctx.fillStyle = 'black'; ctx.setLineDash([2, 2]); ctx.strokeStyle = 'black';
     ctx.strokeRect(P, P, W - P * 2, h - P * 2); ctx.setLineDash([]);
-    ctx.font = 'bold 26px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.font = getUserTitleFont(d, 26); ctx.textAlign = 'center';
     ctx.fillText(d.title || 'FİŞ', W / 2, 50);
-    ctx.font = '12px "JetBrains Mono", monospace';
+    ctx.font = getUserBodyFont(d, 12);
     ctx.fillText(new Date().toLocaleString('tr-TR'), W / 2, 68);
     ctx.fillText('SılaPrint Terminal', W / 2, 82);
     ctx.fillText('═'.repeat(32), W / 2, 98);
-    ctx.textAlign = 'left'; ctx.font = '16px "JetBrains Mono", monospace';
+    ctx.textAlign = 'left'; ctx.font = getUserBodyFont(d, 16);
     items.forEach((item: any, i: number) => {
       const y = 120 + i * 26;
       ctx.fillText(item.name, P + 8, y);
       ctx.textAlign = 'right'; ctx.fillText(`₺${parseFloat(item.price).toFixed(2)}`, W - P - 8, y); ctx.textAlign = 'left';
     });
     const ty = 120 + items.length * 26 + 10;
-    ctx.textAlign = 'center'; ctx.font = '12px monospace'; ctx.fillText('─'.repeat(32), W / 2, ty);
-    ctx.font = 'bold 22px "JetBrains Mono", monospace'; ctx.textAlign = 'right';
+    ctx.textAlign = 'center'; ctx.font = getUserBodyFont(d, 12); ctx.fillText('─'.repeat(32), W / 2, ty);
+    ctx.font = getUserTitleFont(d, 22); ctx.textAlign = 'right';
     ctx.fillText(`TOPLAM: ₺${total.toFixed(2)}`, W - P - 8, ty + 28);
-    ctx.textAlign = 'center'; ctx.font = '12px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center'; ctx.font = getUserBodyFont(d, 12);
     ctx.fillText('Teşekkür ederiz!', W / 2, ty + 52); ctx.textAlign = 'left';
   },
 
@@ -206,9 +239,9 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
       ctx.fillText('♥', 12, y);
       ctx.fillText('♥', W - 24, y);
     }
-    ctx.font = 'bold 28px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.font = getUserTitleFont(d, 28); ctx.textAlign = 'center';
     ctx.fillText(d.title || '💖', W / 2, 80);
-    if (d.message) { ctx.font = '16px Inter, sans-serif'; wrapText(ctx, d.message, W / 2 - 140, 280, 22, 110); }
+    if (d.message) { ctx.font = getUserBodyFont(d, 16); wrapText(ctx, d.message, W / 2 - 140, 280, 22, 110); }
     ctx.textAlign = 'left';
   },
 
@@ -226,13 +259,13 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     // Stars
     ctx.font = '12px sans-serif'; ctx.fillStyle = 'black';
     for (let x = 20; x < W - 16; x += 28) { ctx.fillText('★', x, 28); ctx.fillText('★', x, h - 10); }
-    ctx.font = 'bold 22px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.font = getUserTitleFont(d, 22); ctx.textAlign = 'center';
     ctx.fillText(d.title || '⭐ Başarı Belgesi', W / 2, 65);
-    ctx.font = 'bold 28px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 28);
     ctx.fillText(d.name || '', W / 2, 110);
-    ctx.font = '16px Inter, sans-serif';
+    ctx.font = getUserBodyFont(d, 16);
     if (d.message) { wrapText(ctx, d.message, 30, W - 60, 22, 145); }
-    ctx.font = '13px Inter, sans-serif';
+    ctx.font = getUserBodyFont(d, 13);
     ctx.fillText('— ★ ✦ ★ —', W / 2, h - 25);
     ctx.textAlign = 'left';
   },
@@ -258,10 +291,10 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
       ctx.beginPath(); ctx.arc(x, 25, 1.5, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(x, h - 17, 1.5, 0, Math.PI * 2); ctx.fill();
     }
-    ctx.font = 'bold 22px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.font = getUserTitleFont(d, 22); ctx.textAlign = 'center';
     ctx.fillText('🐱 ' + (d.title || 'Not'), W / 2, 60);
     if (d.message) {
-      ctx.font = '15px Inter, sans-serif';
+      ctx.font = getUserBodyFont(d, 15);
       wrapText(ctx, d.message, 40, W - 80, 22, 90);
     }
     ctx.textAlign = 'left';
@@ -271,11 +304,11 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     fillBg(ctx, canvas, 160);
     ctx.fillStyle = 'black'; ctx.fillRect(0, 0, W, 45);
     ctx.fillStyle = 'white';
-    ctx.font = 'bold 20px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.font = getUserTitleFont(d, 20); ctx.textAlign = 'center';
     ctx.fillText(d.greeting || 'Merhaba, ben', W / 2, 30);
     ctx.fillStyle = 'black';
     ctx.strokeStyle = 'black'; ctx.lineWidth = 3; ctx.strokeRect(0, 0, W, 160);
-    ctx.font = 'bold 42px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 42);
     ctx.fillText(d.name || '', W / 2, 115);
     ctx.textAlign = 'left';
   },
@@ -298,15 +331,15 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
       ctx.fillText(confetti[i % confetti.length], 15 + (i % 6) * 60, 30 + Math.floor(i / 6) * (h - 50));
     }
     ctx.textAlign = 'center'; ctx.fillStyle = 'black';
-    ctx.font = 'bold 18px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 18);
     ctx.fillText('🎂 Mutlu Yıllar! 🎂', W / 2, 70);
-    ctx.font = 'bold 48px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 48);
     ctx.fillText(d.name || '', W / 2, 140);
     if (d.age) {
-      ctx.font = 'bold 60px Inter, sans-serif';
+      ctx.font = getUserTitleFont(d, 60);
       ctx.fillText(d.age, W / 2, 210);
     }
-    ctx.font = '18px Inter, sans-serif';
+    ctx.font = getUserBodyFont(d, 18);
     wrapText(ctx, d.message || 'İyi ki doğdun!', P, W - P * 2, 24, 250);
     ctx.textAlign = 'left';
   },
@@ -322,20 +355,20 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     ctx.fillStyle = 'black'; ctx.textAlign = 'center';
     const style = d.style || 'bold';
     if (style === 'shadow') {
-      ctx.fillStyle = '#999'; ctx.font = 'bold 44px Inter, sans-serif';
+      ctx.fillStyle = '#999'; ctx.font = getUserTitleFont(d, 44);
       ctx.fillText(d.line1 || '', W / 2 + 3, 83);
       ctx.fillStyle = 'black';
     }
     if (style === 'outline') {
-      ctx.font = 'bold 44px Inter, sans-serif';
+      ctx.font = getUserTitleFont(d, 44);
       ctx.strokeStyle = 'black'; ctx.lineWidth = 2;
       ctx.strokeText(d.line1 || '', W / 2, 80);
     } else {
-      ctx.font = 'bold 44px Inter, sans-serif';
+      ctx.font = getUserTitleFont(d, 44);
       ctx.fillText(d.line1 || '', W / 2, 80);
     }
     if (d.line2) {
-      ctx.font = '22px Inter, sans-serif'; ctx.fillStyle = 'black';
+      ctx.font = getUserBodyFont(d, 22); ctx.fillStyle = 'black';
       wrapText(ctx, d.line2, P, W - P * 2, 28, 130);
     }
     // Decorative lines
@@ -359,11 +392,11 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     ctx.textAlign = 'center'; ctx.fillStyle = 'black';
     ctx.font = '14px sans-serif';
     ctx.fillText('🏆 ✦ 🏆 ✦ 🏆', W / 2, 45);
-    ctx.font = 'bold 36px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 36);
     ctx.fillText(d.title || 'TEBRİKLER', W / 2, 100);
-    ctx.font = 'bold 32px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 32);
     ctx.fillText(d.name || '', W / 2, 155);
-    if (d.reason) { ctx.font = '18px Inter, sans-serif'; wrapText(ctx, d.reason, P, W - P * 2, 24, 200); }
+    if (d.reason) { ctx.font = getUserBodyFont(d, 18); wrapText(ctx, d.reason, P, W - P * 2, 24, 200); }
     ctx.font = '14px sans-serif';
     ctx.fillText('★ ✦ ★ ✦ ★', W / 2, h - 20);
     ctx.textAlign = 'left';
@@ -383,14 +416,14 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     ctx.font = '12px "JetBrains Mono", monospace'; ctx.fillText('VOCABULARY', P, 28);
     ctx.strokeStyle = 'black'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(P, 35); ctx.lineTo(W - P, 35); ctx.stroke();
-    ctx.font = 'bold 32px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 32);
     ctx.fillText(d.word || '', P, 72);
-    if (d.pronunciation) { ctx.font = '14px "JetBrains Mono", monospace'; ctx.fillStyle = '#666'; ctx.fillText(d.pronunciation, P, 92); }
+    if (d.pronunciation) { ctx.font = getUserBodyFont(d, 14); ctx.fillStyle = '#666'; ctx.fillText(d.pronunciation, P, 92); }
     ctx.fillStyle = 'black'; ctx.strokeStyle = 'black'; ctx.lineWidth = 0.5;
     ctx.beginPath(); ctx.moveTo(P, 102); ctx.lineTo(W - P, 102); ctx.stroke();
-    ctx.font = 'bold 18px Inter, sans-serif'; ctx.fillText(d.meaning || '', P, 128);
+    ctx.font = getUserTitleFont(d, 18); ctx.fillText(d.meaning || '', P, 128);
     if (d.example) {
-      ctx.font = 'italic 14px Inter, sans-serif'; ctx.fillStyle = '#444';
+      ctx.font = getUserBodyFont(d, 14); ctx.fillStyle = '#444';
       wrapText(ctx, `"${d.example}"`, P, W - P * 2, 20, 160);
     }
   },
@@ -409,15 +442,15 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     ctx.fillStyle = 'white'; ctx.font = 'bold 12px "JetBrains Mono", monospace';
     ctx.fillText(d.subject || 'MATH', P + 6, P + 16);
     ctx.fillStyle = 'black';
-    ctx.font = 'bold 20px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 20);
     ctx.fillText(d.title || '', P, 68);
     // Formula box
     ctx.fillStyle = '#f0f0f0'; ctx.fillRect(P, 80, W - P * 2, 50);
     ctx.strokeStyle = 'black'; ctx.lineWidth = 1; ctx.strokeRect(P, 80, W - P * 2, 50);
-    ctx.fillStyle = 'black'; ctx.font = 'bold 26px "JetBrains Mono", monospace';
+    ctx.fillStyle = 'black'; ctx.font = getUserTitleFont(d, 26);
     ctx.textAlign = 'center'; ctx.fillText(d.formula || '', W / 2, 113); ctx.textAlign = 'left';
     if (d.note) {
-      ctx.font = '14px Inter, sans-serif'; ctx.fillStyle = '#333';
+      ctx.font = getUserBodyFont(d, 14); ctx.fillStyle = '#333';
       wrapText(ctx, d.note, P, W - P * 2, 20, 155);
     }
   },
@@ -435,12 +468,12 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     ctx.fillStyle = 'black'; ctx.fillRect(6, 6, W - 12, 35);
     ctx.fillStyle = 'white'; ctx.font = 'bold 16px Inter, sans-serif'; ctx.textAlign = 'center';
     ctx.fillText('💡 ' + (d.topic || 'Bilgi Kartı'), W / 2, 30); ctx.textAlign = 'left';
-    ctx.fillStyle = 'black'; ctx.font = 'bold 22px Inter, sans-serif';
+    ctx.fillStyle = 'black'; ctx.font = getUserTitleFont(d, 22);
     ctx.fillText(d.title || '', P, 70);
     ctx.strokeStyle = 'black'; ctx.lineWidth = 0.5;
     ctx.beginPath(); ctx.moveTo(P, 78); ctx.lineTo(W - P, 78); ctx.stroke();
     if (d.content) {
-      ctx.font = '15px Inter, sans-serif'; ctx.fillStyle = '#222';
+      ctx.font = getUserBodyFont(d, 15); ctx.fillStyle = '#222';
       wrapText(ctx, d.content, P, W - P * 2, 22, 100);
     }
   },
@@ -454,7 +487,7 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     const h = 60 + days.length * rowH + 10;
     fillBg(ctx, canvas, h);
     ctx.fillStyle = 'black';
-    ctx.font = 'bold 22px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.font = getUserTitleFont(d, 22); ctx.textAlign = 'center';
     ctx.fillText('📆 ' + (d.title || 'Haftalık Plan'), W / 2, 35);
     ctx.textAlign = 'left';
     ctx.strokeStyle = 'black'; ctx.lineWidth = 1;
@@ -484,7 +517,7 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     const h = 60 + hours * rowH + 20;
     fillBg(ctx, canvas, h);
     ctx.fillStyle = 'black';
-    ctx.font = 'bold 22px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.font = getUserTitleFont(d, 22); ctx.textAlign = 'center';
     ctx.fillText('⏰ ' + (d.date || 'Günlük Plan'), W / 2, 35);
     ctx.textAlign = 'left';
     ctx.strokeStyle = 'black'; ctx.lineWidth = 1;
@@ -507,9 +540,9 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     const h = 80 + rows * (cellSize + gap) + 20;
     fillBg(ctx, canvas, h);
     ctx.fillStyle = 'black';
-    ctx.font = 'bold 22px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.font = getUserTitleFont(d, 22); ctx.textAlign = 'center';
     ctx.fillText('✨ ' + (d.title || 'Alışkanlık'), W / 2, 30);
-    ctx.font = '14px Inter, sans-serif';
+    ctx.font = getUserBodyFont(d, 14);
     ctx.fillText(d.month || '', W / 2, 52);
     ctx.textAlign = 'left';
     const startX = (W - cols * (cellSize + gap) + gap) / 2;
@@ -539,11 +572,11 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     ctx.strokeStyle = 'black'; ctx.lineWidth = 2;
     ctx.strokeRect(4, 4, W - 8, h - 8);
     ctx.fillStyle = 'black';
-    ctx.font = 'bold 24px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.font = getUserTitleFont(d, 24); ctx.textAlign = 'center';
     ctx.fillText(d.name || 'Ürün', W / 2, 40);
-    if (d.desc) { ctx.font = '14px Inter, sans-serif'; wrapText(ctx, d.desc, P, W - P * 2, 20, 62); }
+    if (d.desc) { ctx.font = getUserBodyFont(d, 14); wrapText(ctx, d.desc, P, W - P * 2, 20, 62); }
     const priceY = 62 + descLines * 20 + 10;
-    ctx.font = 'bold 32px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 32);
     ctx.fillText(d.price || '', W / 2, priceY);
     // Barcode
     if (d.barcode) {
@@ -565,21 +598,20 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     ctx.strokeStyle = 'black'; ctx.lineWidth = 3;
     ctx.strokeRect(6, 6, W - 12, 188);
     ctx.fillStyle = 'black'; ctx.textAlign = 'center';
-    ctx.font = '18px Inter, sans-serif';
+    ctx.font = getUserBodyFont(d, 18);
     ctx.fillText(d.name || '', W / 2, 35);
-    // Old price with strikethrough
     if (d.oldPrice) {
-      ctx.font = '22px Inter, sans-serif'; ctx.fillStyle = '#888';
+      ctx.font = getUserBodyFont(d, 22); ctx.fillStyle = '#888';
       const oldW = ctx.measureText(d.oldPrice).width;
       ctx.fillText(d.oldPrice, W / 2, 75);
       ctx.strokeStyle = '#888'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.moveTo(W / 2 - oldW / 2 - 4, 70); ctx.lineTo(W / 2 + oldW / 2 + 4, 70); ctx.stroke();
     }
-    ctx.fillStyle = 'black'; ctx.font = 'bold 48px Inter, sans-serif';
+    ctx.fillStyle = 'black'; ctx.font = getUserTitleFont(d, 48);
     ctx.fillText(d.newPrice || '', W / 2, 135);
     if (d.discount) {
       ctx.fillStyle = 'black'; ctx.fillRect(W / 2 - 50, 150, 100, 28);
-      ctx.fillStyle = 'white'; ctx.font = 'bold 18px Inter, sans-serif';
+      ctx.fillStyle = 'white'; ctx.font = getUserTitleFont(d, 18);
       ctx.fillText(d.discount, W / 2, 170);
     }
     ctx.textAlign = 'left';
@@ -600,18 +632,16 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     // From
     ctx.fillStyle = 'black'; ctx.font = 'bold 12px "JetBrains Mono", monospace';
     ctx.fillText('GÖNDEREN:', P, 30);
-    ctx.font = 'bold 16px Inter, sans-serif'; ctx.fillText(d.from || '', P, 52);
+    ctx.font = getUserTitleFont(d, 16); ctx.fillText(d.from || '', P, 52);
     let fromEndY = 72;
-    if (d.fromAddr) { ctx.font = '13px Inter, sans-serif'; fromEndY = wrapText(ctx, d.fromAddr, P, W - P * 2, 18, 72); }
-    // Divider
+    if (d.fromAddr) { ctx.font = getUserBodyFont(d, 13); fromEndY = wrapText(ctx, d.fromAddr, P, W - P * 2, 18, 72); }
     const divY = fromEndY + 15;
     ctx.setLineDash([4, 4]); ctx.strokeStyle = 'black';
     ctx.beginPath(); ctx.moveTo(P, divY); ctx.lineTo(W - P, divY); ctx.stroke();
     ctx.setLineDash([]);
-    // To
     ctx.font = 'bold 12px "JetBrains Mono", monospace'; ctx.fillText('ALICI:', P, divY + 25);
-    ctx.font = 'bold 18px Inter, sans-serif'; ctx.fillText(d.to || '', P, divY + 50);
-    if (d.toAddr) { ctx.font = '14px Inter, sans-serif'; wrapText(ctx, d.toAddr, P, W - P * 2, 20, divY + 75); }
+    ctx.font = getUserTitleFont(d, 18); ctx.fillText(d.to || '', P, divY + 50);
+    if (d.toAddr) { ctx.font = getUserBodyFont(d, 14); wrapText(ctx, d.toAddr, P, W - P * 2, 20, divY + 75); }
   },
 };
 

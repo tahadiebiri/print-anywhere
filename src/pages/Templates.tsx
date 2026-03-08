@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Printer, Loader2, ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { Printer, Loader2, ArrowLeft, Plus, Trash2, Type } from 'lucide-react';
 import { TemplateIcon } from '@/components/TemplateIcon';
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,7 @@ import {
   type TemplateCategory,
   type TemplateDefinition,
 } from '@/lib/template-data';
-import { renderTemplate } from '@/lib/template-renderer';
+import { renderTemplate, templateFonts, templateFontSizes } from '@/lib/template-renderer';
 
 export default function Templates() {
   const [selectedCat, setSelectedCat] = useState<TemplateCategory | null>(null);
@@ -261,6 +261,55 @@ export default function Templates() {
             )}
           </div>
         ))}
+      </div>
+
+      {/* Typography Controls */}
+      <div className="rounded-xl border border-border bg-card p-3 space-y-3">
+        <div className="flex items-center gap-1.5">
+          <Type className="h-3.5 w-3.5 text-muted-foreground" />
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Yazı Tipi</p>
+        </div>
+
+        {/* Font Family */}
+        <div className="space-y-1.5">
+          <Label className="text-xs">Font</Label>
+          <div className="flex flex-wrap gap-1.5">
+            {templateFonts.map(f => (
+              <button
+                key={f.family}
+                onClick={() => updateField('_fontFamily', f.family)}
+                className={`px-3 py-1 rounded-full text-xs font-medium border transition-all ${
+                  (formData._fontFamily || "'Inter', sans-serif") === f.family
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'
+                }`}
+                style={{ fontFamily: f.family }}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Font Size */}
+        <div className="space-y-1.5">
+          <Label className="text-xs">Boyut</Label>
+          <div className="flex gap-1.5">
+            {templateFontSizes.map(s => (
+              <button
+                key={s.value}
+                onClick={() => updateField('_fontSize', s.value)}
+                className={`flex-1 px-2 py-1.5 rounded-lg text-xs font-medium border transition-all text-center ${
+                  (formData._fontSize || 'normal') === s.value
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'
+                }`}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Live Preview */}
