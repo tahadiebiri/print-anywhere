@@ -18,9 +18,10 @@ interface AdminDashboardProps {
   onSaveAll: (templates: TemplateDefinition[]) => void;
   onAddNew: () => void;
   onEditTemplate: (idx: number) => void;
+  onLogout?: () => void;
 }
 
-export function AdminDashboard({ customTemplates, onSaveAll, onAddNew, onEditTemplate }: AdminDashboardProps) {
+export function AdminDashboard({ customTemplates, onSaveAll, onAddNew, onEditTemplate, onLogout }: AdminDashboardProps) {
   const navigate = useNavigate();
   const [jsonMode, setJsonMode] = useState(false);
   const [jsonText, setJsonText] = useState('');
