@@ -29,6 +29,7 @@ export function BottomNav() {
               key={path}
               onClick={() => {
                 if (path === '/qr') registerQrClick();
+                if (path === '/connect') registerConnectClick();
                 navigate(path);
               }}
               className={cn(

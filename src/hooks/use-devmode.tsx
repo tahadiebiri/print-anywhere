@@ -22,6 +22,13 @@ export function DevModeProvider({ children }: { children: ReactNode }) {
   const [enabled, setEnabled] = useState(false);
   const [logs, setLogs] = useState<DevLog[]>([]);
 
+  // Listen for combo toggle event
+  useEffect(() => {
+    const handler = () => setEnabled(prev => !prev);
+    window.addEventListener('toggle-devmode-combo', handler);
+    return () => window.removeEventListener('toggle-devmode-combo', handler);
+  }, []);
+
   const toggle = useCallback((deviceName?: string | null) => {
     if (enabled) {
       setEnabled(false);
