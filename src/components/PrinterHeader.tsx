@@ -2,7 +2,6 @@ import { Bluetooth, BluetoothOff, Loader2, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePrinter } from '@/hooks/use-printer';
 import { useTheme } from '@/hooks/use-theme';
-
 import { useAdminCombo } from '@/hooks/use-admin-combo';
 import { isWebBluetoothSupported } from '@/lib/printer';
 import logo from '@/assets/logo.svg';
@@ -10,14 +9,13 @@ import logo from '@/assets/logo.svg';
 export function PrinterHeader() {
   const { connected, deviceName, connecting, connect, disconnect, error } = usePrinter();
   const { theme, toggleTheme } = useTheme();
-  
   const { registerThemeClick } = useAdminCombo();
 
   const handleThemeToggle = () => {
     registerThemeClick();
     toggleTheme();
   };
-  
+
   const supported = isWebBluetoothSupported();
 
   return (
