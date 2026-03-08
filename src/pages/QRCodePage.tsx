@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { PageHeader } from '@/components/PageHeader';
 import { usePrinter } from '@/hooks/use-printer';
+import { useLanguage } from '@/hooks/use-language';
 import { printCanvas } from '@/lib/printer';
 import { toast } from 'sonner';
 
@@ -17,31 +18,6 @@ type QRFrame = 'none' | 'solid' | 'rounded' | 'dashed' | 'double' | 'shadow' | '
 interface WifiData { ssid: string; password: string; encryption: 'WPA' | 'WEP' | 'nopass'; }
 interface VCardData { name: string; phone: string; email: string; org: string; }
 interface EmailData { to: string; subject: string; body: string; }
-
-const contentTypeLabels: Record<ContentType, { label: string; icon: any }> = {
-  url: { label: 'URL / Metin', icon: Link },
-  wifi: { label: 'WiFi', icon: Wifi },
-  vcard: { label: 'Kişi', icon: User },
-  email: { label: 'E-posta', icon: Mail },
-  phone: { label: 'Telefon', icon: Phone },
-};
-
-const errorLevels: { value: ErrorLevel; label: string; desc: string }[] = [
-  { value: 'L', label: 'Düşük', desc: '~7%' },
-  { value: 'M', label: 'Orta', desc: '~15%' },
-  { value: 'Q', label: 'Yüksek', desc: '~25%' },
-  { value: 'H', label: 'Maks', desc: '~30%' },
-];
-
-const qrFrames: { value: QRFrame; label: string }[] = [
-  { value: 'none', label: 'Yok' },
-  { value: 'solid', label: 'Düz' },
-  { value: 'rounded', label: 'Yuvarlak' },
-  { value: 'dashed', label: 'Kesikli' },
-  { value: 'double', label: 'Çift' },
-  { value: 'shadow', label: 'Gölge' },
-  { value: 'badge', label: 'Rozet' },
-];
 
 export default function QRCodePage() {
   const [advancedMode, setAdvancedMode] = useState(false);
@@ -67,6 +43,32 @@ export default function QRCodePage() {
   const [printing, setPrinting] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { connected } = usePrinter();
+  const { t } = useLanguage();
+
+  const contentTypeLabels: Record<ContentType, { label: string; icon: any }> = {
+    url: { label: t('urlText'), icon: Link },
+    wifi: { label: t('wifi'), icon: Wifi },
+    vcard: { label: t('contact'), icon: User },
+    email: { label: t('email'), icon: Mail },
+    phone: { label: t('phone'), icon: Phone },
+  };
+
+  const errorLevels: { value: ErrorLevel; label: string; desc: string }[] = [
+    { value: 'L', label: t('low'), desc: '~7%' },
+    { value: 'M', label: t('mid'), desc: '~15%' },
+    { value: 'Q', label: t('high'), desc: '~25%' },
+    { value: 'H', label: t('max'), desc: '~30%' },
+  ];
+
+  const qrFrames: { value: QRFrame; label: string }[] = [
+    { value: 'none', label: t('qrFrameNone') },
+    { value: 'solid', label: t('qrFrameSolid') },
+    { value: 'rounded', label: t('qrFrameRounded') },
+    { value: 'dashed', label: t('qrFrameDashed') },
+    { value: 'double', label: t('qrFrameDouble') },
+    { value: 'shadow', label: t('qrFrameShadow') },
+    { value: 'badge', label: t('qrFrameBadge') },
+  ];
 
   const getQRContent = (): string => {
     switch (contentType) {
@@ -176,9 +178,9 @@ export default function QRCodePage() {
     setPrinting(true);
     try {
       await printCanvas(canvasRef.current);
-      toast.success('Yazdırıldı!');
+      toast.success(t('printed'));
     } catch (e: any) {
-      toast.error(e.message || 'Yazdırma hatası');
+      toast.error(e.message || t('printError'));
     } finally {
       setPrinting(false);
     }
@@ -190,7 +192,7 @@ export default function QRCodePage() {
     a.href = previewUrl;
     a.download = `qr-code-${Date.now()}.png`;
     a.click();
-    toast.success('QR kod indirildi!');
+    toast.success(t('qrDownloaded'));
   };
 
   const handleReset = () => {
@@ -210,7 +212,7 @@ export default function QRCodePage() {
   return (
     <div className="p-4 pb-24 max-w-2xl mx-auto space-y-4">
       <div className="flex items-center justify-between">
-        <PageHeader title="QR Kod" />
+        <PageHeader title={t('qrCode')} />
         {/* Mode Toggle */}
         <div className="flex items-center bg-muted rounded-full p-0.5 border border-border">
           <button
@@ -221,7 +223,7 @@ export default function QRCodePage() {
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            <Zap className="h-3 w-3" /> Basit
+            <Zap className="h-3 w-3" /> {t('simple')}
           </button>
           <button
             onClick={() => setAdvancedMode(true)}
@@ -231,7 +233,7 @@ export default function QRCodePage() {
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            <Settings2 className="h-3 w-3" /> Gelişmiş
+            <Settings2 className="h-3 w-3" /> {t('advanced')}
           </button>
         </div>
       </div>
@@ -261,7 +263,7 @@ export default function QRCodePage() {
       <div className="space-y-3 rounded-xl border border-border bg-card p-3">
         {contentType === 'url' && (
           <div className="space-y-1.5">
-            <Label className="text-xs">URL veya Metin</Label>
+            <Label className="text-xs">{t('urlOrText')}</Label>
             <Input placeholder="https://example.com" value={urlText} onChange={e => setUrlText(e.target.value)} />
           </div>
         )}
@@ -269,16 +271,16 @@ export default function QRCodePage() {
         {contentType === 'wifi' && (
           <>
             <div className="space-y-1.5">
-              <Label className="text-xs">Ağ Adı (SSID)</Label>
-              <Input placeholder="WiFi adı" value={wifi.ssid} onChange={e => setWifi(w => ({ ...w, ssid: e.target.value }))} />
+              <Label className="text-xs">{t('networkName')}</Label>
+              <Input placeholder={t('wifiName')} value={wifi.ssid} onChange={e => setWifi(w => ({ ...w, ssid: e.target.value }))} />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Şifre</Label>
-              <Input type="password" placeholder="WiFi şifresi" value={wifi.password} onChange={e => setWifi(w => ({ ...w, password: e.target.value }))} />
+              <Label className="text-xs">{t('password')}</Label>
+              <Input type="password" placeholder={t('wifiPassword')} value={wifi.password} onChange={e => setWifi(w => ({ ...w, password: e.target.value }))} />
             </div>
             {advancedMode && (
               <div className="space-y-1.5">
-                <Label className="text-xs">Şifreleme</Label>
+                <Label className="text-xs">{t('encryption')}</Label>
                 <div className="flex gap-2">
                   {(['WPA', 'WEP', 'nopass'] as const).map(enc => (
                     <button
@@ -290,7 +292,7 @@ export default function QRCodePage() {
                           : 'bg-muted/50 text-muted-foreground border-border'
                       }`}
                     >
-                      {enc === 'nopass' ? 'Açık' : enc}
+                      {enc === 'nopass' ? t('open') : enc}
                     </button>
                   ))}
                 </div>
@@ -302,22 +304,22 @@ export default function QRCodePage() {
         {contentType === 'vcard' && (
           <>
             <div className="space-y-1.5">
-              <Label className="text-xs">Ad Soyad</Label>
+              <Label className="text-xs">{t('fullName')}</Label>
               <Input placeholder="Ahmet Yılmaz" value={vcard.name} onChange={e => setVcard(v => ({ ...v, name: e.target.value }))} />
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1.5">
-                <Label className="text-xs">Telefon</Label>
+                <Label className="text-xs">{t('phone')}</Label>
                 <Input placeholder="+90 555..." value={vcard.phone} onChange={e => setVcard(v => ({ ...v, phone: e.target.value }))} />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">E-posta</Label>
+                <Label className="text-xs">{t('email')}</Label>
                 <Input placeholder="mail@example.com" value={vcard.email} onChange={e => setVcard(v => ({ ...v, email: e.target.value }))} />
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Şirket / Kuruluş</Label>
-              <Input placeholder="Şirket adı" value={vcard.org} onChange={e => setVcard(v => ({ ...v, org: e.target.value }))} />
+              <Label className="text-xs">{t('company')}</Label>
+              <Input placeholder={t('companyName')} value={vcard.org} onChange={e => setVcard(v => ({ ...v, org: e.target.value }))} />
             </div>
           </>
         )}
@@ -325,43 +327,43 @@ export default function QRCodePage() {
         {contentType === 'email' && (
           <>
             <div className="space-y-1.5">
-              <Label className="text-xs">Alıcı E-posta</Label>
+              <Label className="text-xs">{t('recipientEmail')}</Label>
               <Input placeholder="info@example.com" value={emailData.to} onChange={e => setEmailData(d => ({ ...d, to: e.target.value }))} />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Konu</Label>
-              <Input placeholder="Konu başlığı" value={emailData.subject} onChange={e => setEmailData(d => ({ ...d, subject: e.target.value }))} />
+              <Label className="text-xs">{t('subject')}</Label>
+              <Input placeholder={t('subjectPlaceholder')} value={emailData.subject} onChange={e => setEmailData(d => ({ ...d, subject: e.target.value }))} />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Mesaj</Label>
-              <Input placeholder="Mesaj içeriği" value={emailData.body} onChange={e => setEmailData(d => ({ ...d, body: e.target.value }))} />
+              <Label className="text-xs">{t('message')}</Label>
+              <Input placeholder={t('messagePlaceholder')} value={emailData.body} onChange={e => setEmailData(d => ({ ...d, body: e.target.value }))} />
             </div>
           </>
         )}
 
         {contentType === 'phone' && (
           <div className="space-y-1.5">
-            <Label className="text-xs">Telefon Numarası</Label>
+            <Label className="text-xs">{t('phoneNumber')}</Label>
             <Input placeholder="+90 555 123 4567" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} />
           </div>
         )}
 
         {/* Caption */}
         <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Alt Yazı (isteğe bağlı)</Label>
-          <Input placeholder="QR kod altına yazılacak metin" value={caption} onChange={e => setCaption(e.target.value)} />
+          <Label className="text-xs text-muted-foreground">{t('caption')}</Label>
+          <Input placeholder={t('captionPlaceholder')} value={caption} onChange={e => setCaption(e.target.value)} />
         </div>
       </div>
 
       {/* Advanced: Style & Settings */}
       {advancedMode && (
         <div className="rounded-xl border border-border bg-card p-3 space-y-4">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Stil Ayarları</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('styleSettings')}</p>
 
           {/* QR Size */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <Label className="text-xs">QR Boyut</Label>
+              <Label className="text-xs">{t('qrSize')}</Label>
               <span className="text-xs text-muted-foreground">{qrSize}px</span>
             </div>
             <Slider value={[qrSize]} onValueChange={v => setQrSize(v[0])} min={150} max={350} step={10} />
@@ -370,9 +372,9 @@ export default function QRCodePage() {
           {/* Error Correction */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-xs">Hata Düzeltme</Label>
+              <Label className="text-xs">{t('errorCorrection')}</Label>
               {logoDataUrl && (
-                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">🔒 Logo için H zorunlu</span>
+                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">{t('logoRequiresH')}</span>
               )}
             </div>
             <div className="grid grid-cols-4 gap-1.5">
@@ -397,7 +399,7 @@ export default function QRCodePage() {
           {/* Colors */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-xs">QR Rengi</Label>
+              <Label className="text-xs">{t('qrColor')}</Label>
               <div className="flex items-center gap-2">
                 <input
                   type="color"
@@ -409,7 +411,7 @@ export default function QRCodePage() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Arka Plan</Label>
+              <Label className="text-xs">{t('background')}</Label>
               <div className="flex items-center gap-2">
                 <input
                   type="color"
@@ -424,7 +426,7 @@ export default function QRCodePage() {
 
           {/* Frame */}
           <div className="space-y-2">
-            <Label className="text-xs">Çerçeve</Label>
+            <Label className="text-xs">{t('frame')}</Label>
             <div className="flex flex-wrap gap-1.5">
               {qrFrames.map(f => (
                 <button
@@ -444,7 +446,7 @@ export default function QRCodePage() {
 
           {/* Logo */}
           <div className="space-y-2">
-            <Label className="text-xs">Ortaya Logo / İkon</Label>
+            <Label className="text-xs">{t('centerLogo')}</Label>
             <input
               ref={logoInputRef}
               type="file"
@@ -466,7 +468,7 @@ export default function QRCodePage() {
                 </div>
                 <div className="flex-1 space-y-1">
                   <div className="flex justify-between items-center">
-                    <Label className="text-xs">Boyut</Label>
+                    <Label className="text-xs">{t('size')}</Label>
                     <span className="text-xs text-muted-foreground">{logoSize}px</span>
                   </div>
                   <Slider value={[logoSize]} onValueChange={v => setLogoSize(v[0])} min={30} max={100} step={5} />
@@ -485,12 +487,12 @@ export default function QRCodePage() {
                 className="gap-1.5 w-full"
                 onClick={() => logoInputRef.current?.click()}
               >
-                <ImagePlus className="h-3.5 w-3.5" /> Logo Yükle
+                <ImagePlus className="h-3.5 w-3.5" /> {t('uploadLogo')}
               </Button>
             )}
             {logoDataUrl && (
               <p className="text-[10px] text-muted-foreground">
-                Logo eklendiğinde hata düzeltme otomatik olarak Maksimum (H) seviyeye ayarlanır.
+                {t('logoHint')}
               </p>
             )}
           </div>
@@ -503,7 +505,7 @@ export default function QRCodePage() {
       {/* Preview */}
       {previewUrl && (
         <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">Önizleme</Label>
+          <Label className="text-xs text-muted-foreground">{t('preview')}</Label>
           <div className="flex justify-center">
             <div className="border-2 border-dashed border-border rounded-lg p-2 bg-muted/30 inline-block">
               <img src={previewUrl} alt="QR Code Preview" className="block" style={{ width: 384, imageRendering: 'pixelated' as any }} />
@@ -519,7 +521,7 @@ export default function QRCodePage() {
         </Button>
         {previewUrl && (
           <Button variant="outline" size="lg" onClick={handleDownload} className="gap-1.5">
-            <Download className="h-4 w-4" /> İndir
+            <Download className="h-4 w-4" /> {t('download')}
           </Button>
         )}
         <Button
@@ -529,12 +531,12 @@ export default function QRCodePage() {
           onClick={handlePrint}
         >
           {printing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
-          {printing ? 'Yazdırılıyor...' : 'Yazdır'}
+          {printing ? t('printing') : t('print')}
         </Button>
       </div>
 
       {!connected && (
-        <p className="text-xs text-center text-muted-foreground">Yazdırmak için önce yazıcıya bağlanın</p>
+        <p className="text-xs text-center text-muted-foreground">{t('connectFirst')}</p>
       )}
     </div>
   );
