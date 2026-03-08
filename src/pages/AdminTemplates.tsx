@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
   getCustomTemplates,
@@ -10,7 +11,10 @@ import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { TemplateEditor } from '@/components/admin/TemplateEditor';
 
 export default function AdminTemplates() {
-  const [authenticated, setAuthenticated] = useState(true); // Auth handled by combo dialog
+  const navigate = useNavigate();
+  const [authenticated, setAuthenticated] = useState(() => {
+    return sessionStorage.getItem('admin_auth') === '1';
+  });
   const [customTemplates, setCustomTemplates] = useState<TemplateDefinition[]>([]);
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
 
@@ -52,7 +56,12 @@ export default function AdminTemplates() {
   };
 
   if (!authenticated) {
-    return <AdminLogin onLogin={() => setAuthenticated(true)} />;
+    return (
+      <AdminLogin onLogin={() => {
+        sessionStorage.setItem('admin_auth', '1');
+        setAuthenticated(true);
+      }} />
+    );
   }
 
   if (editingIdx !== null && customTemplates[editingIdx]) {
