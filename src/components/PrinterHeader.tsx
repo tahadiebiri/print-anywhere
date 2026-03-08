@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { usePrinter } from '@/hooks/use-printer';
 import { useTheme } from '@/hooks/use-theme';
 import { useDevMode } from '@/hooks/use-devmode';
+import { useAdminCombo } from '@/hooks/use-admin-combo';
 import { isWebBluetoothSupported } from '@/lib/printer';
 import logo from '@/assets/logo.svg';
 
@@ -10,6 +11,12 @@ export function PrinterHeader() {
   const { connected, deviceName, connecting, connect, disconnect, error } = usePrinter();
   const { theme, toggleTheme } = useTheme();
   const { enabled: devMode, toggle: toggleDev } = useDevMode();
+  const { registerThemeClick } = useAdminCombo();
+
+  const handleThemeToggle = () => {
+    registerThemeClick();
+    toggleTheme();
+  };
   const handleDevToggle = () => toggleDev(deviceName);
   const supported = isWebBluetoothSupported();
 
@@ -30,7 +37,7 @@ export function PrinterHeader() {
           >
             <Code className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8">
+          <Button variant="ghost" size="icon" onClick={handleThemeToggle} className="h-8 w-8">
             {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
           {!supported ? (

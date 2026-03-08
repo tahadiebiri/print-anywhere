@@ -6,10 +6,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { PrinterProvider } from "@/hooks/use-printer";
 import { ThemeProvider } from "@/hooks/use-theme";
 import { DevModeProvider } from "@/hooks/use-devmode";
+import { AdminComboProvider } from "@/hooks/use-admin-combo";
 import { PrinterHeader } from "@/components/PrinterHeader";
 import { PrinterDevBridge } from "@/hooks/use-printer";
 import { BottomNav } from "@/components/BottomNav";
 import { DevTerminal } from "@/components/DevTerminal";
+import { AdminPasswordDialog } from "@/components/admin/AdminPasswordDialog";
 import Index from "./pages/Index";
 import TextEditor from "./pages/TextEditor";
 import ImagePrint from "./pages/ImagePrint";
@@ -32,25 +34,28 @@ const App = () => (
         <PrinterProvider>
           <DevModeProvider>
             <BrowserRouter>
-              <div className="min-h-screen bg-background text-foreground">
-              <PrinterDevBridge />
-              <PrinterHeader />
-                <main className="pb-16">
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/text" element={<TextEditor />} />
-                    <Route path="/image" element={<ImagePrint />} />
-                    <Route path="/qr" element={<QRCodePage />} />
-                    <Route path="/templates" element={<Templates />} />
-                    <Route path="/connect" element={<BluetoothConnect />} />
-                    <Route path="/install" element={<InstallPage />} />
-                    <Route path="/admin" element={<AdminTemplates />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </main>
-                <DevTerminal />
-                <BottomNav />
-              </div>
+              <AdminComboProvider>
+                <div className="min-h-screen bg-background text-foreground">
+                <PrinterDevBridge />
+                <PrinterHeader />
+                  <main className="pb-16">
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="/text" element={<TextEditor />} />
+                      <Route path="/image" element={<ImagePrint />} />
+                      <Route path="/qr" element={<QRCodePage />} />
+                      <Route path="/templates" element={<Templates />} />
+                      <Route path="/connect" element={<BluetoothConnect />} />
+                      <Route path="/install" element={<InstallPage />} />
+                      <Route path="/admin" element={<AdminTemplates />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </main>
+                  <AdminPasswordDialog />
+                  <DevTerminal />
+                  <BottomNav />
+                </div>
+              </AdminComboProvider>
             </BrowserRouter>
           </DevModeProvider>
         </PrinterProvider>

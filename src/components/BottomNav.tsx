@@ -2,6 +2,7 @@ import { Home, Type, LayoutTemplate, QrCode, Bluetooth } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { usePrinter } from '@/hooks/use-printer';
+import { useAdminCombo } from '@/hooks/use-admin-combo';
 
 const navItems = [
   { path: '/', icon: Home, label: 'Ana Sayfa' },
@@ -15,6 +16,7 @@ export function BottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
   const { connected } = usePrinter();
+  const { registerQrClick } = useAdminCombo();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/80 backdrop-blur-md safe-area-bottom">
@@ -25,7 +27,10 @@ export function BottomNav() {
           return (
             <button
               key={path}
-              onClick={() => navigate(path)}
+              onClick={() => {
+                if (path === '/qr') registerQrClick();
+                navigate(path);
+              }}
               className={cn(
                 'flex flex-col items-center gap-0.5 py-2 px-3 text-xs transition-colors relative',
                 active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
