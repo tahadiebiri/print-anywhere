@@ -99,7 +99,7 @@ export async function connectPrinter(): Promise<{ name: string; id: string }> {
   const printer = getPrinter();
   devLog('info', 'BLE bağlantı başlatılıyor... Service UUID: 0xAE30 (44592)');
   await printer.connect();
-  const device = (printer as any).device as BluetoothDevice | undefined;
+  const device = (printer as any).device;
   const name = device?.name || 'Termal Yazıcı';
   const id = device?.id || '';
   devLog('info', `Bağlandı: ${name} | TX: 0xAE01 | RX: 0xAE02`);
@@ -109,7 +109,7 @@ export async function connectPrinter(): Promise<{ name: string; id: string }> {
 export async function readBatteryLevel(): Promise<number | null> {
   try {
     const printer = getPrinter();
-    const device = (printer as any).device as BluetoothDevice | undefined;
+    const device = (printer as any).device;
     if (!device?.gatt?.connected) return null;
     const server = device.gatt;
     const service = await server.getPrimaryService('battery_service');
@@ -117,7 +117,6 @@ export async function readBatteryLevel(): Promise<number | null> {
     const value = await char.readValue();
     return value.getUint8(0);
   } catch {
-    // Battery service not available on this printer
     return null;
   }
 }
@@ -126,10 +125,10 @@ export async function getPairedDevices(): Promise<PairedDevice[]> {
   try {
     const nav = navigator as any;
     if (!nav.bluetooth?.getDevices) return [];
-    const devices: BluetoothDevice[] = await nav.bluetooth.getDevices();
-    return devices
-      .filter(d => d.name)
-      .map(d => ({ id: d.id, name: d.name || 'Bilinmeyen' }));
+    const devices = await nav.bluetooth.getDevices();
+    return (devices as any[])
+      .filter((d: any) => d.name)
+      .map((d: any) => ({ id: d.id, name: d.name || 'Bilinmeyen' }));
   } catch {
     return [];
   }
