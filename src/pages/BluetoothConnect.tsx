@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Bluetooth, BluetoothOff, BluetoothSearching, Loader2,
-  Signal, SignalHigh, Battery, Printer, Unplug, CheckCircle2,
-  AlertTriangle, Wifi
+  Signal, Battery, BatteryCharging, BatteryFull, BatteryLow, BatteryMedium,
+  Printer, Unplug, CheckCircle2, AlertTriangle, RefreshCw, History
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { usePrinter } from '@/hooks/use-printer';
-import { isWebBluetoothSupported } from '@/lib/printer';
+import { isWebBluetoothSupported, getPairedDevices, type PairedDevice } from '@/lib/printer';
 import { toast } from 'sonner';
 
 const supportedPrinters = [
@@ -18,10 +19,40 @@ const supportedPrinters = [
   { name: 'Diğer 203/304 DPI BLE yazıcılar', protocol: 'generic' },
 ];
 
+function BatteryIcon({ level }: { level: number }) {
+  if (level > 75) return <BatteryFull className="h-4 w-4" />;
+  if (level > 40) return <BatteryMedium className="h-4 w-4" />;
+  if (level > 15) return <BatteryLow className="h-4 w-4" />;
+  return <Battery className="h-4 w-4 text-destructive" />;
+}
+
+function getBatteryColor(level: number): string {
+  if (level > 60) return 'text-green-500';
+  if (level > 25) return 'text-yellow-500';
+  return 'text-destructive';
+}
+
 export default function BluetoothConnect() {
-  const { connected, deviceName, connecting, connect, disconnect, error } = usePrinter();
+  const { connected, deviceName, connecting, connect, disconnect, error, batteryLevel, refreshBattery } = usePrinter();
   const supported = isWebBluetoothSupported();
   const [showInfo, setShowInfo] = useState(false);
+  const [pairedDevices, setPairedDevices] = useState<PairedDevice[]>([]);
+  const [loadingPaired, setLoadingPaired] = useState(false);
+  const [refreshingBattery, setRefreshingBattery] = useState(false);
+
+  // Load paired devices on mount
+  useEffect(() => {
+    if (supported) {
+      loadPairedDevices();
+    }
+  }, [supported, connected]);
+
+  const loadPairedDevices = async () => {
+    setLoadingPaired(true);
+    const devices = await getPairedDevices();
+    setPairedDevices(devices);
+    setLoadingPaired(false);
+  };
 
   const handleConnect = async () => {
     try {
@@ -35,6 +66,12 @@ export default function BluetoothConnect() {
   const handleDisconnect = async () => {
     await disconnect();
     toast.info('Yazıcı bağlantısı kesildi');
+  };
+
+  const handleRefreshBattery = async () => {
+    setRefreshingBattery(true);
+    await refreshBattery();
+    setRefreshingBattery(false);
   };
 
   if (!supported) {
@@ -113,15 +150,67 @@ export default function BluetoothConnect() {
                 </div>
                 <div className="flex items-center gap-3 mt-1">
                   <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Signal className="h-3 w-3" /> BLE
-                  </span>
-                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Wifi className="h-3 w-3" /> Bağlı
+                    <Signal className="h-3 w-3" /> BLE Bağlı
                   </span>
                 </div>
               </div>
             </div>
 
+            {/* Battery & Signal info */}
+            <div className="grid grid-cols-2 gap-3">
+              {/* Battery card */}
+              <Card className="bg-background/60 border-border/50">
+                <CardContent className="p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground font-medium">Pil Seviyesi</span>
+                    <button
+                      onClick={handleRefreshBattery}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      disabled={refreshingBattery}
+                    >
+                      <RefreshCw className={`h-3 w-3 ${refreshingBattery ? 'animate-spin' : ''}`} />
+                    </button>
+                  </div>
+                  {batteryLevel !== null ? (
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className={getBatteryColor(batteryLevel)}>
+                          <BatteryIcon level={batteryLevel} />
+                        </span>
+                        <span className={`text-lg font-bold ${getBatteryColor(batteryLevel)}`}>
+                          %{batteryLevel}
+                        </span>
+                      </div>
+                      <Progress value={batteryLevel} className="h-1.5" />
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Battery className="h-4 w-4" />
+                      <span className="text-xs">Bilgi yok</span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Connection info card */}
+              <Card className="bg-background/60 border-border/50">
+                <CardContent className="p-3 space-y-2">
+                  <span className="text-xs text-muted-foreground font-medium">Bağlantı</span>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <Signal className="h-4 w-4 text-green-500" />
+                      <span className="text-sm font-semibold">Aktif</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground space-y-0.5">
+                      <p>BLE GATT</p>
+                      <p>384px / 203 DPI</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Device specs */}
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="p-2 rounded-lg bg-background/50">
                 <p className="text-xs text-muted-foreground">Protokol</p>
@@ -175,6 +264,47 @@ export default function BluetoothConnect() {
               <p className="font-medium text-destructive">Bağlantı Hatası</p>
               <p className="text-muted-foreground mt-1">{error}</p>
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Paired / previously connected devices */}
+      {!connected && pairedDevices.length > 0 && (
+        <Card>
+          <CardContent className="p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <History className="h-4 w-4 text-muted-foreground" />
+                <h3 className="font-semibold text-sm">Eşleştirilmiş Cihazlar</h3>
+              </div>
+              <button
+                onClick={loadPairedDevices}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                disabled={loadingPaired}
+              >
+                <RefreshCw className={`h-3.5 w-3.5 ${loadingPaired ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+            <div className="space-y-1">
+              {pairedDevices.map((device) => (
+                <div
+                  key={device.id}
+                  className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-muted/50 transition-colors border border-border/50"
+                >
+                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <Printer className="h-4.5 w-4.5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{device.name}</p>
+                    <p className="text-xs text-muted-foreground">Daha önce eşleştirildi</p>
+                  </div>
+                  <div className="h-2 w-2 rounded-full bg-muted-foreground/30" />
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              💡 Yeniden bağlanmak için "Yazıcı Ara ve Bağlan" butonunu kullanın
+            </p>
           </CardContent>
         </Card>
       )}
