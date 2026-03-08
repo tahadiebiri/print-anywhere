@@ -22,6 +22,25 @@ function drawTemplateIcon(ctx: CanvasRenderingContext2D, icon: string, x: number
   }
 }
 
+// Measure how many lines wrapText would produce (without drawing)
+function measureWrapLines(ctx: CanvasRenderingContext2D, text: string, maxW: number): number {
+  if (!text) return 0;
+  const words = text.split(' ');
+  let line = '';
+  let lines = 0;
+  for (const word of words) {
+    const test = line ? `${line} ${word}` : word;
+    if (ctx.measureText(test).width > maxW) {
+      lines++;
+      line = word;
+    } else {
+      line = test;
+    }
+  }
+  if (line) lines++;
+  return lines;
+}
+
 function wrapText(ctx: CanvasRenderingContext2D, text: string, x: number, maxW: number, lineH: number, startY: number): number {
   const prevAlign = ctx.textAlign;
   ctx.textAlign = 'left';
@@ -41,6 +60,14 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, x: number, maxW: 
   if (line) { ctx.fillText(line, x, y); y += lineH; }
   ctx.textAlign = prevAlign;
   return y;
+}
+
+// Helper: create a temp canvas to measure text without drawing
+function createMeasureCtx(): CanvasRenderingContext2D {
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = 10;
+  return c.getContext('2d')!;
 }
 
 const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, data: Record<string, any>) => void> = {
@@ -107,7 +134,12 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
   },
 
   note(ctx, canvas, d) {
-    const h = 350;
+    // Measure body text height
+    const mCtx = createMeasureCtx();
+    mCtx.font = '15px "JetBrains Mono", monospace';
+    const bodyLines = d.body ? measureWrapLines(mCtx, d.body, W - 60 - P) : 0;
+    const bodyH = bodyLines * 26;
+    const h = Math.max(350, 92 + bodyH + 30);
     fillBg(ctx, canvas, h);
     ctx.fillStyle = 'black';
     ctx.font = 'bold 24px Inter, sans-serif';
@@ -155,17 +187,22 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
 
   // ─── STICKERS ───
   frame_heart(ctx, canvas, d) {
-    fillBg(ctx, canvas, 200);
+    // Measure message
+    const mCtx = createMeasureCtx();
+    mCtx.font = '16px Inter, sans-serif';
+    const msgLines = d.message ? measureWrapLines(mCtx, d.message, 280) : 0;
+    const msgH = msgLines * 22;
+    const h = Math.max(200, 110 + msgH + 30);
+    fillBg(ctx, canvas, h);
     ctx.strokeStyle = 'black'; ctx.lineWidth = 3;
-    ctx.strokeRect(8, 8, W - 16, 184);
+    ctx.strokeRect(8, 8, W - 16, h - 16);
     // Heart border pattern
-    const hearts = '♥ ';
     ctx.font = '14px sans-serif'; ctx.fillStyle = 'black';
     for (let x = 16; x < W - 20; x += 20) {
       ctx.fillText('♥', x, 22);
-      ctx.fillText('♥', x, 194);
+      ctx.fillText('♥', x, h - 6);
     }
-    for (let y = 30; y < 185; y += 20) {
+    for (let y = 30; y < h - 10; y += 20) {
       ctx.fillText('♥', 12, y);
       ctx.fillText('♥', W - 24, y);
     }
@@ -176,38 +213,50 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
   },
 
   frame_star(ctx, canvas, d) {
-    fillBg(ctx, canvas, 220);
+    // Measure message
+    const mCtx = createMeasureCtx();
+    mCtx.font = '16px Inter, sans-serif';
+    const msgLines = d.message ? measureWrapLines(mCtx, d.message, W - 60) : 0;
+    const msgH = Math.max(0, (msgLines - 1) * 22);
+    const h = Math.max(220, 180 + msgH + 30);
+    fillBg(ctx, canvas, h);
     ctx.strokeStyle = 'black'; ctx.lineWidth = 3;
-    ctx.strokeRect(10, 10, W - 20, 200);
-    ctx.lineWidth = 1; ctx.strokeRect(16, 16, W - 32, 188);
+    ctx.strokeRect(10, 10, W - 20, h - 20);
+    ctx.lineWidth = 1; ctx.strokeRect(16, 16, W - 32, h - 32);
     // Stars
-    ctx.font = '12px sans-serif';
-    for (let x = 20; x < W - 16; x += 28) { ctx.fillText('★', x, 28); ctx.fillText('★', x, 210); }
+    ctx.font = '12px sans-serif'; ctx.fillStyle = 'black';
+    for (let x = 20; x < W - 16; x += 28) { ctx.fillText('★', x, 28); ctx.fillText('★', x, h - 10); }
     ctx.font = 'bold 22px Inter, sans-serif'; ctx.textAlign = 'center';
     ctx.fillText(d.title || '⭐ Başarı Belgesi', W / 2, 65);
     ctx.font = 'bold 28px Inter, sans-serif';
     ctx.fillText(d.name || '', W / 2, 110);
     ctx.font = '16px Inter, sans-serif';
-    ctx.fillText(d.message || '', W / 2, 145);
+    if (d.message) { wrapText(ctx, d.message, 30, W - 60, 22, 145); }
     ctx.font = '13px Inter, sans-serif';
-    ctx.fillText('— ★ ✦ ★ —', W / 2, 180);
+    ctx.fillText('— ★ ✦ ★ —', W / 2, h - 25);
     ctx.textAlign = 'left';
   },
 
   frame_cute(ctx, canvas, d) {
-    fillBg(ctx, canvas, 200);
+    // Measure message
+    const mCtx = createMeasureCtx();
+    mCtx.font = '15px Inter, sans-serif';
+    const msgLines = d.message ? measureWrapLines(mCtx, d.message, W - 80) : 0;
+    const msgH = msgLines * 22;
+    const h = Math.max(200, 90 + msgH + 30);
+    fillBg(ctx, canvas, h);
     // Dotted border
     ctx.setLineDash([4, 4]); ctx.strokeStyle = 'black'; ctx.lineWidth = 2;
     const r = 12;
     ctx.beginPath();
-    ctx.roundRect(10, 10, W - 20, 180, r);
+    ctx.roundRect(10, 10, W - 20, h - 20, r);
     ctx.stroke();
     ctx.setLineDash([]);
     // Dots pattern
     ctx.fillStyle = 'black';
     for (let x = 25; x < W - 20; x += 16) {
       ctx.beginPath(); ctx.arc(x, 25, 1.5, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(x, 183, 1.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x, h - 17, 1.5, 0, Math.PI * 2); ctx.fill();
     }
     ctx.font = 'bold 22px Inter, sans-serif'; ctx.textAlign = 'center';
     ctx.fillText('🐱 ' + (d.title || 'Not'), W / 2, 60);
@@ -233,14 +282,20 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
 
   // ─── BANNERS ───
   banner_birthday(ctx, canvas, d) {
-    fillBg(ctx, canvas, 300);
+    // Measure message
+    const mCtx = createMeasureCtx();
+    mCtx.font = '18px Inter, sans-serif';
+    const msgLines = d.message ? measureWrapLines(mCtx, d.message, W - P * 2) : 1;
+    const msgH = Math.max(0, (msgLines - 1) * 24);
+    const h = Math.max(300, 280 + msgH);
+    fillBg(ctx, canvas, h);
     ctx.fillStyle = 'black'; ctx.strokeStyle = 'black'; ctx.lineWidth = 4;
-    ctx.strokeRect(6, 6, W - 12, 288);
+    ctx.strokeRect(6, 6, W - 12, h - 12);
     // Confetti dots
     ctx.font = '16px sans-serif';
     const confetti = ['🎈', '🎉', '✨', '🎊', '⭐'];
     for (let i = 0; i < 12; i++) {
-      ctx.fillText(confetti[i % confetti.length], 15 + (i % 6) * 60, 30 + Math.floor(i / 6) * 250);
+      ctx.fillText(confetti[i % confetti.length], 15 + (i % 6) * 60, 30 + Math.floor(i / 6) * (h - 50));
     }
     ctx.textAlign = 'center'; ctx.fillStyle = 'black';
     ctx.font = 'bold 18px Inter, sans-serif';
@@ -252,12 +307,18 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
       ctx.fillText(d.age, W / 2, 210);
     }
     ctx.font = '18px Inter, sans-serif';
-    ctx.fillText(d.message || 'İyi ki doğdun!', W / 2, 260);
+    wrapText(ctx, d.message || 'İyi ki doğdun!', P, W - P * 2, 24, 250);
     ctx.textAlign = 'left';
   },
 
   banner_custom(ctx, canvas, d) {
-    fillBg(ctx, canvas, 200);
+    // Measure line2
+    const mCtx = createMeasureCtx();
+    mCtx.font = '22px Inter, sans-serif';
+    const line2Lines = d.line2 ? measureWrapLines(mCtx, d.line2, W - P * 2) : 0;
+    const line2H = Math.max(0, (line2Lines - 1) * 28);
+    const h = Math.max(200, 180 + line2H);
+    fillBg(ctx, canvas, h);
     ctx.fillStyle = 'black'; ctx.textAlign = 'center';
     const style = d.style || 'bold';
     if (style === 'shadow') {
@@ -275,20 +336,26 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     }
     if (d.line2) {
       ctx.font = '22px Inter, sans-serif'; ctx.fillStyle = 'black';
-      ctx.fillText(d.line2, W / 2, 130);
+      wrapText(ctx, d.line2, P, W - P * 2, 28, 130);
     }
     // Decorative lines
     ctx.strokeStyle = 'black'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(P, 155); ctx.lineTo(W - P, 155); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(P, 160); ctx.lineTo(W - P, 160); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(P, h - 45); ctx.lineTo(W - P, h - 45); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(P, h - 40); ctx.lineTo(W - P, h - 40); ctx.stroke();
     ctx.textAlign = 'left';
   },
 
   banner_congrats(ctx, canvas, d) {
-    fillBg(ctx, canvas, 280);
+    // Measure reason
+    const mCtx = createMeasureCtx();
+    mCtx.font = '18px Inter, sans-serif';
+    const reasonLines = d.reason ? measureWrapLines(mCtx, d.reason, W - P * 2) : 0;
+    const reasonH = Math.max(0, (reasonLines - 1) * 24);
+    const h = Math.max(280, 265 + reasonH);
+    fillBg(ctx, canvas, h);
     ctx.strokeStyle = 'black'; ctx.lineWidth = 4;
-    ctx.strokeRect(8, 8, W - 16, 264);
-    ctx.lineWidth = 1; ctx.strokeRect(14, 14, W - 28, 252);
+    ctx.strokeRect(8, 8, W - 16, h - 16);
+    ctx.lineWidth = 1; ctx.strokeRect(14, 14, W - 28, h - 28);
     ctx.textAlign = 'center'; ctx.fillStyle = 'black';
     ctx.font = '14px sans-serif';
     ctx.fillText('🏆 ✦ 🏆 ✦ 🏆', W / 2, 45);
@@ -296,16 +363,22 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     ctx.fillText(d.title || 'TEBRİKLER', W / 2, 100);
     ctx.font = 'bold 32px Inter, sans-serif';
     ctx.fillText(d.name || '', W / 2, 155);
-    if (d.reason) { ctx.font = '18px Inter, sans-serif'; ctx.fillText(d.reason, W / 2, 200); }
+    if (d.reason) { ctx.font = '18px Inter, sans-serif'; wrapText(ctx, d.reason, P, W - P * 2, 24, 200); }
     ctx.font = '14px sans-serif';
-    ctx.fillText('★ ✦ ★ ✦ ★', W / 2, 245);
+    ctx.fillText('★ ✦ ★ ✦ ★', W / 2, h - 20);
     ctx.textAlign = 'left';
   },
 
   // ─── STUDY CARDS ───
   vocab_card(ctx, canvas, d) {
-    fillBg(ctx, canvas, 220);
-    ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.strokeRect(6, 6, W - 12, 208);
+    // Measure example text
+    const mCtx = createMeasureCtx();
+    mCtx.font = 'italic 14px Inter, sans-serif';
+    const exLines = d.example ? measureWrapLines(mCtx, `"${d.example}"`, W - P * 2) : 0;
+    const exH = exLines * 20;
+    const h = Math.max(220, 160 + exH + 20);
+    fillBg(ctx, canvas, h);
+    ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.strokeRect(6, 6, W - 12, h - 12);
     ctx.fillStyle = 'black';
     ctx.font = '12px "JetBrains Mono", monospace'; ctx.fillText('VOCABULARY', P, 28);
     ctx.strokeStyle = 'black'; ctx.lineWidth = 1;
@@ -323,8 +396,14 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
   },
 
   formula_card(ctx, canvas, d) {
-    fillBg(ctx, canvas, 220);
-    ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.strokeRect(6, 6, W - 12, 208);
+    // Measure note text
+    const mCtx = createMeasureCtx();
+    mCtx.font = '14px Inter, sans-serif';
+    const noteLines = d.note ? measureWrapLines(mCtx, d.note, W - P * 2) : 0;
+    const noteH = noteLines * 20;
+    const h = Math.max(220, 155 + noteH + 20);
+    fillBg(ctx, canvas, h);
+    ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.strokeRect(6, 6, W - 12, h - 12);
     // Subject badge
     ctx.fillStyle = 'black'; ctx.fillRect(P, P, 80, 22);
     ctx.fillStyle = 'white'; ctx.font = 'bold 12px "JetBrains Mono", monospace';
@@ -344,8 +423,14 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
   },
 
   info_card(ctx, canvas, d) {
-    fillBg(ctx, canvas, 280);
-    ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.strokeRect(6, 6, W - 12, 268);
+    // Measure content text
+    const mCtx = createMeasureCtx();
+    mCtx.font = '15px Inter, sans-serif';
+    const contentLines = d.content ? measureWrapLines(mCtx, d.content, W - P * 2) : 0;
+    const contentH = contentLines * 22;
+    const h = Math.max(280, 100 + contentH + 30);
+    fillBg(ctx, canvas, h);
+    ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.strokeRect(6, 6, W - 12, h - 12);
     // Topic header
     ctx.fillStyle = 'black'; ctx.fillRect(6, 6, W - 12, 35);
     ctx.fillStyle = 'white'; ctx.font = 'bold 16px Inter, sans-serif'; ctx.textAlign = 'center';
@@ -444,25 +529,32 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
 
   // ─── COMMERCIAL LABELS ───
   product_label(ctx, canvas, d) {
-    fillBg(ctx, canvas, 240);
+    // Measure desc
+    const mCtx = createMeasureCtx();
+    mCtx.font = '14px Inter, sans-serif';
+    const descLines = d.desc ? measureWrapLines(mCtx, d.desc, W - P * 2) : 0;
+    const descH = Math.max(0, (descLines - 1) * 20);
+    const h = Math.max(240, 240 + descH);
+    fillBg(ctx, canvas, h);
     ctx.strokeStyle = 'black'; ctx.lineWidth = 2;
-    ctx.strokeRect(4, 4, W - 8, 232);
+    ctx.strokeRect(4, 4, W - 8, h - 8);
     ctx.fillStyle = 'black';
     ctx.font = 'bold 24px Inter, sans-serif'; ctx.textAlign = 'center';
     ctx.fillText(d.name || 'Ürün', W / 2, 40);
-    if (d.desc) { ctx.font = '14px Inter, sans-serif'; ctx.fillText(d.desc, W / 2, 62); }
+    if (d.desc) { ctx.font = '14px Inter, sans-serif'; wrapText(ctx, d.desc, P, W - P * 2, 20, 62); }
+    const priceY = 62 + descLines * 20 + 10;
     ctx.font = 'bold 32px Inter, sans-serif';
-    ctx.fillText(d.price || '', W / 2, 100);
+    ctx.fillText(d.price || '', W / 2, priceY);
     // Barcode
     if (d.barcode) {
       try {
         const barcodeCanvas = document.createElement('canvas');
         JsBarcode(barcodeCanvas, d.barcode, { format: 'CODE128', width: 2, height: 60, displayValue: true, fontSize: 14, margin: 5 });
         const bx = (W - barcodeCanvas.width) / 2;
-        ctx.drawImage(barcodeCanvas, bx, 120);
+        ctx.drawImage(barcodeCanvas, bx, priceY + 20);
       } catch {
         ctx.font = '14px "JetBrains Mono", monospace';
-        ctx.fillText(d.barcode, W / 2, 160);
+        ctx.fillText(d.barcode, W / 2, priceY + 40);
       }
     }
     ctx.textAlign = 'left';
@@ -494,21 +586,32 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
   },
 
   address_label(ctx, canvas, d) {
-    fillBg(ctx, canvas, 280);
-    ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.strokeRect(6, 6, W - 12, 268);
+    // Measure addresses
+    const mCtx = createMeasureCtx();
+    mCtx.font = '13px Inter, sans-serif';
+    const fromLines = d.fromAddr ? measureWrapLines(mCtx, d.fromAddr, W - P * 2) : 0;
+    mCtx.font = '14px Inter, sans-serif';
+    const toLines = d.toAddr ? measureWrapLines(mCtx, d.toAddr, W - P * 2) : 0;
+    const fromH = fromLines * 18;
+    const toH = toLines * 20;
+    const h = Math.max(280, 72 + fromH + 50 + 25 + toH + 30);
+    fillBg(ctx, canvas, h);
+    ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.strokeRect(6, 6, W - 12, h - 12);
     // From
     ctx.fillStyle = 'black'; ctx.font = 'bold 12px "JetBrains Mono", monospace';
     ctx.fillText('GÖNDEREN:', P, 30);
     ctx.font = 'bold 16px Inter, sans-serif'; ctx.fillText(d.from || '', P, 52);
-    if (d.fromAddr) { ctx.font = '13px Inter, sans-serif'; wrapText(ctx, d.fromAddr, P, W - P * 2, 18, 72); }
+    let fromEndY = 72;
+    if (d.fromAddr) { ctx.font = '13px Inter, sans-serif'; fromEndY = wrapText(ctx, d.fromAddr, P, W - P * 2, 18, 72); }
     // Divider
+    const divY = fromEndY + 15;
     ctx.setLineDash([4, 4]); ctx.strokeStyle = 'black';
-    ctx.beginPath(); ctx.moveTo(P, 120); ctx.lineTo(W - P, 120); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(P, divY); ctx.lineTo(W - P, divY); ctx.stroke();
     ctx.setLineDash([]);
     // To
-    ctx.font = 'bold 12px "JetBrains Mono", monospace'; ctx.fillText('ALICI:', P, 145);
-    ctx.font = 'bold 18px Inter, sans-serif'; ctx.fillText(d.to || '', P, 170);
-    if (d.toAddr) { ctx.font = '14px Inter, sans-serif'; wrapText(ctx, d.toAddr, P, W - P * 2, 20, 195); }
+    ctx.font = 'bold 12px "JetBrains Mono", monospace'; ctx.fillText('ALICI:', P, divY + 25);
+    ctx.font = 'bold 18px Inter, sans-serif'; ctx.fillText(d.to || '', P, divY + 50);
+    if (d.toAddr) { ctx.font = '14px Inter, sans-serif'; wrapText(ctx, d.toAddr, P, W - P * 2, 20, divY + 75); }
   },
 };
 
