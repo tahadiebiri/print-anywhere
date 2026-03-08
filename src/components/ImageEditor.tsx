@@ -479,7 +479,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
               className="flex-1"
               onKeyDown={e => e.key === 'Enter' && addText()}
             />
-            <Button size="sm" onClick={addText} disabled={!textInput.trim()}>Ekle</Button>
+            <Button size="sm" onClick={addText} disabled={!textInput.trim()}>{t('add')}</Button>
           </div>
 
           {/* Font & Color row */}
