@@ -1,4 +1,4 @@
-import { Home, Type, Image, QrCode, Bluetooth } from 'lucide-react';
+import { Home, Type, LayoutTemplate, QrCode, Bluetooth } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { usePrinter } from '@/hooks/use-printer';
@@ -6,7 +6,7 @@ import { usePrinter } from '@/hooks/use-printer';
 const navItems = [
   { path: '/', icon: Home, label: 'Ana Sayfa' },
   { path: '/text', icon: Type, label: 'Metin' },
-  { path: '/image', icon: Image, label: 'Fotoğraf' },
+  { path: '/templates', icon: LayoutTemplate, label: 'Şablonlar' },
   { path: '/qr', icon: QrCode, label: 'QR Kod' },
   { path: '/connect', icon: Bluetooth, label: 'Bağlantı' },
 ];
