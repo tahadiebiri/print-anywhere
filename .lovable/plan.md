@@ -1,116 +1,46 @@
-# Fotoğraf Baskısı Sayfası Yenileme ve Logo Ekleme
 
-## Ozet
 
-Mevcut "Gorsel Bas" sayfasi yerine, gomulu kamera onizlemesi, galeri secimi, fotograf duzenleme ve baski metodu secimi iceren yeni bir "Fotograf Baskisi" sayfasi olusturulacak. Ayrica uygulama logosu eklenecek.
+# Arayuz Iyilestirme ve Hata Giderme Plani
+
+## Tespit Edilen Sorunlar
+
+1. **BottomNav**: "Görsel" yazisi eski, "Fotoğraf" olmali
+2. **ImagePrint sayfasi**: Kamera gorunumunde `PageHeader` gereksiz yer kapliyor, kamera tam ekran olmali
+3. **ImageEditor**: Iki ayri onizleme (duzenleme + baski) kafa karistirici; tek onizleme yeterli
+4. **CameraView**: On kamera ile cekim sirasinda aynalama dogru ama `setPointerCapture` touch cihazlarda sorun cikarabilir
+5. **Genel UI**: Sayfalarda tutarsiz bosluklar, buton boyutlari ve renk kullanimi
 
 ## Yapilacaklar
 
-### 1. Logo Ekleme
+### 1. BottomNav Guncelleme
+- "Görsel" → "Fotoğraf" olarak degistirilecek
 
-- `user-uploads://logo.svg` dosyasi `src/assets/logo.svg` olarak kopyalanacak
-- Header'daki emoji (printer emoji) yerine SVG logo kullanilacak
-- Ana sayfadaki emoji de logo ile degistirilecek
+### 2. ImagePrint Tam Ekran Kamera
+- Kamera modunda `PageHeader` gizlenecek, kamera tam ekran olacak
+- Sadece editor modunda PageHeader gosterilecek
 
-### 2. Fotograf Baskisi Sayfasi - Gomulu Kamera
+### 3. ImageEditor Sadeleştirme
+- Iki canvas yerine tek baski onizlemesi gosterilecek
+- Duzenleme kontrolleri (boyut, dondur) ve baski metodu secimi ayni akista olacak
+- Undo/redo butonlari ve slider'lar icin tutarli spacing
 
-Mevcut `/image` rotasindaki `ImagePrint.tsx` tamamen yenilenecek. Sayfa acildiginda:
+### 4. Tum Sayfalarda UI Tutarliligi
+- Buton ve kart stillerinde tutarli `gap`, `padding` kullanimi
+- Print butonlari tum sayfalarda ayni stilde olacak
+- `disabled` durumlarinda tutarli mesaj gosterimi
+- Templates sayfasinda onizleme canvas'i kullaniciya gosterilecek (su an `hidden`)
 
-- **Kamera gorunumu**: `navigator.mediaDevices.getUserMedia()` ile kamera akisi bir `<video>` elementinde canli gosterilecek
-- **Sol alt**: "Galeri" butonu (galeriden fotograf secmek icin)
-- **Sag alt**: "Kamera Cevir" butonu (on/arka kamera gecisi icin `facingMode` degistirilecek)
-- **Ortada**: Cek butonu (deklansor) - video'dan kare yakalayip canvas'a cizecek
-
-### 3. Duzenleme Arayuzu
-
-Fotograf cekildikten veya galeriden secildikten sonra:
-
-- **Yeniden boyutlandirma**: Slider ile olceklendirme (zoom in/out)
-- **Kirpma alani**: 384px genisligine sabit, yukseklik oranla ayarlanabilir
-- **Surukleme**: Gorsel kirpma cercevesi icinde suruklenebilir olacak
-- **Dondurme**: 90 derece dondurme butonu (mevcut ozellik korunacak)
-- **Parlaklik/Kontrast**: Mevcut slider'lar korunacak
-- **Metin ekleme:** Gorsel uzarine metin ekleme ve duzenleme olacak.
-- **Karalama:** Gorsel uzerinde karalama yapilabilen bir kalem araci olacak ve kalem kalinligi ayarlanabilir olacak. Ayrica silgi araci ile silinebilecek.
-- **Undo/Redo:** yapilan degisiklikleri ileri geri alinabilecek.
-
-### 4. Baski Metodu Secimi
-
-Onizleme asamasinda secenekler:
-
-- **Normal (Dithering)**: Floyd-Steinberg dithering (mevcut)
-- **Yuksek Kontrast**: Sert siyah-beyaz
-- **Negatif**: Ters renkler
-- **Halftone**: Nokta deseni
-- **Kenar Algilama**: Sobel filtresi
-- **Sert Esik**: Threshold tabanli
-
-Mevcut cerceve secenekleri de korunacak (Polaroid, Film Seridi, vb.)
-
-### 5. Sayfa Akisi: (yukarida yaptigim guncellemelere gore yeniden sekillendir)
-
-```text
-+---------------------------+
-|  [Geri]  Fotograf Baskisi |
-+---------------------------+
-|                           |
-|   +-------------------+   |
-|   |  Tam Ekran        |   |
-|   |  Canli Kamera     |   |
-|   |  Onizlemesi       |   |
-|   |                   |   |
-|   +-------------------+   |
-|                           |
-| [Galeri]    [O]   [Cevir] |
-+---------------------------+
-
-        | Fotograf cek |
-        v
-
-+---------------------------+
-|  [Geri]  Fotograf Baskisi |
-+---------------------------+
-|  Boyut: [====o========]   |
-|  Dondur: [90]             |
-|  +-------------------+    |
-|  | Kirpilmis/         |   |
-|  | Boyutlandirilmis   |   |
-|  | Onizleme           |   |
-|  +-------------------+    |
-|  Efekt: [Dropdown    v]   |
-|  Cerceve: [Dropdown  v]   |
-|  Parlaklik: [=====o==]    |
-|  Kontrast:  [=====o==]    |
-|  +-------------------+    |
-|  | Baski Onizlemesi   |   |
-|  +-------------------+    |
-| [<-]       [BAS ]     [->]|
-+---------------------------+
-```
+### 5. Kucuk Hata Duzeltmeleri
+- `CameraView` icinde `cameraReady` false iken shutter butonu disable, ama galeri seciminden sonra editor'e geciste sorun yok — dogrulanacak
+- `ImageEditor`'da `touch-none` class'i mobilde suruklenebilirlik icin gerekli ama scroll'u engelleyebilir — sadece canvas alanina uygulanacak
 
 ## Teknik Detaylar
 
-### Degistirilecek/Olusturulacak Dosyalar
+### Degisecek Dosyalar
+1. **`src/components/BottomNav.tsx`** — label guncelleme
+2. **`src/pages/ImagePrint.tsx`** — kamera modunda header gizleme
+3. **`src/components/ImageEditor.tsx`** — tek onizleme canvas, daha temiz layout
+4. **`src/components/CameraView.tsx`** — tam ekran duzeltmeleri, touch iyilestirme
+5. **`src/pages/Templates.tsx`** — basmadan once onizleme gosterimi
+6. **`src/pages/TextEditor.tsx`** — kucuk UI tutarliligi duzeltmeleri
 
-1. `**src/assets/logo.svg**` - Logo dosyasi kopyalanacak
-2. `**src/components/PrinterHeader.tsx**` - Logo import edilip emoji yerine kullanilacak
-3. `**src/pages/Index.tsx**` - Ana sayfadaki emoji yerine logo
-4. `**src/pages/ImagePrint.tsx**` - Tamamen yenilenecek:
-  - `getUserMedia` ile kamera erisimi
-  - `facingMode` state'i ile on/arka kamera gecisi
-  - Video'dan kare yakalama (`drawImage` ile)
-  - Pinch-to-zoom veya slider ile boyutlandirma
-  - Mevcut efekt ve cerceve mantigi korunacak
-  - Iki asamali UI: kamera gorunumu ve duzenleme gorunumu
-
-### Kamera API Kullanimi
-
-- `navigator.mediaDevices.getUserMedia({ video: { facingMode } })` ile stream alinacak
-- Kamera izni reddedildiginde kullaniciya uyari gosterilecek ve sadece galeri modu aktif kalacak
-- Sayfa terk edildiginde stream durdurulacak (`useEffect` cleanup)
-
-### Boyutlandirma Mantigi
-
-- Slider 50%-200% arasi olceklendirme
-- Canvas uzerinde kirpma: 384px genislik sabit, yukseklik gorsel oranina gore
-- Gorsel suruklenebilir (touch ve mouse event'leri)
