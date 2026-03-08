@@ -598,21 +598,20 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     ctx.strokeStyle = 'black'; ctx.lineWidth = 3;
     ctx.strokeRect(6, 6, W - 12, 188);
     ctx.fillStyle = 'black'; ctx.textAlign = 'center';
-    ctx.font = '18px Inter, sans-serif';
+    ctx.font = getUserBodyFont(d, 18);
     ctx.fillText(d.name || '', W / 2, 35);
-    // Old price with strikethrough
     if (d.oldPrice) {
-      ctx.font = '22px Inter, sans-serif'; ctx.fillStyle = '#888';
+      ctx.font = getUserBodyFont(d, 22); ctx.fillStyle = '#888';
       const oldW = ctx.measureText(d.oldPrice).width;
       ctx.fillText(d.oldPrice, W / 2, 75);
       ctx.strokeStyle = '#888'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.moveTo(W / 2 - oldW / 2 - 4, 70); ctx.lineTo(W / 2 + oldW / 2 + 4, 70); ctx.stroke();
     }
-    ctx.fillStyle = 'black'; ctx.font = 'bold 48px Inter, sans-serif';
+    ctx.fillStyle = 'black'; ctx.font = getUserTitleFont(d, 48);
     ctx.fillText(d.newPrice || '', W / 2, 135);
     if (d.discount) {
       ctx.fillStyle = 'black'; ctx.fillRect(W / 2 - 50, 150, 100, 28);
-      ctx.fillStyle = 'white'; ctx.font = 'bold 18px Inter, sans-serif';
+      ctx.fillStyle = 'white'; ctx.font = getUserTitleFont(d, 18);
       ctx.fillText(d.discount, W / 2, 170);
     }
     ctx.textAlign = 'left';
