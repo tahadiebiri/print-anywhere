@@ -16,7 +16,7 @@ export function BottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
   const { connected } = usePrinter();
-  const { registerQrClick } = useAdminCombo();
+  const { registerQrClick, registerConnectClick } = useAdminCombo();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/80 backdrop-blur-md safe-area-bottom">
