@@ -271,8 +271,8 @@ export default function QRCodePage() {
         {contentType === 'wifi' && (
           <>
             <div className="space-y-1.5">
-              <Label className="text-xs">Ağ Adı (SSID)</Label>
-              <Input placeholder="WiFi adı" value={wifi.ssid} onChange={e => setWifi(w => ({ ...w, ssid: e.target.value }))} />
+              <Label className="text-xs">{t('networkName')}</Label>
+              <Input placeholder={t('wifiName')} value={wifi.ssid} onChange={e => setWifi(w => ({ ...w, ssid: e.target.value }))} />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs">Şifre</Label>
