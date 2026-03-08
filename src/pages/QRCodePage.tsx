@@ -521,7 +521,7 @@ export default function QRCodePage() {
         </Button>
         {previewUrl && (
           <Button variant="outline" size="lg" onClick={handleDownload} className="gap-1.5">
-            <Download className="h-4 w-4" /> İndir
+            <Download className="h-4 w-4" /> {t('download')}
           </Button>
         )}
         <Button
