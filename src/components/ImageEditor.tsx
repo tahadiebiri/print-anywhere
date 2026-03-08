@@ -463,7 +463,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
             className="flex-1"
           />
           <Button variant="ghost" size="sm" className="gap-1 text-destructive" onClick={clearDrawing}>
-            <Trash2 className="h-3.5 w-3.5" /> Temizle
+            <Trash2 className="h-3.5 w-3.5" /> {t('clear')}
           </Button>
         </div>
       )}
