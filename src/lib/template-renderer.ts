@@ -304,11 +304,11 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     fillBg(ctx, canvas, 160);
     ctx.fillStyle = 'black'; ctx.fillRect(0, 0, W, 45);
     ctx.fillStyle = 'white';
-    ctx.font = 'bold 20px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.font = getUserTitleFont(d, 20); ctx.textAlign = 'center';
     ctx.fillText(d.greeting || 'Merhaba, ben', W / 2, 30);
     ctx.fillStyle = 'black';
     ctx.strokeStyle = 'black'; ctx.lineWidth = 3; ctx.strokeRect(0, 0, W, 160);
-    ctx.font = 'bold 42px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 42);
     ctx.fillText(d.name || '', W / 2, 115);
     ctx.textAlign = 'left';
   },
