@@ -468,12 +468,12 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     ctx.fillStyle = 'black'; ctx.fillRect(6, 6, W - 12, 35);
     ctx.fillStyle = 'white'; ctx.font = 'bold 16px Inter, sans-serif'; ctx.textAlign = 'center';
     ctx.fillText('💡 ' + (d.topic || 'Bilgi Kartı'), W / 2, 30); ctx.textAlign = 'left';
-    ctx.fillStyle = 'black'; ctx.font = 'bold 22px Inter, sans-serif';
+    ctx.fillStyle = 'black'; ctx.font = getUserTitleFont(d, 22);
     ctx.fillText(d.title || '', P, 70);
     ctx.strokeStyle = 'black'; ctx.lineWidth = 0.5;
     ctx.beginPath(); ctx.moveTo(P, 78); ctx.lineTo(W - P, 78); ctx.stroke();
     if (d.content) {
-      ctx.font = '15px Inter, sans-serif'; ctx.fillStyle = '#222';
+      ctx.font = getUserBodyFont(d, 15); ctx.fillStyle = '#222';
       wrapText(ctx, d.content, P, W - P * 2, 22, 100);
     }
   },
