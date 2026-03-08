@@ -69,6 +69,7 @@ const defaultState: EditorState = {
 };
 
 export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
+  const { t } = useLanguage();
   const [state, setState] = useState<EditorState>(defaultState);
   const [history, setHistory] = useState<EditorState[]>([defaultState]);
   const [historyIdx, setHistoryIdx] = useState(0);
