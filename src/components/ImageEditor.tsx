@@ -475,7 +475,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
             <Input
               value={textInput}
               onChange={e => setTextInput(e.target.value)}
-              placeholder="Metin yazın..."
+              placeholder={t('textPlaceholderImg')}
               className="flex-1"
               onKeyDown={e => e.key === 'Enter' && addText()}
             />
