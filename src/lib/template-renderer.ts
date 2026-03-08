@@ -416,14 +416,14 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     ctx.font = '12px "JetBrains Mono", monospace'; ctx.fillText('VOCABULARY', P, 28);
     ctx.strokeStyle = 'black'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(P, 35); ctx.lineTo(W - P, 35); ctx.stroke();
-    ctx.font = 'bold 32px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 32);
     ctx.fillText(d.word || '', P, 72);
-    if (d.pronunciation) { ctx.font = '14px "JetBrains Mono", monospace'; ctx.fillStyle = '#666'; ctx.fillText(d.pronunciation, P, 92); }
+    if (d.pronunciation) { ctx.font = getUserBodyFont(d, 14); ctx.fillStyle = '#666'; ctx.fillText(d.pronunciation, P, 92); }
     ctx.fillStyle = 'black'; ctx.strokeStyle = 'black'; ctx.lineWidth = 0.5;
     ctx.beginPath(); ctx.moveTo(P, 102); ctx.lineTo(W - P, 102); ctx.stroke();
-    ctx.font = 'bold 18px Inter, sans-serif'; ctx.fillText(d.meaning || '', P, 128);
+    ctx.font = getUserTitleFont(d, 18); ctx.fillText(d.meaning || '', P, 128);
     if (d.example) {
-      ctx.font = 'italic 14px Inter, sans-serif'; ctx.fillStyle = '#444';
+      ctx.font = getUserBodyFont(d, 14); ctx.fillStyle = '#444';
       wrapText(ctx, `"${d.example}"`, P, W - P * 2, 20, 160);
     }
   },
