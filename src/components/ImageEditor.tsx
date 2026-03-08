@@ -452,7 +452,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
       {(tool === 'pen' || tool === 'eraser') && (
         <div className="flex items-center gap-3">
           <Label className="text-xs text-muted-foreground shrink-0">
-            {tool === 'pen' ? 'Kalem' : 'Silgi'}: {penSize}px
+            {tool === 'pen' ? t('pen') : t('eraser')}: {penSize}px
           </Label>
           <Slider
             value={[penSize]}
