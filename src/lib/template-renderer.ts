@@ -291,10 +291,10 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
       ctx.beginPath(); ctx.arc(x, 25, 1.5, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(x, h - 17, 1.5, 0, Math.PI * 2); ctx.fill();
     }
-    ctx.font = 'bold 22px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.font = getUserTitleFont(d, 22); ctx.textAlign = 'center';
     ctx.fillText('🐱 ' + (d.title || 'Not'), W / 2, 60);
     if (d.message) {
-      ctx.font = '15px Inter, sans-serif';
+      ctx.font = getUserBodyFont(d, 15);
       wrapText(ctx, d.message, 40, W - 80, 22, 90);
     }
     ctx.textAlign = 'left';
