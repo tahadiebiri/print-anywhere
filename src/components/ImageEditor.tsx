@@ -401,9 +401,9 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
     setPrinting(true);
     try {
       await printCanvas(composite);
-      toast.success('Yazdırıldı!');
+      toast.success(t('printed'));
     } catch (e: any) {
-      toast.error(e.message || 'Yazdırma hatası');
+      toast.error(e.message || t('printError'));
     } finally {
       setPrinting(false);
     }
