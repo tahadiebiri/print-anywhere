@@ -20,6 +20,15 @@ export default function HomePage() {
   const { connected, deviceName } = usePrinter();
   const supported = isWebBluetoothSupported();
   const [feeding, setFeeding] = useState(false);
+  const [showInstall, setShowInstall] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+      || (navigator as any).standalone === true;
+    const wasDismissed = sessionStorage.getItem('install-dismissed');
+    if (!isStandalone && !wasDismissed) setShowInstall(true);
+  }, []);
 
   const handleFeed = async (direction: 'forward' | 'backward') => {
     setFeeding(true);
