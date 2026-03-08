@@ -411,17 +411,18 @@ export default function QRCodePage() {
         </div>
       )}
 
+      {/* Hidden canvas for rendering */}
+      <canvas ref={canvasRef} className="hidden" />
+
       {/* Preview */}
-      {qrDataUrl && (
+      {previewUrl && (
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Önizleme</Label>
           <div className="flex justify-center">
-            <div className="border-2 border-dashed border-border rounded-lg p-4 bg-white inline-block">
-              <img src={qrDataUrl} alt="QR Code" className="block mx-auto" style={{ width: Math.min(qrSize, 250) }} />
-              {caption && <p className="text-center mt-2 text-sm text-black font-medium">{caption}</p>}
+            <div className="border-2 border-dashed border-border rounded-lg p-2 bg-muted/30 inline-block">
+              <img src={previewUrl} alt="QR Code Preview" className="block" style={{ width: 384, imageRendering: 'pixelated' as any }} />
             </div>
           </div>
-          <canvas ref={canvasRef} className="hidden" />
         </div>
       )}
 
