@@ -23,6 +23,8 @@ function drawTemplateIcon(ctx: CanvasRenderingContext2D, icon: string, x: number
 }
 
 function wrapText(ctx: CanvasRenderingContext2D, text: string, x: number, maxW: number, lineH: number, startY: number): number {
+  const prevAlign = ctx.textAlign;
+  ctx.textAlign = 'left';
   const words = text.split(' ');
   let line = '';
   let y = startY;
@@ -37,6 +39,7 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, x: number, maxW: 
     }
   }
   if (line) { ctx.fillText(line, x, y); y += lineH; }
+  ctx.textAlign = prevAlign;
   return y;
 }
 
