@@ -192,7 +192,7 @@ export default function QRCodePage() {
     a.href = previewUrl;
     a.download = `qr-code-${Date.now()}.png`;
     a.click();
-    toast.success('QR kod indirildi!');
+    toast.success(t('qrDownloaded'));
   };
 
   const handleReset = () => {
