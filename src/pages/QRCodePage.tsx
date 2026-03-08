@@ -58,6 +58,9 @@ export default function QRCodePage() {
   const [fgColor, setFgColor] = useState('#000000');
   const [bgColor, setBgColor] = useState('#ffffff');
   const [frame, setFrame] = useState<QRFrame>('none');
+  const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
+  const [logoSize, setLogoSize] = useState(60);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
