@@ -1,36 +1,109 @@
 import { useState, useRef, useEffect } from 'react';
 import QRCode from 'qrcode';
-import { Printer, Loader2 } from 'lucide-react';
+import { Printer, Loader2, QrCode, Wifi, User, Mail, Phone, Link, ChevronDown, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ThermalPreview, ThermalPreviewHandle } from '@/components/ThermalPreview';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PageHeader } from '@/components/PageHeader';
 import { usePrinter } from '@/hooks/use-printer';
 import { printCanvas } from '@/lib/printer';
 import { toast } from 'sonner';
 
+type ContentType = 'url' | 'wifi' | 'vcard' | 'email' | 'phone';
+type ErrorLevel = 'L' | 'M' | 'Q' | 'H';
+type QRFrame = 'none' | 'solid' | 'rounded' | 'dashed' | 'double' | 'shadow' | 'badge';
+
+interface WifiData { ssid: string; password: string; encryption: 'WPA' | 'WEP' | 'nopass'; }
+interface VCardData { name: string; phone: string; email: string; org: string; }
+interface EmailData { to: string; subject: string; body: string; }
+
+const contentTypeLabels: Record<ContentType, { label: string; icon: any }> = {
+  url: { label: 'URL / Metin', icon: Link },
+  wifi: { label: 'WiFi', icon: Wifi },
+  vcard: { label: 'Kişi (vCard)', icon: User },
+  email: { label: 'E-posta', icon: Mail },
+  phone: { label: 'Telefon', icon: Phone },
+};
+
+const errorLevels: { value: ErrorLevel; label: string; desc: string }[] = [
+  { value: 'L', label: 'Düşük', desc: '~7% düzeltme' },
+  { value: 'M', label: 'Orta', desc: '~15% düzeltme' },
+  { value: 'Q', label: 'Yüksek', desc: '~25% düzeltme' },
+  { value: 'H', label: 'Maksimum', desc: '~30% düzeltme' },
+];
+
+const qrFrames: { value: QRFrame; label: string }[] = [
+  { value: 'none', label: 'Yok' },
+  { value: 'solid', label: 'Düz Çerçeve' },
+  { value: 'rounded', label: 'Yuvarlatılmış' },
+  { value: 'dashed', label: 'Kesikli' },
+  { value: 'double', label: 'Çift Çizgi' },
+  { value: 'shadow', label: 'Gölgeli' },
+  { value: 'badge', label: 'Rozet' },
+];
+
 export default function QRCodePage() {
-  const [content, setContent] = useState('');
+  const [contentType, setContentType] = useState<ContentType>('url');
+  const [urlText, setUrlText] = useState('');
+  const [wifi, setWifi] = useState<WifiData>({ ssid: '', password: '', encryption: 'WPA' });
+  const [vcard, setVcard] = useState<VCardData>({ name: '', phone: '', email: '', org: '' });
+  const [emailData, setEmailData] = useState<EmailData>({ to: '', subject: '', body: '' });
+  const [phoneNumber, setPhoneNumber] = useState('');
+
   const [caption, setCaption] = useState('');
+  const [qrSize, setQrSize] = useState(280);
+  const [errorLevel, setErrorLevel] = useState<ErrorLevel>('M');
+  const [fgColor, setFgColor] = useState('#000000');
+  const [bgColor, setBgColor] = useState('#ffffff');
+  const [frame, setFrame] = useState<QRFrame>('none');
+
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [printing, setPrinting] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { connected } = usePrinter();
 
-  useEffect(() => {
-    if (!content.trim()) {
-      setQrDataUrl(null);
-      return;
+  // Build QR content string
+  const getQRContent = (): string => {
+    switch (contentType) {
+      case 'url': return urlText.trim();
+      case 'wifi':
+        if (!wifi.ssid) return '';
+        return `WIFI:T:${wifi.encryption};S:${wifi.ssid};P:${wifi.password};;`;
+      case 'vcard':
+        if (!vcard.name) return '';
+        return [
+          'BEGIN:VCARD', 'VERSION:3.0',
+          `FN:${vcard.name}`,
+          vcard.phone ? `TEL:${vcard.phone}` : '',
+          vcard.email ? `EMAIL:${vcard.email}` : '',
+          vcard.org ? `ORG:${vcard.org}` : '',
+          'END:VCARD'
+        ].filter(Boolean).join('\n');
+      case 'email':
+        if (!emailData.to) return '';
+        return `mailto:${emailData.to}?subject=${encodeURIComponent(emailData.subject)}&body=${encodeURIComponent(emailData.body)}`;
+      case 'phone':
+        return phoneNumber.trim() ? `tel:${phoneNumber.trim()}` : '';
+      default: return '';
     }
-    QRCode.toDataURL(content, {
-      width: 300,
-      margin: 2,
-      color: { dark: '#000000', light: '#ffffff' },
-    }).then(setQrDataUrl).catch(() => setQrDataUrl(null));
-  }, [content]);
+  };
 
-  // Draw combined QR + caption on a hidden canvas for printing
+  const qrContent = getQRContent();
+
+  useEffect(() => {
+    if (!qrContent) { setQrDataUrl(null); return; }
+    QRCode.toDataURL(qrContent, {
+      width: qrSize,
+      margin: 2,
+      errorCorrectionLevel: errorLevel,
+      color: { dark: fgColor, light: bgColor },
+    }).then(setQrDataUrl).catch(() => setQrDataUrl(null));
+  }, [qrContent, qrSize, errorLevel, fgColor, bgColor]);
+
+  // Draw combined QR + frame + caption on hidden canvas
   useEffect(() => {
     if (!qrDataUrl || !canvasRef.current) return;
     const canvas = canvasRef.current;
@@ -39,24 +112,36 @@ export default function QRCodePage() {
 
     const img = new window.Image();
     img.onload = () => {
-      const qrSize = 300;
-      const captionHeight = caption ? 40 : 0;
-      canvas.width = 384;
-      canvas.height = qrSize + 42 + captionHeight; // 42 = padding
+      const W = 384;
+      const pad = frame !== 'none' ? 28 : 16;
+      const displaySize = Math.min(qrSize, W - pad * 2);
+      const captionH = caption ? 36 : 0;
+      const totalH = pad + displaySize + (caption ? 12 : 0) + captionH + pad;
+
+      canvas.width = W;
+      canvas.height = totalH;
 
       ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, (384 - qrSize) / 2, 20, qrSize, qrSize);
+      ctx.fillRect(0, 0, W, totalH);
+
+      // Draw frame
+      if (frame !== 'none') {
+        drawQRFrame(ctx, frame, W, totalH);
+      }
+
+      const qrX = (W - displaySize) / 2;
+      const qrY = pad;
+      ctx.drawImage(img, qrX, qrY, displaySize, displaySize);
 
       if (caption) {
         ctx.fillStyle = 'black';
-        ctx.font = '20px Inter, sans-serif';
+        ctx.font = 'bold 18px Inter, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(caption, 192, qrSize + 40);
+        ctx.fillText(caption, W / 2, qrY + displaySize + 28, W - pad * 2);
       }
     };
     img.src = qrDataUrl;
-  }, [qrDataUrl, caption]);
+  }, [qrDataUrl, caption, qrSize, frame]);
 
   const handlePrint = async () => {
     if (!canvasRef.current) return;
@@ -71,55 +156,304 @@ export default function QRCodePage() {
     }
   };
 
+  const handleReset = () => {
+    setUrlText(''); setCaption('');
+    setWifi({ ssid: '', password: '', encryption: 'WPA' });
+    setVcard({ name: '', phone: '', email: '', org: '' });
+    setEmailData({ to: '', subject: '', body: '' });
+    setPhoneNumber('');
+    setQrSize(280); setErrorLevel('M');
+    setFgColor('#000000'); setBgColor('#ffffff');
+    setFrame('none');
+  };
+
   return (
     <div className="p-4 pb-24 max-w-2xl mx-auto space-y-4">
       <PageHeader title="QR Kod" />
 
-      <div className="space-y-2">
-        <Label>URL veya Metin</Label>
-        <Input
-          placeholder="https://example.com"
-          value={content}
-          onChange={e => setContent(e.target.value)}
-        />
+      {/* Content Type Selector */}
+      <div className="flex flex-wrap gap-2">
+        {(Object.keys(contentTypeLabels) as ContentType[]).map(type => {
+          const { label, icon: Icon } = contentTypeLabels[type];
+          return (
+            <button
+              key={type}
+              onClick={() => setContentType(type)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
+                contentType === type
+                  ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                  : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'
+              }`}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              {label}
+            </button>
+          );
+        })}
       </div>
 
-      <div className="space-y-2">
-        <Label>Açıklama (isteğe bağlı)</Label>
-        <Input
-          placeholder="QR kod altına yazılacak metin"
-          value={caption}
-          onChange={e => setCaption(e.target.value)}
-        />
+      {/* Content Input Forms */}
+      <div className="space-y-3 rounded-xl border border-border bg-card p-3">
+        {contentType === 'url' && (
+          <div className="space-y-1.5">
+            <Label className="text-xs">URL veya Metin</Label>
+            <Input placeholder="https://example.com" value={urlText} onChange={e => setUrlText(e.target.value)} />
+          </div>
+        )}
+
+        {contentType === 'wifi' && (
+          <>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Ağ Adı (SSID)</Label>
+              <Input placeholder="WiFi adı" value={wifi.ssid} onChange={e => setWifi(w => ({ ...w, ssid: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Şifre</Label>
+              <Input type="password" placeholder="WiFi şifresi" value={wifi.password} onChange={e => setWifi(w => ({ ...w, password: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Şifreleme</Label>
+              <div className="flex gap-2">
+                {(['WPA', 'WEP', 'nopass'] as const).map(enc => (
+                  <button
+                    key={enc}
+                    onClick={() => setWifi(w => ({ ...w, encryption: enc }))}
+                    className={`px-3 py-1 rounded-md text-xs font-medium border transition-all ${
+                      wifi.encryption === enc
+                        ? 'bg-primary text-primary-foreground border-primary'
+                        : 'bg-muted/50 text-muted-foreground border-border'
+                    }`}
+                  >
+                    {enc === 'nopass' ? 'Açık' : enc}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        {contentType === 'vcard' && (
+          <>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Ad Soyad</Label>
+              <Input placeholder="Ahmet Yılmaz" value={vcard.name} onChange={e => setVcard(v => ({ ...v, name: e.target.value }))} />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Telefon</Label>
+                <Input placeholder="+90 555..." value={vcard.phone} onChange={e => setVcard(v => ({ ...v, phone: e.target.value }))} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">E-posta</Label>
+                <Input placeholder="mail@example.com" value={vcard.email} onChange={e => setVcard(v => ({ ...v, email: e.target.value }))} />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Şirket / Kuruluş</Label>
+              <Input placeholder="Şirket adı" value={vcard.org} onChange={e => setVcard(v => ({ ...v, org: e.target.value }))} />
+            </div>
+          </>
+        )}
+
+        {contentType === 'email' && (
+          <>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Alıcı E-posta</Label>
+              <Input placeholder="info@example.com" value={emailData.to} onChange={e => setEmailData(d => ({ ...d, to: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Konu</Label>
+              <Input placeholder="Konu başlığı" value={emailData.subject} onChange={e => setEmailData(d => ({ ...d, subject: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Mesaj</Label>
+              <Input placeholder="Mesaj içeriği" value={emailData.body} onChange={e => setEmailData(d => ({ ...d, body: e.target.value }))} />
+            </div>
+          </>
+        )}
+
+        {contentType === 'phone' && (
+          <div className="space-y-1.5">
+            <Label className="text-xs">Telefon Numarası</Label>
+            <Input placeholder="+90 555 123 4567" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} />
+          </div>
+        )}
+
+        {/* Caption (all types) */}
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Alt Yazı (isteğe bağlı)</Label>
+          <Input placeholder="QR kod altına yazılacak metin" value={caption} onChange={e => setCaption(e.target.value)} />
+        </div>
       </div>
 
+      {/* Style & Settings */}
+      <div className="rounded-xl border border-border bg-card p-3 space-y-4">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Stil Ayarları</p>
+
+        {/* QR Size */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <Label className="text-xs">QR Boyut</Label>
+            <span className="text-xs text-muted-foreground">{qrSize}px</span>
+          </div>
+          <Slider value={[qrSize]} onValueChange={v => setQrSize(v[0])} min={150} max={350} step={10} />
+        </div>
+
+        {/* Error Correction */}
+        <div className="space-y-2">
+          <Label className="text-xs">Hata Düzeltme</Label>
+          <div className="grid grid-cols-4 gap-1.5">
+            {errorLevels.map(lvl => (
+              <button
+                key={lvl.value}
+                onClick={() => setErrorLevel(lvl.value)}
+                className={`text-center px-2 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                  errorLevel === lvl.value
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'
+                }`}
+              >
+                <div>{lvl.label}</div>
+                <div className="text-[10px] opacity-70">{lvl.desc}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Colors */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs">QR Rengi</Label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={fgColor}
+                onChange={e => setFgColor(e.target.value)}
+                className="w-8 h-8 rounded-md border border-border cursor-pointer"
+              />
+              <Input value={fgColor} onChange={e => setFgColor(e.target.value)} className="font-mono text-xs h-8" />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Arka Plan</Label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={bgColor}
+                onChange={e => setBgColor(e.target.value)}
+                className="w-8 h-8 rounded-md border border-border cursor-pointer"
+              />
+              <Input value={bgColor} onChange={e => setBgColor(e.target.value)} className="font-mono text-xs h-8" />
+            </div>
+          </div>
+        </div>
+
+        {/* Frame */}
+        <div className="space-y-2">
+          <Label className="text-xs">Çerçeve</Label>
+          <div className="flex flex-wrap gap-1.5">
+            {qrFrames.map(f => (
+              <button
+                key={f.value}
+                onClick={() => setFrame(f.value)}
+                className={`px-3 py-1 rounded-full text-xs font-medium border transition-all ${
+                  frame === f.value
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Preview */}
       {qrDataUrl && (
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Önizleme</Label>
           <div className="flex justify-center">
             <div className="border-2 border-dashed border-border rounded-lg p-4 bg-white inline-block">
-              <img src={qrDataUrl} alt="QR Code" className="block mx-auto" style={{ width: 200 }} />
-              {caption && <p className="text-center mt-2 text-sm text-black">{caption}</p>}
+              <img src={qrDataUrl} alt="QR Code" className="block mx-auto" style={{ width: Math.min(qrSize, 250) }} />
+              {caption && <p className="text-center mt-2 text-sm text-black font-medium">{caption}</p>}
             </div>
           </div>
-          {/* Hidden canvas for printing */}
           <canvas ref={canvasRef} className="hidden" />
         </div>
       )}
 
-      <Button
-        className="w-full gap-2"
-        size="lg"
-        disabled={!connected || !content.trim() || printing}
-        onClick={handlePrint}
-      >
-        {printing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
-        {printing ? 'Yazdırılıyor...' : 'Bas'}
-      </Button>
+      {/* Actions */}
+      <div className="flex gap-2">
+        <Button variant="outline" size="lg" onClick={handleReset} className="gap-1.5">
+          <RotateCcw className="h-4 w-4" /> Sıfırla
+        </Button>
+        <Button
+          className="flex-1 gap-2"
+          size="lg"
+          disabled={!connected || !qrContent || printing}
+          onClick={handlePrint}
+        >
+          {printing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
+          {printing ? 'Yazdırılıyor...' : 'Yazdır'}
+        </Button>
+      </div>
 
       {!connected && (
         <p className="text-xs text-center text-muted-foreground">Yazdırmak için önce yazıcıya bağlanın</p>
       )}
     </div>
   );
+}
+
+// ─── QR Frame Drawing ───
+function drawQRFrame(ctx: CanvasRenderingContext2D, frame: QRFrame, w: number, h: number) {
+  const m = 10;
+  ctx.strokeStyle = 'black';
+  ctx.fillStyle = 'black';
+  ctx.lineWidth = 2;
+
+  switch (frame) {
+    case 'solid':
+      ctx.strokeRect(m, m, w - m * 2, h - m * 2);
+      break;
+    case 'rounded':
+      ctx.beginPath();
+      ctx.roundRect(m, m, w - m * 2, h - m * 2, 14);
+      ctx.stroke();
+      break;
+    case 'dashed':
+      ctx.setLineDash([8, 4]);
+      ctx.strokeRect(m, m, w - m * 2, h - m * 2);
+      ctx.setLineDash([]);
+      break;
+    case 'double':
+      ctx.strokeRect(m, m, w - m * 2, h - m * 2);
+      ctx.strokeRect(m + 4, m + 4, w - m * 2 - 8, h - m * 2 - 8);
+      break;
+    case 'shadow':
+      ctx.fillStyle = 'rgba(0,0,0,0.12)';
+      ctx.fillRect(m + 4, m + 4, w - m * 2, h - m * 2);
+      ctx.fillStyle = 'white';
+      ctx.fillRect(m, m, w - m * 2, h - m * 2);
+      ctx.strokeStyle = 'black';
+      ctx.strokeRect(m, m, w - m * 2, h - m * 2);
+      break;
+    case 'badge': {
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.roundRect(m, m, w - m * 2, h - m * 2, 18);
+      ctx.stroke();
+      // Top banner area
+      ctx.fillStyle = 'black';
+      ctx.beginPath();
+      ctx.roundRect(w / 2 - 50, m - 2, 100, 20, [0, 0, 8, 8]);
+      ctx.fill();
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 11px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('QR CODE', w / 2, m + 13);
+      break;
+    }
+  }
 }
