@@ -12,6 +12,11 @@ import { TemplateEditor } from '@/components/admin/TemplateEditor';
 
 export default function AdminTemplates() {
   const navigate = useNavigate();
+  const handleLogout = () => {
+    sessionStorage.removeItem('admin_auth');
+    toast.success('Çıkış yapıldı');
+    navigate('/');
+  };
   const [authenticated, setAuthenticated] = useState(() => {
     return sessionStorage.getItem('admin_auth') === '1';
   });
