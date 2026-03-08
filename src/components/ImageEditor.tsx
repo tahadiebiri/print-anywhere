@@ -516,7 +516,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
 
           {/* Size */}
           <div className="flex items-center gap-3">
-            <Label className="text-xs text-muted-foreground shrink-0">Boyut: {textFontSize}px</Label>
+            <Label className="text-xs text-muted-foreground shrink-0">{t('size')}: {textFontSize}px</Label>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setTextFontSize(s => Math.max(8, s - 2))}>
               <Minus className="h-3 w-3" />
             </Button>
