@@ -280,7 +280,7 @@ export default function QRCodePage() {
             </div>
             {advancedMode && (
               <div className="space-y-1.5">
-                <Label className="text-xs">Şifreleme</Label>
+                <Label className="text-xs">{t('encryption')}</Label>
                 <div className="flex gap-2">
                   {(['WPA', 'WEP', 'nopass'] as const).map(enc => (
                     <button
