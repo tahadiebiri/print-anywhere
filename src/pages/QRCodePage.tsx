@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import QRCode from 'qrcode';
-import { Printer, Loader2, Wifi, User, Mail, Phone, Link, RotateCcw, Download, Settings2, Zap } from 'lucide-react';
+import { Printer, Loader2, Wifi, User, Mail, Phone, Link, RotateCcw, Download, Settings2, Zap, ImagePlus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -58,6 +58,9 @@ export default function QRCodePage() {
   const [fgColor, setFgColor] = useState('#000000');
   const [bgColor, setBgColor] = useState('#ffffff');
   const [frame, setFrame] = useState<QRFrame>('none');
+  const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
+  const [logoSize, setLogoSize] = useState(60);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -92,15 +95,18 @@ export default function QRCodePage() {
 
   const qrContent = getQRContent();
 
+  // Auto-set error correction to H when logo is present
+  const effectiveErrorLevel = logoDataUrl ? 'H' : errorLevel;
+
   useEffect(() => {
     if (!qrContent) { setQrDataUrl(null); return; }
     QRCode.toDataURL(qrContent, {
       width: qrSize,
       margin: 2,
-      errorCorrectionLevel: errorLevel,
+      errorCorrectionLevel: effectiveErrorLevel,
       color: { dark: fgColor, light: bgColor },
     }).then(setQrDataUrl).catch(() => setQrDataUrl(null));
-  }, [qrContent, qrSize, errorLevel, fgColor, bgColor]);
+  }, [qrContent, qrSize, effectiveErrorLevel, fgColor, bgColor]);
 
   // Draw combined QR + frame + caption on hidden canvas, then update preview
   useEffect(() => {
@@ -131,18 +137,39 @@ export default function QRCodePage() {
       const qrY = pad;
       ctx.drawImage(img, qrX, qrY, displaySize, displaySize);
 
-      if (caption) {
-        ctx.fillStyle = 'black';
-        ctx.font = 'bold 18px Inter, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(caption, W / 2, qrY + displaySize + 28, W - pad * 2);
-      }
+      // Draw logo in center
+      const drawLogoAndFinish = () => {
+        if (caption) {
+          ctx.fillStyle = 'black';
+          ctx.font = 'bold 18px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(caption, W / 2, qrY + displaySize + 28, W - pad * 2);
+        }
+        setPreviewUrl(canvas.toDataURL('image/png'));
+      };
 
-      // Update preview from canvas
-      setPreviewUrl(canvas.toDataURL('image/png'));
+      if (logoDataUrl) {
+        const logoImg = new window.Image();
+        logoImg.onload = () => {
+          const lSize = logoSize;
+          const lx = qrX + (displaySize - lSize) / 2;
+          const ly = qrY + (displaySize - lSize) / 2;
+          // White background behind logo
+          const padding = 4;
+          ctx.fillStyle = 'white';
+          ctx.beginPath();
+          ctx.roundRect(lx - padding, ly - padding, lSize + padding * 2, lSize + padding * 2, 8);
+          ctx.fill();
+          ctx.drawImage(logoImg, lx, ly, lSize, lSize);
+          drawLogoAndFinish();
+        };
+        logoImg.src = logoDataUrl;
+      } else {
+        drawLogoAndFinish();
+      }
     };
     img.src = qrDataUrl;
-  }, [qrDataUrl, caption, qrSize, frame]);
+  }, [qrDataUrl, caption, qrSize, frame, logoDataUrl, logoSize]);
 
   const handlePrint = async () => {
     if (!canvasRef.current) return;
@@ -174,7 +201,7 @@ export default function QRCodePage() {
     setPhoneNumber('');
     setQrSize(280); setErrorLevel('M');
     setFgColor('#000000'); setBgColor('#ffffff');
-    setFrame('none');
+    setFrame('none'); setLogoDataUrl(null); setLogoSize(60);
   };
 
   // Simple mode content types
@@ -407,6 +434,59 @@ export default function QRCodePage() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Logo */}
+          <div className="space-y-2">
+            <Label className="text-xs">Ortaya Logo / İkon</Label>
+            <input
+              ref={logoInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={e => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = ev => setLogoDataUrl(ev.target?.result as string);
+                reader.readAsDataURL(file);
+                e.target.value = '';
+              }}
+            />
+            {logoDataUrl ? (
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg border border-border overflow-hidden bg-white flex items-center justify-center">
+                  <img src={logoDataUrl} alt="Logo" className="w-10 h-10 object-contain" />
+                </div>
+                <div className="flex-1 space-y-1">
+                  <div className="flex justify-between items-center">
+                    <Label className="text-xs">Boyut</Label>
+                    <span className="text-xs text-muted-foreground">{logoSize}px</span>
+                  </div>
+                  <Slider value={[logoSize]} onValueChange={v => setLogoSize(v[0])} min={30} max={100} step={5} />
+                </div>
+                <button
+                  onClick={() => setLogoDataUrl(null)}
+                  className="p-1.5 rounded-md border border-border text-muted-foreground hover:text-destructive hover:border-destructive transition-colors"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 w-full"
+                onClick={() => logoInputRef.current?.click()}
+              >
+                <ImagePlus className="h-3.5 w-3.5" /> Logo Yükle
+              </Button>
+            )}
+            {logoDataUrl && (
+              <p className="text-[10px] text-muted-foreground">
+                Logo eklendiğinde hata düzeltme otomatik olarak Maksimum (H) seviyeye ayarlanır.
+              </p>
+            )}
           </div>
         </div>
       )}
