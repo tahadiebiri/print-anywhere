@@ -60,6 +60,7 @@ export default function QRCodePage() {
   const [frame, setFrame] = useState<QRFrame>('none');
 
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [printing, setPrinting] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { connected } = usePrinter();
@@ -101,7 +102,7 @@ export default function QRCodePage() {
     }).then(setQrDataUrl).catch(() => setQrDataUrl(null));
   }, [qrContent, qrSize, errorLevel, fgColor, bgColor]);
 
-  // Draw combined QR + frame + caption on hidden canvas
+  // Draw combined QR + frame + caption on hidden canvas, then update preview
   useEffect(() => {
     if (!qrDataUrl || !canvasRef.current) return;
     const canvas = canvasRef.current;
@@ -136,6 +137,9 @@ export default function QRCodePage() {
         ctx.textAlign = 'center';
         ctx.fillText(caption, W / 2, qrY + displaySize + 28, W - pad * 2);
       }
+
+      // Update preview from canvas
+      setPreviewUrl(canvas.toDataURL('image/png'));
     };
     img.src = qrDataUrl;
   }, [qrDataUrl, caption, qrSize, frame]);
@@ -154,9 +158,9 @@ export default function QRCodePage() {
   };
 
   const handleDownload = () => {
-    if (!qrDataUrl) return;
+    if (!previewUrl) return;
     const a = document.createElement('a');
-    a.href = qrDataUrl;
+    a.href = previewUrl;
     a.download = `qr-code-${Date.now()}.png`;
     a.click();
     toast.success('QR kod indirildi!');
@@ -407,17 +411,18 @@ export default function QRCodePage() {
         </div>
       )}
 
+      {/* Hidden canvas for rendering */}
+      <canvas ref={canvasRef} className="hidden" />
+
       {/* Preview */}
-      {qrDataUrl && (
+      {previewUrl && (
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Önizleme</Label>
           <div className="flex justify-center">
-            <div className="border-2 border-dashed border-border rounded-lg p-4 bg-white inline-block">
-              <img src={qrDataUrl} alt="QR Code" className="block mx-auto" style={{ width: Math.min(qrSize, 250) }} />
-              {caption && <p className="text-center mt-2 text-sm text-black font-medium">{caption}</p>}
+            <div className="border-2 border-dashed border-border rounded-lg p-2 bg-muted/30 inline-block">
+              <img src={previewUrl} alt="QR Code Preview" className="block" style={{ width: 384, imageRendering: 'pixelated' as any }} />
             </div>
           </div>
-          <canvas ref={canvasRef} className="hidden" />
         </div>
       )}
 
@@ -426,7 +431,7 @@ export default function QRCodePage() {
         <Button variant="outline" size="lg" onClick={handleReset} className="gap-1.5">
           <RotateCcw className="h-4 w-4" />
         </Button>
-        {qrDataUrl && (
+        {previewUrl && (
           <Button variant="outline" size="lg" onClick={handleDownload} className="gap-1.5">
             <Download className="h-4 w-4" /> İndir
           </Button>
