@@ -60,6 +60,7 @@ export default function QRCodePage() {
   const [frame, setFrame] = useState<QRFrame>('none');
 
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [printing, setPrinting] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { connected } = usePrinter();
