@@ -4,6 +4,13 @@ export interface AppPrinterState {
   connected: boolean;
   deviceName: string | null;
   connecting: boolean;
+  batteryLevel: number | null;
+  deviceId: string | null;
+}
+
+export interface PairedDevice {
+  id: string;
+  name: string;
 }
 
 let printerInstance: CatPrinter | null = null;
