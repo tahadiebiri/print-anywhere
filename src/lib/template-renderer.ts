@@ -239,9 +239,9 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
       ctx.fillText('♥', 12, y);
       ctx.fillText('♥', W - 24, y);
     }
-    ctx.font = 'bold 28px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.font = getUserTitleFont(d, 28); ctx.textAlign = 'center';
     ctx.fillText(d.title || '💖', W / 2, 80);
-    if (d.message) { ctx.font = '16px Inter, sans-serif'; wrapText(ctx, d.message, W / 2 - 140, 280, 22, 110); }
+    if (d.message) { ctx.font = getUserBodyFont(d, 16); wrapText(ctx, d.message, W / 2 - 140, 280, 22, 110); }
     ctx.textAlign = 'left';
   },
 
