@@ -17,7 +17,7 @@ export function PrinterHeader() {
     registerThemeClick();
     toggleTheme();
   };
-  const handleDevToggle = () => toggleDev(deviceName);
+  
   const supported = isWebBluetoothSupported();
 
   return (
