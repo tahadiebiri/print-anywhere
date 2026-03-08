@@ -392,11 +392,11 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     ctx.textAlign = 'center'; ctx.fillStyle = 'black';
     ctx.font = '14px sans-serif';
     ctx.fillText('🏆 ✦ 🏆 ✦ 🏆', W / 2, 45);
-    ctx.font = 'bold 36px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 36);
     ctx.fillText(d.title || 'TEBRİKLER', W / 2, 100);
-    ctx.font = 'bold 32px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 32);
     ctx.fillText(d.name || '', W / 2, 155);
-    if (d.reason) { ctx.font = '18px Inter, sans-serif'; wrapText(ctx, d.reason, P, W - P * 2, 24, 200); }
+    if (d.reason) { ctx.font = getUserBodyFont(d, 18); wrapText(ctx, d.reason, P, W - P * 2, 24, 200); }
     ctx.font = '14px sans-serif';
     ctx.fillText('★ ✦ ★ ✦ ★', W / 2, h - 20);
     ctx.textAlign = 'left';
