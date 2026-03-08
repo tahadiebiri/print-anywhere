@@ -2,6 +2,7 @@ import { Home, Type, LayoutTemplate, QrCode, Bluetooth } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { usePrinter } from '@/hooks/use-printer';
+import { useAdminCombo } from '@/hooks/use-admin-combo';
 
 const navItems = [
   { path: '/', icon: Home, label: 'Ana Sayfa' },
