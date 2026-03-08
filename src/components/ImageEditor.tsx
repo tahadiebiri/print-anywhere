@@ -468,7 +468,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
 
       {/* Text tool options */}
       {tool === 'text' && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex gap-2">
             <Input
               value={textInput}
@@ -479,6 +479,40 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
             />
             <Button size="sm" onClick={addText} disabled={!textInput.trim()}>Ekle</Button>
           </div>
+
+          {/* Font & Color row */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">Yazı Tipi</Label>
+              <Select value={textFont} onValueChange={setTextFont}>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {fontOptions.map(f => (
+                    <SelectItem key={f.value} value={f.value} className="text-xs">
+                      <span style={{ fontFamily: f.value }}>{f.label}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">Renk</Label>
+              <div className="flex items-center gap-1 flex-wrap">
+                {colorPresets.map(c => (
+                  <button
+                    key={c}
+                    className={`w-6 h-6 rounded-full border-2 transition-transform ${textColor === c ? 'border-primary scale-110' : 'border-border'}`}
+                    style={{ backgroundColor: c }}
+                    onClick={() => setTextColor(c)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Size */}
           <div className="flex items-center gap-3">
             <Label className="text-xs text-muted-foreground shrink-0">Boyut: {textFontSize}px</Label>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setTextFontSize(s => Math.max(8, s - 2))}>
