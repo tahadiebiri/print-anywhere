@@ -233,7 +233,7 @@ export default function QRCodePage() {
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            <Settings2 className="h-3 w-3" /> Gelişmiş
+            <Settings2 className="h-3 w-3" /> {t('advanced')}
           </button>
         </div>
       </div>
