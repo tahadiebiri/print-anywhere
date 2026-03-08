@@ -331,15 +331,15 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
       ctx.fillText(confetti[i % confetti.length], 15 + (i % 6) * 60, 30 + Math.floor(i / 6) * (h - 50));
     }
     ctx.textAlign = 'center'; ctx.fillStyle = 'black';
-    ctx.font = 'bold 18px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 18);
     ctx.fillText('🎂 Mutlu Yıllar! 🎂', W / 2, 70);
-    ctx.font = 'bold 48px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 48);
     ctx.fillText(d.name || '', W / 2, 140);
     if (d.age) {
-      ctx.font = 'bold 60px Inter, sans-serif';
+      ctx.font = getUserTitleFont(d, 60);
       ctx.fillText(d.age, W / 2, 210);
     }
-    ctx.font = '18px Inter, sans-serif';
+    ctx.font = getUserBodyFont(d, 18);
     wrapText(ctx, d.message || 'İyi ki doğdun!', P, W - P * 2, 24, 250);
     ctx.textAlign = 'left';
   },
