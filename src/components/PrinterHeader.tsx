@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { usePrinter } from '@/hooks/use-printer';
 import { useTheme } from '@/hooks/use-theme';
 import { useDevMode } from '@/hooks/use-devmode';
+import { useAdminCombo } from '@/hooks/use-admin-combo';
 import { isWebBluetoothSupported } from '@/lib/printer';
 import logo from '@/assets/logo.svg';
 
