@@ -1,11 +1,12 @@
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
-import { connectPrinter, disconnectPrinter, setDevLogCallback, type AppPrinterState } from '@/lib/printer';
+import { connectPrinter, disconnectPrinter, readBatteryLevel, setDevLogCallback, type AppPrinterState } from '@/lib/printer';
 import { useDevMode } from '@/hooks/use-devmode';
 
 interface PrinterContextType extends AppPrinterState {
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
   error: string | null;
+  refreshBattery: () => Promise<void>;
 }
 
 const PrinterContext = createContext<PrinterContextType | null>(null);
@@ -15,38 +16,51 @@ export function PrinterProvider({ children }: { children: ReactNode }) {
     connected: false,
     deviceName: null,
     connecting: false,
+    batteryLevel: null,
+    deviceId: null,
   });
   const [error, setError] = useState<string | null>(null);
 
-  return (
-    <PrinterContext.Provider value={{ ...state, connect: useConnectFn(setState, setError), disconnect: useDisconnectFn(setState), error }}>
-      {children}
-    </PrinterContext.Provider>
-  );
-}
+  const refreshBattery = useCallback(async () => {
+    if (!state.connected) return;
+    const level = await readBatteryLevel();
+    if (level !== null) {
+      setState(s => ({ ...s, batteryLevel: level }));
+    }
+  }, [state.connected]);
 
-function useConnectFn(setState: any, setError: any) {
-  return useCallback(async () => {
-    setState((s: AppPrinterState) => ({ ...s, connecting: true }));
+  const connectFn = useCallback(async () => {
+    setState(s => ({ ...s, connecting: true }));
     setError(null);
     try {
-      const name = await connectPrinter();
-      setState({ connected: true, deviceName: name, connecting: false });
+      const { name, id } = await connectPrinter();
+      setState({ connected: true, deviceName: name, connecting: false, batteryLevel: null, deviceId: id });
+      // Try reading battery after connection
+      setTimeout(async () => {
+        const level = await readBatteryLevel();
+        if (level !== null) {
+          setState(s => ({ ...s, batteryLevel: level }));
+        }
+      }, 1000);
     } catch (e: any) {
-      setState((s: AppPrinterState) => ({ ...s, connecting: false }));
+      setState(s => ({ ...s, connecting: false }));
       setError(e.message || 'Bağlantı hatası');
     }
-  }, [setState, setError]);
-}
+  }, []);
 
-function useDisconnectFn(setState: any) {
-  return useCallback(async () => {
+  const disconnectFn = useCallback(async () => {
     try {
       await disconnectPrinter();
     } finally {
-      setState({ connected: false, deviceName: null, connecting: false });
+      setState({ connected: false, deviceName: null, connecting: false, batteryLevel: null, deviceId: null });
     }
-  }, [setState]);
+  }, []);
+
+  return (
+    <PrinterContext.Provider value={{ ...state, connect: connectFn, disconnect: disconnectFn, error, refreshBattery }}>
+      {children}
+    </PrinterContext.Provider>
+  );
 }
 
 // Bridge component to connect devmode logs to printer

@@ -4,6 +4,13 @@ export interface AppPrinterState {
   connected: boolean;
   deviceName: string | null;
   connecting: boolean;
+  batteryLevel: number | null;
+  deviceId: string | null;
+}
+
+export interface PairedDevice {
+  id: string;
+  name: string;
 }
 
 let printerInstance: CatPrinter | null = null;
@@ -88,13 +95,43 @@ export function getPrinter(): CatPrinter {
   return printerInstance;
 }
 
-export async function connectPrinter(): Promise<string> {
+export async function connectPrinter(): Promise<{ name: string; id: string }> {
   const printer = getPrinter();
   devLog('info', 'BLE bağlantı başlatılıyor... Service UUID: 0xAE30 (44592)');
   await printer.connect();
-  const name = (printer as any).device?.name || 'Termal Yazıcı';
+  const device = (printer as any).device;
+  const name = device?.name || 'Termal Yazıcı';
+  const id = device?.id || '';
   devLog('info', `Bağlandı: ${name} | TX: 0xAE01 | RX: 0xAE02`);
-  return name;
+  return { name, id };
+}
+
+export async function readBatteryLevel(): Promise<number | null> {
+  try {
+    const printer = getPrinter();
+    const device = (printer as any).device;
+    if (!device?.gatt?.connected) return null;
+    const server = device.gatt;
+    const service = await server.getPrimaryService('battery_service');
+    const char = await service.getCharacteristic('battery_level');
+    const value = await char.readValue();
+    return value.getUint8(0);
+  } catch {
+    return null;
+  }
+}
+
+export async function getPairedDevices(): Promise<PairedDevice[]> {
+  try {
+    const nav = navigator as any;
+    if (!nav.bluetooth?.getDevices) return [];
+    const devices = await nav.bluetooth.getDevices();
+    return (devices as any[])
+      .filter((d: any) => d.name)
+      .map((d: any) => ({ id: d.id, name: d.name || 'Bilinmeyen' }));
+  } catch {
+    return [];
+  }
 }
 
 export async function disconnectPrinter(): Promise<void> {
