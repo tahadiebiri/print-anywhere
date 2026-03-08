@@ -20,6 +20,9 @@ export default function HomePage() {
   const navigate = useNavigate();
   const { connected, deviceName } = usePrinter();
   const supported = isWebBluetoothSupported();
+  const settings = getAppSettings();
+  const displayLogo = settings.logoUrl || defaultLogo;
+  const appName = settings.appName || 'SılaPrint';
   const [feeding, setFeeding] = useState(false);
   const [showInstall, setShowInstall] = useState(false);
   const [dismissed, setDismissed] = useState(false);
