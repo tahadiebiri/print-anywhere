@@ -355,20 +355,20 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     ctx.fillStyle = 'black'; ctx.textAlign = 'center';
     const style = d.style || 'bold';
     if (style === 'shadow') {
-      ctx.fillStyle = '#999'; ctx.font = 'bold 44px Inter, sans-serif';
+      ctx.fillStyle = '#999'; ctx.font = getUserTitleFont(d, 44);
       ctx.fillText(d.line1 || '', W / 2 + 3, 83);
       ctx.fillStyle = 'black';
     }
     if (style === 'outline') {
-      ctx.font = 'bold 44px Inter, sans-serif';
+      ctx.font = getUserTitleFont(d, 44);
       ctx.strokeStyle = 'black'; ctx.lineWidth = 2;
       ctx.strokeText(d.line1 || '', W / 2, 80);
     } else {
-      ctx.font = 'bold 44px Inter, sans-serif';
+      ctx.font = getUserTitleFont(d, 44);
       ctx.fillText(d.line1 || '', W / 2, 80);
     }
     if (d.line2) {
-      ctx.font = '22px Inter, sans-serif'; ctx.fillStyle = 'black';
+      ctx.font = getUserBodyFont(d, 22); ctx.fillStyle = 'black';
       wrapText(ctx, d.line2, P, W - P * 2, 28, 130);
     }
     // Decorative lines
