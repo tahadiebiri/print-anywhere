@@ -545,7 +545,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
 
       {/* Scale */}
       <div className="space-y-1">
-        <Label className="text-xs text-muted-foreground">Boyut: %{state.scale}</Label>
+        <Label className="text-xs text-muted-foreground">{t('size')}: %{state.scale}</Label>
         <Slider value={[state.scale]} onValueChange={([v]) => update({ scale: v })} min={50} max={200} step={5} />
       </div>
 
