@@ -42,6 +42,7 @@ const App = () => (
                     <Route path="/qr" element={<QRCodePage />} />
                     <Route path="/templates" element={<Templates />} />
                     <Route path="/connect" element={<BluetoothConnect />} />
+                    <Route path="/install" element={<InstallPage />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </main>
