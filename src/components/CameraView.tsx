@@ -45,7 +45,6 @@ export function CameraView({ onCapture }: CameraViewProps) {
     } catch {
       setCameraError('cameraError');
     }
-    }
   }, []);
 
   useEffect(() => {
