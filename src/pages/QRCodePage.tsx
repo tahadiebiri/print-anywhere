@@ -1,12 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import QRCode from 'qrcode';
-import { Printer, Loader2, QrCode, Wifi, User, Mail, Phone, Link, ChevronDown, RotateCcw } from 'lucide-react';
+import { Printer, Loader2, Wifi, User, Mail, Phone, Link, RotateCcw, Download, Settings2, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PageHeader } from '@/components/PageHeader';
 import { usePrinter } from '@/hooks/use-printer';
 import { printCanvas } from '@/lib/printer';
@@ -23,29 +21,30 @@ interface EmailData { to: string; subject: string; body: string; }
 const contentTypeLabels: Record<ContentType, { label: string; icon: any }> = {
   url: { label: 'URL / Metin', icon: Link },
   wifi: { label: 'WiFi', icon: Wifi },
-  vcard: { label: 'Kişi (vCard)', icon: User },
+  vcard: { label: 'Kişi', icon: User },
   email: { label: 'E-posta', icon: Mail },
   phone: { label: 'Telefon', icon: Phone },
 };
 
 const errorLevels: { value: ErrorLevel; label: string; desc: string }[] = [
-  { value: 'L', label: 'Düşük', desc: '~7% düzeltme' },
-  { value: 'M', label: 'Orta', desc: '~15% düzeltme' },
-  { value: 'Q', label: 'Yüksek', desc: '~25% düzeltme' },
-  { value: 'H', label: 'Maksimum', desc: '~30% düzeltme' },
+  { value: 'L', label: 'Düşük', desc: '~7%' },
+  { value: 'M', label: 'Orta', desc: '~15%' },
+  { value: 'Q', label: 'Yüksek', desc: '~25%' },
+  { value: 'H', label: 'Maks', desc: '~30%' },
 ];
 
 const qrFrames: { value: QRFrame; label: string }[] = [
   { value: 'none', label: 'Yok' },
-  { value: 'solid', label: 'Düz Çerçeve' },
-  { value: 'rounded', label: 'Yuvarlatılmış' },
+  { value: 'solid', label: 'Düz' },
+  { value: 'rounded', label: 'Yuvarlak' },
   { value: 'dashed', label: 'Kesikli' },
-  { value: 'double', label: 'Çift Çizgi' },
-  { value: 'shadow', label: 'Gölgeli' },
+  { value: 'double', label: 'Çift' },
+  { value: 'shadow', label: 'Gölge' },
   { value: 'badge', label: 'Rozet' },
 ];
 
 export default function QRCodePage() {
+  const [advancedMode, setAdvancedMode] = useState(false);
   const [contentType, setContentType] = useState<ContentType>('url');
   const [urlText, setUrlText] = useState('');
   const [wifi, setWifi] = useState<WifiData>({ ssid: '', password: '', encryption: 'WPA' });
@@ -65,7 +64,6 @@ export default function QRCodePage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { connected } = usePrinter();
 
-  // Build QR content string
   const getQRContent = (): string => {
     switch (contentType) {
       case 'url': return urlText.trim();
@@ -124,7 +122,6 @@ export default function QRCodePage() {
       ctx.fillStyle = 'white';
       ctx.fillRect(0, 0, W, totalH);
 
-      // Draw frame
       if (frame !== 'none') {
         drawQRFrame(ctx, frame, W, totalH);
       }
@@ -156,6 +153,15 @@ export default function QRCodePage() {
     }
   };
 
+  const handleDownload = () => {
+    if (!qrDataUrl) return;
+    const a = document.createElement('a');
+    a.href = qrDataUrl;
+    a.download = `qr-code-${Date.now()}.png`;
+    a.click();
+    toast.success('QR kod indirildi!');
+  };
+
   const handleReset = () => {
     setUrlText(''); setCaption('');
     setWifi({ ssid: '', password: '', encryption: 'WPA' });
@@ -167,13 +173,41 @@ export default function QRCodePage() {
     setFrame('none');
   };
 
+  // Simple mode content types
+  const simpleTypes: ContentType[] = ['url', 'wifi', 'phone'];
+
   return (
     <div className="p-4 pb-24 max-w-2xl mx-auto space-y-4">
-      <PageHeader title="QR Kod" />
+      <div className="flex items-center justify-between">
+        <PageHeader title="QR Kod" />
+        {/* Mode Toggle */}
+        <div className="flex items-center bg-muted rounded-full p-0.5 border border-border">
+          <button
+            onClick={() => setAdvancedMode(false)}
+            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+              !advancedMode
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <Zap className="h-3 w-3" /> Basit
+          </button>
+          <button
+            onClick={() => setAdvancedMode(true)}
+            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+              advancedMode
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <Settings2 className="h-3 w-3" /> Gelişmiş
+          </button>
+        </div>
+      </div>
 
       {/* Content Type Selector */}
       <div className="flex flex-wrap gap-2">
-        {(Object.keys(contentTypeLabels) as ContentType[]).map(type => {
+        {((advancedMode ? Object.keys(contentTypeLabels) : simpleTypes) as ContentType[]).map(type => {
           const { label, icon: Icon } = contentTypeLabels[type];
           return (
             <button
@@ -211,24 +245,26 @@ export default function QRCodePage() {
               <Label className="text-xs">Şifre</Label>
               <Input type="password" placeholder="WiFi şifresi" value={wifi.password} onChange={e => setWifi(w => ({ ...w, password: e.target.value }))} />
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs">Şifreleme</Label>
-              <div className="flex gap-2">
-                {(['WPA', 'WEP', 'nopass'] as const).map(enc => (
-                  <button
-                    key={enc}
-                    onClick={() => setWifi(w => ({ ...w, encryption: enc }))}
-                    className={`px-3 py-1 rounded-md text-xs font-medium border transition-all ${
-                      wifi.encryption === enc
-                        ? 'bg-primary text-primary-foreground border-primary'
-                        : 'bg-muted/50 text-muted-foreground border-border'
-                    }`}
-                  >
-                    {enc === 'nopass' ? 'Açık' : enc}
-                  </button>
-                ))}
+            {advancedMode && (
+              <div className="space-y-1.5">
+                <Label className="text-xs">Şifreleme</Label>
+                <div className="flex gap-2">
+                  {(['WPA', 'WEP', 'nopass'] as const).map(enc => (
+                    <button
+                      key={enc}
+                      onClick={() => setWifi(w => ({ ...w, encryption: enc }))}
+                      className={`px-3 py-1 rounded-md text-xs font-medium border transition-all ${
+                        wifi.encryption === enc
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'bg-muted/50 text-muted-foreground border-border'
+                      }`}
+                    >
+                      {enc === 'nopass' ? 'Açık' : enc}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </>
         )}
 
@@ -279,95 +315,97 @@ export default function QRCodePage() {
           </div>
         )}
 
-        {/* Caption (all types) */}
+        {/* Caption */}
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">Alt Yazı (isteğe bağlı)</Label>
           <Input placeholder="QR kod altına yazılacak metin" value={caption} onChange={e => setCaption(e.target.value)} />
         </div>
       </div>
 
-      {/* Style & Settings */}
-      <div className="rounded-xl border border-border bg-card p-3 space-y-4">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Stil Ayarları</p>
+      {/* Advanced: Style & Settings */}
+      {advancedMode && (
+        <div className="rounded-xl border border-border bg-card p-3 space-y-4">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Stil Ayarları</p>
 
-        {/* QR Size */}
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <Label className="text-xs">QR Boyut</Label>
-            <span className="text-xs text-muted-foreground">{qrSize}px</span>
+          {/* QR Size */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <Label className="text-xs">QR Boyut</Label>
+              <span className="text-xs text-muted-foreground">{qrSize}px</span>
+            </div>
+            <Slider value={[qrSize]} onValueChange={v => setQrSize(v[0])} min={150} max={350} step={10} />
           </div>
-          <Slider value={[qrSize]} onValueChange={v => setQrSize(v[0])} min={150} max={350} step={10} />
-        </div>
 
-        {/* Error Correction */}
-        <div className="space-y-2">
-          <Label className="text-xs">Hata Düzeltme</Label>
-          <div className="grid grid-cols-4 gap-1.5">
-            {errorLevels.map(lvl => (
-              <button
-                key={lvl.value}
-                onClick={() => setErrorLevel(lvl.value)}
-                className={`text-center px-2 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                  errorLevel === lvl.value
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'
-                }`}
-              >
-                <div>{lvl.label}</div>
-                <div className="text-[10px] opacity-70">{lvl.desc}</div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Colors */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <Label className="text-xs">QR Rengi</Label>
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={fgColor}
-                onChange={e => setFgColor(e.target.value)}
-                className="w-8 h-8 rounded-md border border-border cursor-pointer"
-              />
-              <Input value={fgColor} onChange={e => setFgColor(e.target.value)} className="font-mono text-xs h-8" />
+          {/* Error Correction */}
+          <div className="space-y-2">
+            <Label className="text-xs">Hata Düzeltme</Label>
+            <div className="grid grid-cols-4 gap-1.5">
+              {errorLevels.map(lvl => (
+                <button
+                  key={lvl.value}
+                  onClick={() => setErrorLevel(lvl.value)}
+                  className={`text-center px-2 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                    errorLevel === lvl.value
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'
+                  }`}
+                >
+                  <div>{lvl.label}</div>
+                  <div className="text-[10px] opacity-70">{lvl.desc}</div>
+                </button>
+              ))}
             </div>
           </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs">Arka Plan</Label>
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={bgColor}
-                onChange={e => setBgColor(e.target.value)}
-                className="w-8 h-8 rounded-md border border-border cursor-pointer"
-              />
-              <Input value={bgColor} onChange={e => setBgColor(e.target.value)} className="font-mono text-xs h-8" />
+
+          {/* Colors */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs">QR Rengi</Label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={fgColor}
+                  onChange={e => setFgColor(e.target.value)}
+                  className="w-8 h-8 rounded-md border border-border cursor-pointer"
+                />
+                <Input value={fgColor} onChange={e => setFgColor(e.target.value)} className="font-mono text-xs h-8" />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Arka Plan</Label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={bgColor}
+                  onChange={e => setBgColor(e.target.value)}
+                  className="w-8 h-8 rounded-md border border-border cursor-pointer"
+                />
+                <Input value={bgColor} onChange={e => setBgColor(e.target.value)} className="font-mono text-xs h-8" />
+              </div>
+            </div>
+          </div>
+
+          {/* Frame */}
+          <div className="space-y-2">
+            <Label className="text-xs">Çerçeve</Label>
+            <div className="flex flex-wrap gap-1.5">
+              {qrFrames.map(f => (
+                <button
+                  key={f.value}
+                  onClick={() => setFrame(f.value)}
+                  className={`px-3 py-1 rounded-full text-xs font-medium border transition-all ${
+                    frame === f.value
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
-
-        {/* Frame */}
-        <div className="space-y-2">
-          <Label className="text-xs">Çerçeve</Label>
-          <div className="flex flex-wrap gap-1.5">
-            {qrFrames.map(f => (
-              <button
-                key={f.value}
-                onClick={() => setFrame(f.value)}
-                className={`px-3 py-1 rounded-full text-xs font-medium border transition-all ${
-                  frame === f.value
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Preview */}
       {qrDataUrl && (
@@ -386,8 +424,13 @@ export default function QRCodePage() {
       {/* Actions */}
       <div className="flex gap-2">
         <Button variant="outline" size="lg" onClick={handleReset} className="gap-1.5">
-          <RotateCcw className="h-4 w-4" /> Sıfırla
+          <RotateCcw className="h-4 w-4" />
         </Button>
+        {qrDataUrl && (
+          <Button variant="outline" size="lg" onClick={handleDownload} className="gap-1.5">
+            <Download className="h-4 w-4" /> İndir
+          </Button>
+        )}
         <Button
           className="flex-1 gap-2"
           size="lg"
@@ -444,7 +487,6 @@ function drawQRFrame(ctx: CanvasRenderingContext2D, frame: QRFrame, w: number, h
       ctx.beginPath();
       ctx.roundRect(m, m, w - m * 2, h - m * 2, 18);
       ctx.stroke();
-      // Top banner area
       ctx.fillStyle = 'black';
       ctx.beginPath();
       ctx.roundRect(w / 2 - 50, m - 2, 100, 20, [0, 0, 8, 8]);
