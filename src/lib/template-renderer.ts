@@ -517,7 +517,7 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     const h = 60 + hours * rowH + 20;
     fillBg(ctx, canvas, h);
     ctx.fillStyle = 'black';
-    ctx.font = 'bold 22px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.font = getUserTitleFont(d, 22); ctx.textAlign = 'center';
     ctx.fillText('⏰ ' + (d.date || 'Günlük Plan'), W / 2, 35);
     ctx.textAlign = 'left';
     ctx.strokeStyle = 'black'; ctx.lineWidth = 1;
