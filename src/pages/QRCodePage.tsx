@@ -426,7 +426,7 @@ export default function QRCodePage() {
 
           {/* Frame */}
           <div className="space-y-2">
-            <Label className="text-xs">Çerçeve</Label>
+            <Label className="text-xs">{t('frame')}</Label>
             <div className="flex flex-wrap gap-1.5">
               {qrFrames.map(f => (
                 <button
