@@ -52,7 +52,7 @@ const fontOptions = [
   { value: 'JetBrains Mono', label: 'JetBrains Mono' },
   { value: 'Inter', label: 'Inter' },
   { value: 'Georgia', label: 'Serif' },
-  { value: 'cursive', label: 'El Yazısı' },
+  { value: 'cursive', label: 'handwriting' },
 ];
 
 const colorPresets = [
