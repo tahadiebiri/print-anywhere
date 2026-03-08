@@ -358,7 +358,7 @@ export default function QRCodePage() {
       {/* Advanced: Style & Settings */}
       {advancedMode && (
         <div className="rounded-xl border border-border bg-card p-3 space-y-4">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Stil Ayarları</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t('styleSettings')}</p>
 
           {/* QR Size */}
           <div className="space-y-2">
