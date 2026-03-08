@@ -125,6 +125,7 @@ export function AdminDashboard({ customTemplates, onSaveAll, onAddNew, onEditTem
             <Settings className="h-5 w-5" /> Sistem Ayarları
           </Button>
         )}
+      </div>
 
       {/* Secondary actions */}
       <div className="grid grid-cols-3 gap-2">
