@@ -15,6 +15,7 @@ import TextEditor from "./pages/TextEditor";
 import ImagePrint from "./pages/ImagePrint";
 import QRCodePage from "./pages/QRCodePage";
 import Templates from "./pages/Templates";
+import BluetoothConnect from "./pages/BluetoothConnect";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
