@@ -487,7 +487,7 @@ export default function QRCodePage() {
                 className="gap-1.5 w-full"
                 onClick={() => logoInputRef.current?.click()}
               >
-                <ImagePlus className="h-3.5 w-3.5" /> Logo Yükle
+                <ImagePlus className="h-3.5 w-3.5" /> {t('uploadLogo')}
               </Button>
             )}
             {logoDataUrl && (
