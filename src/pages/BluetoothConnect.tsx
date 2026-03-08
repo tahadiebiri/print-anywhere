@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import {
   Bluetooth, BluetoothOff, BluetoothSearching, Loader2,
-  Signal, Battery, BatteryCharging, BatteryFull, BatteryLow, BatteryMedium,
-  Printer, Unplug, CheckCircle2, AlertTriangle, RefreshCw, History
+  Signal, Battery, BatteryFull, BatteryLow, BatteryMedium,
+  Printer, Unplug, CheckCircle2, AlertTriangle, RefreshCw, History, RotateCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { usePrinter } from '@/hooks/use-printer';
 import { isWebBluetoothSupported, getPairedDevices, type PairedDevice } from '@/lib/printer';
 import { toast } from 'sonner';
@@ -33,7 +35,7 @@ function getBatteryColor(level: number): string {
 }
 
 export default function BluetoothConnect() {
-  const { connected, deviceName, connecting, connect, disconnect, error, batteryLevel, refreshBattery } = usePrinter();
+  const { connected, deviceName, connecting, connect, disconnect, error, batteryLevel, refreshBattery, autoReconnect, setAutoReconnect, reconnecting } = usePrinter();
   const supported = isWebBluetoothSupported();
   const [showInfo, setShowInfo] = useState(false);
   const [pairedDevices, setPairedDevices] = useState<PairedDevice[]>([]);
@@ -106,13 +108,17 @@ export default function BluetoothConnect() {
       {/* Status hero */}
       <div className="text-center py-8 space-y-4">
         <div className={`mx-auto h-24 w-24 rounded-full flex items-center justify-center transition-colors ${
-          connected
-            ? 'bg-green-500/10 dark:bg-green-500/20'
-            : connecting
-              ? 'bg-primary/10 animate-pulse'
-              : 'bg-muted'
+          reconnecting
+            ? 'bg-yellow-500/10 dark:bg-yellow-500/20 animate-pulse'
+            : connected
+              ? 'bg-green-500/10 dark:bg-green-500/20'
+              : connecting
+                ? 'bg-primary/10 animate-pulse'
+                : 'bg-muted'
         }`}>
-          {connecting ? (
+          {reconnecting ? (
+            <RotateCw className="h-12 w-12 text-yellow-500 animate-spin" />
+          ) : connecting ? (
             <BluetoothSearching className="h-12 w-12 text-primary animate-pulse" />
           ) : connected ? (
             <Bluetooth className="h-12 w-12 text-green-500" />
@@ -123,14 +129,16 @@ export default function BluetoothConnect() {
 
         <div className="space-y-1">
           <h1 className="text-xl font-bold">
-            {connecting ? 'Aranıyor...' : connected ? 'Yazıcı Bağlı' : 'Yazıcı Bağlantısı'}
+            {reconnecting ? 'Yeniden Bağlanıyor...' : connecting ? 'Aranıyor...' : connected ? 'Yazıcı Bağlı' : 'Yazıcı Bağlantısı'}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {connecting
-              ? 'Yakındaki BLE yazıcılar taranıyor'
-              : connected
-                ? 'Yazdırmaya hazır'
-                : 'BLE termal yazıcınıza bağlanın'}
+            {reconnecting
+              ? 'Bağlantı koptu, otomatik yeniden bağlanılıyor'
+              : connecting
+                ? 'Yakındaki BLE yazıcılar taranıyor'
+                : connected
+                  ? 'Yazdırmaya hazır'
+                  : 'BLE termal yazıcınıza bağlanın'}
           </p>
         </div>
       </div>
@@ -224,6 +232,19 @@ export default function BluetoothConnect() {
                 <p className="text-xs text-muted-foreground">DPI</p>
                 <p className="text-sm font-semibold mt-0.5">203</p>
               </div>
+            </div>
+
+            {/* Auto-reconnect toggle */}
+            <div className="flex items-center justify-between py-2 px-1">
+              <div className="flex items-center gap-2">
+                <RotateCw className="h-4 w-4 text-muted-foreground" />
+                <Label htmlFor="auto-reconnect" className="text-sm cursor-pointer">Otomatik yeniden bağlan</Label>
+              </div>
+              <Switch
+                id="auto-reconnect"
+                checked={autoReconnect}
+                onCheckedChange={setAutoReconnect}
+              />
             </div>
 
             <Button
