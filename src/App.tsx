@@ -55,6 +55,7 @@ const App = () => (
                       </Routes>
                     </main>
                     <AdminPasswordDialog />
+                    <BrowserCheckDialog />
                     <DevTerminal />
                     <BottomNav />
                   </div>
