@@ -12,7 +12,7 @@ const quickActions = [
   { path: '/text', icon: Type, label: 'Metin Bas', desc: 'Metin yaz ve bas' },
   { path: '/image', icon: Image, label: 'Fotoğraf Bas', desc: 'Kamera veya galeriden bas' },
   { path: '/qr', icon: QrCode, label: 'QR Kod', desc: 'QR kod oluştur ve bas' },
-  { path: '/templates', icon: LayoutTemplate, label: 'Şablonlar', desc: 'Hazır şablon kullan' },
+  { path: '/templates', icon: LayoutTemplate, label: 'Şablonlar', desc: '20+ hazır şablon' },
 ];
 
 export default function HomePage() {
