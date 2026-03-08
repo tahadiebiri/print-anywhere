@@ -410,10 +410,10 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
   };
 
   const toolButtons: { mode: ToolMode; icon: typeof Move; label: string }[] = [
-    { mode: 'move', icon: Move, label: 'Taşı' },
-    { mode: 'pen', icon: Pencil, label: 'Kalem' },
-    { mode: 'eraser', icon: Eraser, label: 'Silgi' },
-    { mode: 'text', icon: Type, label: 'Metin' },
+    { mode: 'move', icon: Move, label: t('move') },
+    { mode: 'pen', icon: Pencil, label: t('pen') },
+    { mode: 'eraser', icon: Eraser, label: t('eraser') },
+    { mode: 'text', icon: Type, label: t('text') },
   ];
 
   return (
