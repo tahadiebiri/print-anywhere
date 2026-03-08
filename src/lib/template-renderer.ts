@@ -259,13 +259,13 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     // Stars
     ctx.font = '12px sans-serif'; ctx.fillStyle = 'black';
     for (let x = 20; x < W - 16; x += 28) { ctx.fillText('★', x, 28); ctx.fillText('★', x, h - 10); }
-    ctx.font = 'bold 22px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.font = getUserTitleFont(d, 22); ctx.textAlign = 'center';
     ctx.fillText(d.title || '⭐ Başarı Belgesi', W / 2, 65);
-    ctx.font = 'bold 28px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 28);
     ctx.fillText(d.name || '', W / 2, 110);
-    ctx.font = '16px Inter, sans-serif';
+    ctx.font = getUserBodyFont(d, 16);
     if (d.message) { wrapText(ctx, d.message, 30, W - 60, 22, 145); }
-    ctx.font = '13px Inter, sans-serif';
+    ctx.font = getUserBodyFont(d, 13);
     ctx.fillText('— ★ ✦ ★ —', W / 2, h - 25);
     ctx.textAlign = 'left';
   },
