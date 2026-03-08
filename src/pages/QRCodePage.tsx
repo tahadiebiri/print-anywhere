@@ -318,8 +318,8 @@ export default function QRCodePage() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Şirket / Kuruluş</Label>
-              <Input placeholder="Şirket adı" value={vcard.org} onChange={e => setVcard(v => ({ ...v, org: e.target.value }))} />
+              <Label className="text-xs">{t('company')}</Label>
+              <Input placeholder={t('companyName')} value={vcard.org} onChange={e => setVcard(v => ({ ...v, org: e.target.value }))} />
             </div>
           </>
         )}
