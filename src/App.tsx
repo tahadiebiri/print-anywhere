@@ -13,6 +13,7 @@ import { PrinterDevBridge } from "@/hooks/use-printer";
 import { BottomNav } from "@/components/BottomNav";
 import { DevTerminal } from "@/components/DevTerminal";
 import { AdminPasswordDialog } from "@/components/admin/AdminPasswordDialog";
+import { BrowserCheckDialog } from "@/components/BrowserCheckDialog";
 import Index from "./pages/Index";
 import TextEditor from "./pages/TextEditor";
 import ImagePrint from "./pages/ImagePrint";
@@ -54,6 +55,7 @@ const App = () => (
                       </Routes>
                     </main>
                     <AdminPasswordDialog />
+                    <BrowserCheckDialog />
                     <DevTerminal />
                     <BottomNav />
                   </div>
