@@ -17,6 +17,7 @@ import QRCodePage from "./pages/QRCodePage";
 import Templates from "./pages/Templates";
 import BluetoothConnect from "./pages/BluetoothConnect";
 import InstallPage from "./pages/InstallPage";
+import AdminTemplates from "./pages/AdminTemplates";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
                     <Route path="/templates" element={<Templates />} />
                     <Route path="/connect" element={<BluetoothConnect />} />
                     <Route path="/install" element={<InstallPage />} />
+                    <Route path="/admin" element={<AdminTemplates />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </main>
