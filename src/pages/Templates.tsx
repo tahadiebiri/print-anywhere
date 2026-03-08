@@ -47,7 +47,11 @@ export default function Templates() {
     const timer = setTimeout(() => {
       const canvas = canvasRef.current!;
       const ctx = canvas.getContext('2d')!;
-      renderTemplate(ctx, canvas, selectedTemplate.render, formData);
+      renderTemplate(ctx, canvas, selectedTemplate.render, formData, {
+        border: selectedTemplate.border,
+        divider: selectedTemplate.divider,
+        customSvg: selectedTemplate.customSvg,
+      });
     }, 100);
     return () => clearTimeout(timer);
   }, [selectedTemplate, formData]);
