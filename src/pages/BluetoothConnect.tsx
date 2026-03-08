@@ -230,6 +230,19 @@ export default function BluetoothConnect() {
               </div>
             </div>
 
+            {/* Auto-reconnect toggle */}
+            <div className="flex items-center justify-between py-2 px-1">
+              <div className="flex items-center gap-2">
+                <RotateCw className="h-4 w-4 text-muted-foreground" />
+                <Label htmlFor="auto-reconnect" className="text-sm cursor-pointer">Otomatik yeniden bağlan</Label>
+              </div>
+              <Switch
+                id="auto-reconnect"
+                checked={autoReconnect}
+                onCheckedChange={setAutoReconnect}
+              />
+            </div>
+
             <Button
               variant="outline"
               className="w-full gap-2 text-destructive hover:text-destructive border-destructive/30 hover:bg-destructive/5"
