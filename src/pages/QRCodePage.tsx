@@ -374,7 +374,7 @@ export default function QRCodePage() {
             <div className="flex items-center justify-between">
               <Label className="text-xs">{t('errorCorrection')}</Label>
               {logoDataUrl && (
-                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">🔒 Logo için H zorunlu</span>
+                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">{t('logoRequiresH')}</span>
               )}
             </div>
             <div className="grid grid-cols-4 gap-1.5">
