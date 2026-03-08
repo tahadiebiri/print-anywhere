@@ -369,17 +369,23 @@ export default function QRCodePage() {
 
           {/* Error Correction */}
           <div className="space-y-2">
-            <Label className="text-xs">Hata Düzeltme</Label>
+            <div className="flex items-center justify-between">
+              <Label className="text-xs">Hata Düzeltme</Label>
+              {logoDataUrl && (
+                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">🔒 Logo için H zorunlu</span>
+              )}
+            </div>
             <div className="grid grid-cols-4 gap-1.5">
               {errorLevels.map(lvl => (
                 <button
                   key={lvl.value}
+                  disabled={!!logoDataUrl}
                   onClick={() => setErrorLevel(lvl.value)}
                   className={`text-center px-2 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                    errorLevel === lvl.value
+                    (logoDataUrl ? lvl.value === 'H' : errorLevel === lvl.value)
                       ? 'bg-primary text-primary-foreground border-primary'
                       : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted'
-                  }`}
+                  } ${logoDataUrl ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <div>{lvl.label}</div>
                   <div className="text-[10px] opacity-70">{lvl.desc}</div>
