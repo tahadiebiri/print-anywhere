@@ -201,7 +201,7 @@ export default function QRCodePage() {
     setPhoneNumber('');
     setQrSize(280); setErrorLevel('M');
     setFgColor('#000000'); setBgColor('#ffffff');
-    setFrame('none');
+    setFrame('none'); setLogoDataUrl(null); setLogoSize(60);
   };
 
   // Simple mode content types
