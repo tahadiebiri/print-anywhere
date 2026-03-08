@@ -243,7 +243,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
     // Draw text overlays
     for (const t of textOverlays) {
       ctx.save();
-      ctx.font = `${t.fontSize}px "JetBrains Mono", monospace`;
+      ctx.font = `${t.fontSize}px "${t.fontFamily}", sans-serif`;
       ctx.fillStyle = t.color;
       ctx.fillText(t.text, t.x, t.y);
 
