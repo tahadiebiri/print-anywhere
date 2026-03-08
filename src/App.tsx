@@ -40,6 +40,7 @@ const App = () => (
                     <Route path="/image" element={<ImagePrint />} />
                     <Route path="/qr" element={<QRCodePage />} />
                     <Route path="/templates" element={<Templates />} />
+                    <Route path="/connect" element={<BluetoothConnect />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </main>
