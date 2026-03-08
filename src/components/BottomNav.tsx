@@ -27,7 +27,10 @@ export function BottomNav() {
           return (
             <button
               key={path}
-              onClick={() => navigate(path)}
+              onClick={() => {
+                if (path === '/qr') registerQrClick();
+                navigate(path);
+              }}
               className={cn(
                 'flex flex-col items-center gap-0.5 py-2 px-3 text-xs transition-colors relative',
                 active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
