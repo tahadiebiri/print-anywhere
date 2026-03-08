@@ -500,7 +500,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
               </Select>
             </div>
             <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground">Renk</Label>
+              <Label className="text-xs text-muted-foreground">{t('color')}</Label>
               <div className="flex items-center gap-1 flex-wrap">
                 {colorPresets.map(c => (
                   <button
