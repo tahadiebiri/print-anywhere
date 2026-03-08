@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { usePrinter } from '@/hooks/use-printer';
 import { isWebBluetoothSupported, feedPaper } from '@/lib/printer';
 import { toast } from 'sonner';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const quickActions = [
   { path: '/text', icon: Type, label: 'Metin Bas', desc: 'Metin yaz ve bas' },
