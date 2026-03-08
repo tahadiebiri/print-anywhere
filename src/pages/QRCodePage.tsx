@@ -223,7 +223,7 @@ export default function QRCodePage() {
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            <Zap className="h-3 w-3" /> Basit
+            <Zap className="h-3 w-3" /> {t('simple')}
           </button>
           <button
             onClick={() => setAdvancedMode(true)}
