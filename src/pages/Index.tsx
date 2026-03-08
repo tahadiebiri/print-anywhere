@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Type, Image, QrCode, LayoutTemplate, Bluetooth, AlertTriangle, ChevronsUp, ChevronsDown, Download, X } from 'lucide-react';
-import logo from '@/assets/logo.svg';
+import defaultLogo from '@/assets/logo.svg';
+import { getAppSettings } from '@/lib/app-settings';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { usePrinter } from '@/hooks/use-printer';
