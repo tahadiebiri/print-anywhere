@@ -130,7 +130,7 @@ export default function Templates() {
               onClick={() => initForm(tmpl)}
             >
               <CardContent className="p-4 text-center space-y-2">
-                <span className="text-3xl">{tmpl.icon}</span>
+                <TemplateIcon icon={tmpl.icon} size="lg" />
                 <p className="font-semibold text-sm">{tmpl.name}</p>
                 <p className="text-xs text-muted-foreground">{tmpl.description}</p>
               </CardContent>
