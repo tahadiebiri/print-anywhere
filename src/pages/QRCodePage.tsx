@@ -492,7 +492,7 @@ export default function QRCodePage() {
             )}
             {logoDataUrl && (
               <p className="text-[10px] text-muted-foreground">
-                Logo eklendiğinde hata düzeltme otomatik olarak Maksimum (H) seviyeye ayarlanır.
+                {t('logoHint')}
               </p>
             )}
           </div>
