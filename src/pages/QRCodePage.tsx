@@ -309,7 +309,7 @@ export default function QRCodePage() {
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1.5">
-                <Label className="text-xs">Telefon</Label>
+                <Label className="text-xs">{t('phone')}</Label>
                 <Input placeholder="+90 555..." value={vcard.phone} onChange={e => setVcard(v => ({ ...v, phone: e.target.value }))} />
               </div>
               <div className="space-y-1.5">
