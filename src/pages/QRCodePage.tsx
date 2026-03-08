@@ -399,7 +399,7 @@ export default function QRCodePage() {
           {/* Colors */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-xs">QR Rengi</Label>
+              <Label className="text-xs">{t('qrColor')}</Label>
               <div className="flex items-center gap-2">
                 <input
                   type="color"
