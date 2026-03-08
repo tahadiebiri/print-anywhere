@@ -468,7 +468,7 @@ export default function QRCodePage() {
                 </div>
                 <div className="flex-1 space-y-1">
                   <div className="flex justify-between items-center">
-                    <Label className="text-xs">Boyut</Label>
+                    <Label className="text-xs">{t('size')}</Label>
                     <span className="text-xs text-muted-foreground">{logoSize}px</span>
                   </div>
                   <Slider value={[logoSize]} onValueChange={v => setLogoSize(v[0])} min={30} max={100} step={5} />
