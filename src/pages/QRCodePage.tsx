@@ -292,7 +292,7 @@ export default function QRCodePage() {
                           : 'bg-muted/50 text-muted-foreground border-border'
                       }`}
                     >
-                      {enc === 'nopass' ? 'Açık' : enc}
+                      {enc === 'nopass' ? t('open') : enc}
                     </button>
                   ))}
                 </div>
