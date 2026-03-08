@@ -1,0 +1,153 @@
+import { useState, useEffect } from 'react';
+import { Download, Share, Check, Smartphone, Monitor, ExternalLink } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
+export default function InstallPage() {
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [installed, setInstalled] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  useEffect(() => {
+    // Check if already installed
+    const standalone = window.matchMedia('(display-mode: standalone)').matches
+      || (navigator as any).standalone === true;
+    setIsStandalone(standalone);
+
+    // Check iOS
+    const ua = navigator.userAgent;
+    setIsIOS(/iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream);
+
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+    window.addEventListener('appinstalled', () => setInstalled(true));
+
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
+    await deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setInstalled(true);
+    }
+    setDeferredPrompt(null);
+  };
+
+  if (isStandalone || installed) {
+    return (
+      <div className="p-4 pb-24 max-w-2xl mx-auto">
+        <div className="text-center py-16 space-y-4">
+          <div className="mx-auto h-20 w-20 rounded-full bg-green-500/10 flex items-center justify-center">
+            <Check className="h-10 w-10 text-green-500" />
+          </div>
+          <h1 className="text-xl font-bold">Uygulama Yüklendi!</h1>
+          <p className="text-sm text-muted-foreground">
+            SılaPrint ana ekranınıza eklendi. Artık bağımsız bir uygulama olarak kullanabilirsiniz.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-4 pb-24 max-w-2xl mx-auto space-y-6">
+      {/* Hero */}
+      <div className="text-center py-8 space-y-4">
+        <div className="mx-auto h-24 w-24 rounded-2xl overflow-hidden shadow-lg">
+          <img src="/pwa-192x192.png" alt="SılaPrint" className="w-full h-full" />
+        </div>
+        <div className="space-y-1">
+          <h1 className="text-xl font-bold">SılaPrint'i Yükle</h1>
+          <p className="text-sm text-muted-foreground">
+            Ana ekranınıza ekleyin, gerçek bir uygulama gibi kulllanın
+          </p>
+        </div>
+      </div>
+
+      {/* Install button (Android / Desktop Chrome) */}
+      {deferredPrompt && (
+        <Button
+          size="lg"
+          className="w-full gap-2 h-14 text-base"
+          onClick={handleInstall}
+        >
+          <Download className="h-5 w-5" />
+          Uygulamayı Yükle
+        </Button>
+      )}
+
+      {/* iOS instructions */}
+      {isIOS && !deferredPrompt && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="p-4 space-y-4">
+            <h3 className="font-semibold text-sm flex items-center gap-2">
+              <Smartphone className="h-4 w-4 text-primary" />
+              iPhone / iPad'e Yükleme
+            </h3>
+            <div className="space-y-3">
+              {[
+                { step: '1', text: 'Safari\'de paylaş butonuna dokunun', icon: Share },
+                { step: '2', text: '"Ana Ekrana Ekle" seçeneğini bulun', icon: ExternalLink },
+                { step: '3', text: '"Ekle" butonuna dokunun', icon: Check },
+              ].map(({ step, text, icon: Icon }) => (
+                <div key={step} className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <span className="text-xs font-bold text-primary">{step}</span>
+                  </div>
+                  <p className="text-sm">{text}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Desktop / fallback instructions */}
+      {!isIOS && !deferredPrompt && (
+        <Card>
+          <CardContent className="p-4 space-y-3">
+            <h3 className="font-semibold text-sm flex items-center gap-2">
+              <Monitor className="h-4 w-4 text-muted-foreground" />
+              Yükleme Talimatları
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Chrome veya Edge adres çubuğundaki yükleme simgesine tıklayın veya tarayıcı menüsünden "Uygulamayı yükle" seçeneğini kullanın.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Features */}
+      <Card>
+        <CardContent className="p-4 space-y-3">
+          <h3 className="font-semibold text-sm">Uygulama Avantajları</h3>
+          <div className="grid grid-cols-1 gap-2">
+            {[
+              'Ana ekrandan tek dokunuşla açın',
+              'Tam ekran deneyim, tarayıcı çubuğu yok',
+              'Çevrimdışı çalışır',
+              'Daha hızlı yükleme süreleri',
+            ].map((text, i) => (
+              <div key={i} className="flex items-center gap-2 py-1">
+                <Check className="h-4 w-4 text-green-500 shrink-0" />
+                <span className="text-sm text-muted-foreground">{text}</span>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
