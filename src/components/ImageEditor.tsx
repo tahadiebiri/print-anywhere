@@ -575,7 +575,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
       {/* Effect & Frame */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Efekt</Label>
+          <Label className="text-xs text-muted-foreground">{t('effect')}</Label>
           <Select value={state.filter} onValueChange={(v) => update({ filter: v as FilterType })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
