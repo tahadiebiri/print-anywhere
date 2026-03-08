@@ -114,10 +114,16 @@ export function AdminDashboard({ customTemplates, onSaveAll, onAddNew, onEditTem
         </Card>
       </div>
 
-      {/* Primary action */}
-      <Button className="w-full gap-2 h-12 text-base" onClick={onAddNew}>
-        <Plus className="h-5 w-5" /> Yeni Şablon Oluştur
-      </Button>
+      {/* Primary actions */}
+      <div className="grid grid-cols-2 gap-3">
+        <Button className="gap-2 h-12 text-base" onClick={onAddNew}>
+          <Plus className="h-5 w-5" /> Yeni Şablon
+        </Button>
+        {onOpenSettings && (
+          <Button variant="outline" className="gap-2 h-12 text-base" onClick={onOpenSettings}>
+            <Settings className="h-5 w-5" /> Sistem Ayarları
+          </Button>
+        )}
 
       {/* Secondary actions */}
       <div className="grid grid-cols-3 gap-2">
