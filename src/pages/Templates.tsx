@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Printer, Loader2, ArrowLeft, Plus, Trash2 } from 'lucide-react';
-import { svgIcons } from '@/lib/svg-assets';
+import { TemplateIcon } from '@/components/TemplateIcon';
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
