@@ -108,13 +108,17 @@ export default function BluetoothConnect() {
       {/* Status hero */}
       <div className="text-center py-8 space-y-4">
         <div className={`mx-auto h-24 w-24 rounded-full flex items-center justify-center transition-colors ${
-          connected
-            ? 'bg-green-500/10 dark:bg-green-500/20'
-            : connecting
-              ? 'bg-primary/10 animate-pulse'
-              : 'bg-muted'
+          reconnecting
+            ? 'bg-yellow-500/10 dark:bg-yellow-500/20 animate-pulse'
+            : connected
+              ? 'bg-green-500/10 dark:bg-green-500/20'
+              : connecting
+                ? 'bg-primary/10 animate-pulse'
+                : 'bg-muted'
         }`}>
-          {connecting ? (
+          {reconnecting ? (
+            <RotateCw className="h-12 w-12 text-yellow-500 animate-spin" />
+          ) : connecting ? (
             <BluetoothSearching className="h-12 w-12 text-primary animate-pulse" />
           ) : connected ? (
             <Bluetooth className="h-12 w-12 text-green-500" />
