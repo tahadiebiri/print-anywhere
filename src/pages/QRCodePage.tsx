@@ -531,7 +531,7 @@ export default function QRCodePage() {
           onClick={handlePrint}
         >
           {printing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
-          {printing ? 'Yazdırılıyor...' : 'Yazdır'}
+          {printing ? t('printing') : t('print')}
         </Button>
       </div>
 
