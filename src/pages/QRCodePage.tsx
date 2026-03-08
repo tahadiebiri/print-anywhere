@@ -212,7 +212,7 @@ export default function QRCodePage() {
   return (
     <div className="p-4 pb-24 max-w-2xl mx-auto space-y-4">
       <div className="flex items-center justify-between">
-        <PageHeader title="QR Kod" />
+        <PageHeader title={t('qrCode')} />
         {/* Mode Toggle */}
         <div className="flex items-center bg-muted rounded-full p-0.5 border border-border">
           <button
