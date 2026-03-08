@@ -485,7 +485,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
           {/* Font & Color row */}
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground">Yazı Tipi</Label>
+              <Label className="text-xs text-muted-foreground">{t('font')}</Label>
               <Select value={textFont} onValueChange={setTextFont}>
                 <SelectTrigger className="h-8 text-xs">
                   <SelectValue />
