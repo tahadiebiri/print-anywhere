@@ -505,7 +505,7 @@ export default function QRCodePage() {
       {/* Preview */}
       {previewUrl && (
         <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">Önizleme</Label>
+          <Label className="text-xs text-muted-foreground">{t('preview')}</Label>
           <div className="flex justify-center">
             <div className="border-2 border-dashed border-border rounded-lg p-2 bg-muted/30 inline-block">
               <img src={previewUrl} alt="QR Code Preview" className="block" style={{ width: 384, imageRendering: 'pixelated' as any }} />
