@@ -44,7 +44,20 @@ interface TextOverlay {
   y: number;
   fontSize: number;
   color: string;
+  fontFamily: string;
 }
+
+const fontOptions = [
+  { value: 'JetBrains Mono', label: 'JetBrains Mono' },
+  { value: 'Inter', label: 'Inter' },
+  { value: 'Georgia', label: 'Serif' },
+  { value: 'cursive', label: 'El Yazısı' },
+];
+
+const colorPresets = [
+  '#000000', '#FFFFFF', '#EF4444', '#F97316',
+  '#EAB308', '#22C55E', '#3B82F6', '#8B5CF6',
+];
 
 type ToolMode = 'move' | 'pen' | 'eraser' | 'text';
 
