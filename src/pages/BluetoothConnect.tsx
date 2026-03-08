@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import {
   Bluetooth, BluetoothOff, BluetoothSearching, Loader2,
-  Signal, Battery, BatteryCharging, BatteryFull, BatteryLow, BatteryMedium,
-  Printer, Unplug, CheckCircle2, AlertTriangle, RefreshCw, History
+  Signal, Battery, BatteryFull, BatteryLow, BatteryMedium,
+  Printer, Unplug, CheckCircle2, AlertTriangle, RefreshCw, History, RotateCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { usePrinter } from '@/hooks/use-printer';
 import { isWebBluetoothSupported, getPairedDevices, type PairedDevice } from '@/lib/printer';
 import { toast } from 'sonner';
