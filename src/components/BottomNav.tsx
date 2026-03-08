@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 const navItems = [
   { path: '/', icon: Home, label: 'Ana Sayfa' },
   { path: '/text', icon: Type, label: 'Metin' },
-  { path: '/image', icon: Image, label: 'Görsel' },
+  { path: '/image', icon: Image, label: 'Fotoğraf' },
   { path: '/qr', icon: QrCode, label: 'QR Kod' },
   { path: '/templates', icon: LayoutTemplate, label: 'Şablonlar' },
 ];

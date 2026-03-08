@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { RotateCw, Printer, Loader2, ArrowLeft } from 'lucide-react';
+import { RotateCw, Printer, Loader2, Undo2, Redo2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -14,32 +14,65 @@ interface ImageEditorProps {
   onBack: () => void;
 }
 
+interface EditorState {
+  scale: number;
+  brightness: number;
+  contrast: number;
+  filter: FilterType;
+  frameType: string;
+  rotation: number;
+  offsetX: number;
+  offsetY: number;
+}
+
+const defaultState: EditorState = {
+  scale: 100, brightness: 0, contrast: 0,
+  filter: 'none', frameType: 'none', rotation: 0,
+  offsetX: 0, offsetY: 0,
+};
+
 export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
-  const [scale, setScale] = useState(100);
-  const [brightness, setBrightness] = useState(0);
-  const [contrast, setContrast] = useState(0);
-  const [filter, setFilter] = useState<FilterType>('none');
-  const [frameType, setFrameType] = useState('none');
-  const [rotation, setRotation] = useState(0);
+  const [state, setState] = useState<EditorState>(defaultState);
+  const [history, setHistory] = useState<EditorState[]>([defaultState]);
+  const [historyIdx, setHistoryIdx] = useState(0);
   const [printing, setPrinting] = useState(false);
 
-  // Drag state
-  const [offsetX, setOffsetX] = useState(0);
-  const [offsetY, setOffsetY] = useState(0);
   const dragRef = useRef<{ startX: number; startY: number; ox: number; oy: number } | null>(null);
-
-  const previewCanvasRef = useRef<HTMLCanvasElement>(null);
-  const printCanvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const { connected } = usePrinter();
 
-  const renderPreview = useCallback(() => {
-    const canvas = previewCanvasRef.current;
+  const pushState = useCallback((next: EditorState) => {
+    setState(next);
+    setHistory(h => [...h.slice(0, historyIdx + 1), next]);
+    setHistoryIdx(i => i + 1);
+  }, [historyIdx]);
+
+  const update = useCallback((partial: Partial<EditorState>) => {
+    pushState({ ...state, ...partial });
+  }, [state, pushState]);
+
+  const undo = () => {
+    if (historyIdx > 0) {
+      setHistoryIdx(i => i - 1);
+      setState(history[historyIdx - 1]);
+    }
+  };
+  const redo = () => {
+    if (historyIdx < history.length - 1) {
+      setHistoryIdx(i => i + 1);
+      setState(history[historyIdx + 1]);
+    }
+  };
+
+  const renderCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const img = new window.Image();
     img.onload = () => {
+      const { scale, brightness, contrast, filter, frameType, rotation, offsetX, offsetY } = state;
       const PRINT_W = 384;
       const scaleFactor = scale / 100;
       const framePad = frameType === 'polaroid' ? 30 : frameType !== 'none' ? 16 : 0;
@@ -82,41 +115,42 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
       ctx.filter = 'none';
       ctx.restore();
 
-      // Render print preview with filter
-      const pc = printCanvasRef.current;
-      if (pc) {
-        pc.width = canvas.width;
-        pc.height = canvas.height;
-        const pctx = pc.getContext('2d')!;
-        pctx.drawImage(canvas, 0, 0);
-        applyFilter(pctx, pc.width, pc.height, filter, framePad, cropW, cropH);
-      }
+      applyFilter(ctx, canvas.width, canvas.height, filter, framePad, cropW, cropH);
     };
     img.src = imageSrc;
-  }, [imageSrc, scale, brightness, contrast, filter, frameType, rotation, offsetX, offsetY]);
+  }, [imageSrc, state]);
 
   useEffect(() => {
-    const timer = setTimeout(renderPreview, 50);
+    const timer = setTimeout(renderCanvas, 50);
     return () => clearTimeout(timer);
-  }, [renderPreview]);
+  }, [renderCanvas]);
 
-  // Drag handlers for the preview canvas
+  // Drag handlers
   const handlePointerDown = (e: React.PointerEvent) => {
-    dragRef.current = { startX: e.clientX, startY: e.clientY, ox: offsetX, oy: offsetY };
+    dragRef.current = { startX: e.clientX, startY: e.clientY, ox: state.offsetX, oy: state.offsetY };
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
   };
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!dragRef.current) return;
-    setOffsetX(dragRef.current.ox + (e.clientX - dragRef.current.startX));
-    setOffsetY(dragRef.current.oy + (e.clientY - dragRef.current.startY));
+    setState(s => ({
+      ...s,
+      offsetX: dragRef.current!.ox + (e.clientX - dragRef.current!.startX),
+      offsetY: dragRef.current!.oy + (e.clientY - dragRef.current!.startY),
+    }));
   };
-  const handlePointerUp = () => { dragRef.current = null; };
+  const handlePointerUp = () => {
+    if (dragRef.current) {
+      // Commit drag to history
+      pushState(state);
+      dragRef.current = null;
+    }
+  };
 
   const handlePrint = async () => {
-    if (!printCanvasRef.current) return;
+    if (!canvasRef.current) return;
     setPrinting(true);
     try {
-      await printCanvas(printCanvasRef.current);
+      await printCanvas(canvasRef.current);
       toast.success('Yazdırıldı!');
     } catch (e: any) {
       toast.error(e.message || 'Yazdırma hatası');
@@ -127,43 +161,45 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
 
   return (
     <div className="p-4 pb-24 max-w-2xl mx-auto space-y-4">
-      <Button variant="ghost" size="sm" onClick={onBack} className="gap-1 -ml-2">
-        <ArrowLeft className="h-4 w-4" /> Geri
-      </Button>
-
-      {/* Scale slider */}
-      <div className="space-y-1">
-        <Label className="text-xs">Boyut: %{scale}</Label>
-        <Slider value={[scale]} onValueChange={([v]) => setScale(v)} min={50} max={200} step={5} />
+      {/* Undo / Redo */}
+      <div className="flex items-center gap-2">
+        <Button variant="outline" size="icon" className="h-8 w-8" onClick={undo} disabled={historyIdx <= 0}>
+          <Undo2 className="h-4 w-4" />
+        </Button>
+        <Button variant="outline" size="icon" className="h-8 w-8" onClick={redo} disabled={historyIdx >= history.length - 1}>
+          <Redo2 className="h-4 w-4" />
+        </Button>
+        <div className="flex-1" />
+        <Button variant="outline" size="sm" className="gap-1" onClick={() => update({ rotation: (state.rotation + 90) % 360 })}>
+          <RotateCw className="h-4 w-4" /> {state.rotation}°
+        </Button>
       </div>
 
-      {/* Rotation */}
-      <Button variant="outline" size="sm" className="gap-1" onClick={() => setRotation(r => (r + 90) % 360)}>
-        <RotateCw className="h-4 w-4" /> Döndür ({rotation}°)
-      </Button>
-
-      {/* Editable preview - draggable */}
+      {/* Scale */}
       <div className="space-y-1">
-        <Label className="text-xs text-muted-foreground">Düzenleme Önizlemesi (sürükle)</Label>
-        <div className="flex justify-center">
-          <div className="border-2 border-dashed border-border rounded-lg p-2 bg-muted/30 inline-block overflow-hidden cursor-grab active:cursor-grabbing touch-none">
-            <canvas
-              ref={previewCanvasRef}
-              style={{ width: '384px', imageRendering: 'auto' }}
-              className="block"
-              onPointerDown={handlePointerDown}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-            />
-          </div>
+        <Label className="text-xs text-muted-foreground">Boyut: %{state.scale}</Label>
+        <Slider value={[state.scale]} onValueChange={([v]) => update({ scale: v })} min={50} max={200} step={5} />
+      </div>
+
+      {/* Canvas preview */}
+      <div className="flex justify-center">
+        <div className="border-2 border-dashed border-border rounded-lg p-2 bg-muted/30 inline-block overflow-hidden cursor-grab active:cursor-grabbing">
+          <canvas
+            ref={canvasRef}
+            style={{ width: '100%', maxWidth: '384px', imageRendering: 'pixelated' }}
+            className="block touch-none"
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+          />
         </div>
       </div>
 
-      {/* Effect & Frame selectors */}
+      {/* Effect & Frame */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">Efekt</Label>
-          <Select value={filter} onValueChange={(v) => setFilter(v as FilterType)}>
+          <Select value={state.filter} onValueChange={(v) => update({ filter: v as FilterType })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               {filters.map(f => (
@@ -174,7 +210,7 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
         </div>
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">Çerçeve</Label>
-          <Select value={frameType} onValueChange={setFrameType}>
+          <Select value={state.frameType} onValueChange={(v) => update({ frameType: v })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               {photoFrames.map(f => (
@@ -186,32 +222,18 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
       </div>
 
       {/* Brightness & Contrast */}
-      <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <Label className="text-xs">Parlaklık: {brightness}</Label>
-          <Slider value={[brightness]} onValueChange={([v]) => setBrightness(v)} min={-50} max={50} step={5} />
+          <Label className="text-xs text-muted-foreground">Parlaklık: {state.brightness}</Label>
+          <Slider value={[state.brightness]} onValueChange={([v]) => update({ brightness: v })} min={-50} max={50} step={5} />
         </div>
         <div className="space-y-1">
-          <Label className="text-xs">Kontrast: {contrast}</Label>
-          <Slider value={[contrast]} onValueChange={([v]) => setContrast(v)} min={-50} max={50} step={5} />
+          <Label className="text-xs text-muted-foreground">Kontrast: {state.contrast}</Label>
+          <Slider value={[state.contrast]} onValueChange={([v]) => update({ contrast: v })} min={-50} max={50} step={5} />
         </div>
       </div>
 
-      {/* Print preview */}
-      <div className="space-y-1">
-        <Label className="text-xs text-muted-foreground">Baskı Önizlemesi</Label>
-        <div className="flex justify-center">
-          <div className="border-2 border-dashed border-border rounded-lg p-2 bg-muted/30 inline-block overflow-x-auto">
-            <canvas
-              ref={printCanvasRef}
-              style={{ width: '384px', imageRendering: 'pixelated' }}
-              className="block"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Print button */}
+      {/* Print */}
       <Button
         className="w-full gap-2"
         size="lg"

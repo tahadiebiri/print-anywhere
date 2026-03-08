@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ClipboardList, ShoppingCart, StickyNote, Tag, Receipt, Printer, Loader2, ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -67,13 +67,11 @@ export default function Templates() {
         const h = 70 + validItems.length * lineH + 20;
         fillBg(h);
         ctx.fillStyle = 'black';
-        // Header with underline
         ctx.font = 'bold 24px Inter, sans-serif';
         ctx.fillText('☑ ' + (title || 'Yapılacaklar'), p, 38);
         ctx.strokeStyle = 'black';
         ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(p, 48); ctx.lineTo(384 - p, 48); ctx.stroke();
-        // Items with checkboxes
         ctx.font = '18px "JetBrains Mono", monospace';
         ctx.lineWidth = 1.5;
         validItems.forEach((item, i) => {
@@ -93,12 +91,10 @@ export default function Templates() {
         ctx.textAlign = 'center';
         ctx.fillText('🛒 ' + (title || 'Alışveriş Listesi'), 192, 35);
         ctx.textAlign = 'left';
-        // Dashed divider
         ctx.setLineDash([3, 3]);
         ctx.strokeStyle = 'black';
         ctx.beginPath(); ctx.moveTo(p, 48); ctx.lineTo(384 - p, 48); ctx.stroke();
         ctx.setLineDash([]);
-        // Table-like items
         ctx.font = '16px "JetBrains Mono", monospace';
         validItems.forEach((item, i) => {
           const y = 72 + i * lineH;
@@ -115,26 +111,21 @@ export default function Templates() {
         const h = 350;
         fillBg(h);
         ctx.fillStyle = 'black';
-        // Decorative header
         ctx.font = 'bold 24px Inter, sans-serif';
         ctx.fillText('📝 ' + (title || 'Not'), p, 35);
-        // Double line under header
         ctx.strokeStyle = 'black';
         ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(p, 46); ctx.lineTo(384 - p, 46); ctx.stroke();
         ctx.lineWidth = 0.5;
         ctx.beginPath(); ctx.moveTo(p, 50); ctx.lineTo(384 - p, 50); ctx.stroke();
-        // Ruled lines with margin line
         ctx.strokeStyle = '#999';
         ctx.lineWidth = 0.5;
         for (let y = 75; y < h - 15; y += 26) {
           ctx.beginPath(); ctx.moveTo(p, y); ctx.lineTo(384 - p, y); ctx.stroke();
         }
-        // Red margin line
         ctx.strokeStyle = '#cc4444';
         ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(50, 55); ctx.lineTo(50, h - 10); ctx.stroke();
-        // Note text
         if (noteBody) {
           ctx.fillStyle = 'black';
           ctx.font = '15px "JetBrains Mono", monospace';
@@ -159,12 +150,10 @@ export default function Templates() {
         const h = 160;
         fillBg(h);
         ctx.fillStyle = 'black';
-        // Ornamental border
         ctx.lineWidth = 3;
         ctx.strokeRect(6, 6, 372, h - 12);
         ctx.lineWidth = 1;
         ctx.strokeRect(12, 12, 360, h - 24);
-        // Decorative corners
         const corner = 20;
         [[12,12],[372-corner+12,12],[12,h-12-corner],[372-corner+12,h-12-corner]].forEach(([cx, cy]) => {
           ctx.fillRect(cx, cy, corner, 2);
@@ -172,7 +161,6 @@ export default function Templates() {
           ctx.fillRect(cx + corner - 2, cy, 2, corner);
           ctx.fillRect(cx, cy + corner - 2, corner, 2);
         });
-        // Content
         ctx.font = 'bold 28px Inter, sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText(title || 'Etiket', 192, 60);
@@ -182,7 +170,6 @@ export default function Templates() {
           ctx.font = 'italic 13px Inter, sans-serif';
           ctx.fillText(labelSubtext, 192, 115);
         }
-        // Divider decoration
         ctx.fillText('— ✦ —', 192, 140);
         ctx.textAlign = 'left';
         break;
@@ -194,22 +181,18 @@ export default function Templates() {
         const h = 160 + validItems.length * lineH + 40;
         fillBg(h);
         ctx.fillStyle = 'black';
-        // Receipt header with dashed border
         ctx.setLineDash([2, 2]);
         ctx.strokeStyle = 'black';
         ctx.strokeRect(p, p, 384 - p * 2, h - p * 2);
         ctx.setLineDash([]);
-        // Store name
         ctx.font = 'bold 26px Inter, sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText(title || 'FİŞ', 192, 50);
         ctx.font = '12px "JetBrains Mono", monospace';
         ctx.fillText(new Date().toLocaleString('tr-TR'), 192, 68);
         ctx.fillText('SılaPrint Terminal', 192, 82);
-        // Divider
         ctx.font = '12px monospace';
         ctx.fillText('═'.repeat(32), 192, 98);
-        // Items
         ctx.textAlign = 'left';
         ctx.font = '16px "JetBrains Mono", monospace';
         validItems.forEach((item, i) => {
@@ -219,7 +202,6 @@ export default function Templates() {
           ctx.fillText(`₺${parseFloat(item.price).toFixed(2)}`, 384 - p - 8, y);
           ctx.textAlign = 'left';
         });
-        // Total
         const totalY = 120 + validItems.length * lineH + 10;
         ctx.textAlign = 'center';
         ctx.font = '12px monospace';
@@ -235,6 +217,14 @@ export default function Templates() {
       }
     }
   };
+
+  // Auto-render preview when inputs change
+  useEffect(() => {
+    if (selected) {
+      const timer = setTimeout(renderToCanvas, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [selected, title, items, noteBody, labelDesc, labelSubtext, receiptItems, shopItems]);
 
   const handlePrint = async () => {
     renderToCanvas();
@@ -403,7 +393,19 @@ export default function Templates() {
         )}
       </div>
 
-      <canvas ref={canvasRef} className="hidden" />
+      {/* Live Preview */}
+      <div className="space-y-1">
+        <Label className="text-xs text-muted-foreground">Önizleme</Label>
+        <div className="flex justify-center">
+          <div className="border-2 border-dashed border-border rounded-lg p-2 bg-muted/30 inline-block">
+            <canvas
+              ref={canvasRef}
+              style={{ width: '100%', maxWidth: '384px', imageRendering: 'pixelated' }}
+              className="block"
+            />
+          </div>
+        </div>
+      </div>
 
       <Button
         className="w-full gap-2"
@@ -412,7 +414,7 @@ export default function Templates() {
         onClick={handlePrint}
       >
         {printing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
-        {printing ? 'Yazdırılıyor...' : 'Önizle ve Bas'}
+        {printing ? 'Yazdırılıyor...' : 'Bas'}
       </Button>
 
       {!connected && (

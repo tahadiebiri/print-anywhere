@@ -15,7 +15,6 @@ export function CameraView({ onCapture }: CameraViewProps) {
   const [cameraReady, setCameraReady] = useState(false);
 
   const startCamera = useCallback(async (facing: 'user' | 'environment') => {
-    // Stop existing stream
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(t => t.stop());
       streamRef.current = null;
@@ -29,7 +28,6 @@ export function CameraView({ onCapture }: CameraViewProps) {
         audio: false,
       };
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      // Reset zoom to 1x on back camera to avoid wide-angle
       if (facing === 'environment') {
         const track = stream.getVideoTracks()[0];
         const caps = track.getCapabilities?.() as any;
@@ -65,7 +63,6 @@ export function CameraView({ onCapture }: CameraViewProps) {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     const ctx = canvas.getContext('2d')!;
-    // Mirror for front camera
     if (facingMode === 'user') {
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
@@ -87,9 +84,9 @@ export function CameraView({ onCapture }: CameraViewProps) {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
-      {/* Camera preview */}
-      <div className="flex-1 relative bg-black overflow-hidden mx-0 mt-0">
+    <div className="fixed inset-0 z-40 flex flex-col bg-black">
+      {/* Camera preview - fills all available space */}
+      <div className="flex-1 relative overflow-hidden">
         {cameraError ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center text-white/70 p-6 text-center gap-3">
             <Camera className="h-12 w-12 opacity-50" />
@@ -107,13 +104,13 @@ export function CameraView({ onCapture }: CameraViewProps) {
         )}
       </div>
 
-      {/* Controls */}
-      <div className="flex items-center justify-between px-6 py-4">
+      {/* Controls - fixed at bottom */}
+      <div className="flex items-center justify-between px-8 py-5 bg-black/80 backdrop-blur-sm safe-area-bottom">
         {/* Gallery */}
         <Button
           variant="ghost"
           size="icon"
-          className="h-12 w-12 rounded-full"
+          className="h-12 w-12 rounded-full text-white hover:bg-white/20"
           onClick={() => galleryRef.current?.click()}
         >
           <ImageIcon className="h-6 w-6" />
@@ -130,16 +127,17 @@ export function CameraView({ onCapture }: CameraViewProps) {
         <button
           onClick={handleCapture}
           disabled={!cameraReady && !cameraError}
-          className="h-16 w-16 rounded-full border-4 border-primary bg-primary/20 flex items-center justify-center active:scale-90 transition-transform disabled:opacity-40"
+          className="h-18 w-18 rounded-full border-4 border-white bg-white/20 flex items-center justify-center active:scale-90 transition-transform disabled:opacity-40"
+          style={{ width: 72, height: 72 }}
         >
-          <div className="h-12 w-12 rounded-full bg-primary" />
+          <div className="rounded-full bg-white" style={{ width: 56, height: 56 }} />
         </button>
 
         {/* Switch camera */}
         <Button
           variant="ghost"
           size="icon"
-          className="h-12 w-12 rounded-full"
+          className="h-12 w-12 rounded-full text-white hover:bg-white/20"
           onClick={toggleCamera}
           disabled={!!cameraError}
         >
