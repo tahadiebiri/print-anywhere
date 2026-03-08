@@ -363,7 +363,7 @@ export default function QRCodePage() {
           {/* QR Size */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <Label className="text-xs">QR Boyut</Label>
+              <Label className="text-xs">{t('qrSize')}</Label>
               <span className="text-xs text-muted-foreground">{qrSize}px</span>
             </div>
             <Slider value={[qrSize]} onValueChange={v => setQrSize(v[0])} min={150} max={350} step={10} />
