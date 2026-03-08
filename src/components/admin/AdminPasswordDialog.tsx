@@ -8,6 +8,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { useAdminCombo } from '@/hooks/use-admin-combo';
@@ -22,6 +23,7 @@ export function AdminPasswordDialog() {
     if (password === 'silaprint2026') {
       setShowPasswordDialog(false);
       setPassword('');
+      sessionStorage.setItem('admin_auth', '1');
       toast.success('Admin paneli açıldı');
       navigate('/admin');
     } else {
@@ -39,6 +41,9 @@ export function AdminPasswordDialog() {
             <Lock className="h-5 w-5 text-primary" />
             Admin Girişi
           </DialogTitle>
+          <DialogDescription className="text-center">
+            Devam etmek için admin şifresini girin
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 pt-2">
           <div className="relative">
