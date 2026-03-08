@@ -540,9 +540,9 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     const h = 80 + rows * (cellSize + gap) + 20;
     fillBg(ctx, canvas, h);
     ctx.fillStyle = 'black';
-    ctx.font = 'bold 22px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.font = getUserTitleFont(d, 22); ctx.textAlign = 'center';
     ctx.fillText('✨ ' + (d.title || 'Alışkanlık'), W / 2, 30);
-    ctx.font = '14px Inter, sans-serif';
+    ctx.font = getUserBodyFont(d, 14);
     ctx.fillText(d.month || '', W / 2, 52);
     ctx.textAlign = 'left';
     const startX = (W - cols * (cellSize + gap) + gap) / 2;
