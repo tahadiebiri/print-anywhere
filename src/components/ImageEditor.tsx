@@ -359,7 +359,8 @@ export function ImageEditor({ imageSrc, onBack }: ImageEditorProps) {
       x: 20,
       y: canvasDims.h / 2,
       fontSize: textFontSize,
-      color: 'black',
+      color: textColor,
+      fontFamily: textFont,
     };
     setTextOverlays(prev => [...prev, newText]);
     setSelectedTextId(newText.id);
