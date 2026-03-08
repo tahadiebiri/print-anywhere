@@ -15,6 +15,7 @@ import TextEditor from "./pages/TextEditor";
 import ImagePrint from "./pages/ImagePrint";
 import QRCodePage from "./pages/QRCodePage";
 import Templates from "./pages/Templates";
+import BluetoothConnect from "./pages/BluetoothConnect";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
                     <Route path="/image" element={<ImagePrint />} />
                     <Route path="/qr" element={<QRCodePage />} />
                     <Route path="/templates" element={<Templates />} />
+                    <Route path="/connect" element={<BluetoothConnect />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </main>
