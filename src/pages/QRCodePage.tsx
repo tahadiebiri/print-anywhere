@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { PageHeader } from '@/components/PageHeader';
 import { usePrinter } from '@/hooks/use-printer';
+import { useLanguage } from '@/hooks/use-language';
 import { printCanvas } from '@/lib/printer';
 import { toast } from 'sonner';
 
@@ -17,31 +18,6 @@ type QRFrame = 'none' | 'solid' | 'rounded' | 'dashed' | 'double' | 'shadow' | '
 interface WifiData { ssid: string; password: string; encryption: 'WPA' | 'WEP' | 'nopass'; }
 interface VCardData { name: string; phone: string; email: string; org: string; }
 interface EmailData { to: string; subject: string; body: string; }
-
-const contentTypeLabels: Record<ContentType, { label: string; icon: any }> = {
-  url: { label: 'URL / Metin', icon: Link },
-  wifi: { label: 'WiFi', icon: Wifi },
-  vcard: { label: 'Kişi', icon: User },
-  email: { label: 'E-posta', icon: Mail },
-  phone: { label: 'Telefon', icon: Phone },
-};
-
-const errorLevels: { value: ErrorLevel; label: string; desc: string }[] = [
-  { value: 'L', label: 'Düşük', desc: '~7%' },
-  { value: 'M', label: 'Orta', desc: '~15%' },
-  { value: 'Q', label: 'Yüksek', desc: '~25%' },
-  { value: 'H', label: 'Maks', desc: '~30%' },
-];
-
-const qrFrames: { value: QRFrame; label: string }[] = [
-  { value: 'none', label: 'Yok' },
-  { value: 'solid', label: 'Düz' },
-  { value: 'rounded', label: 'Yuvarlak' },
-  { value: 'dashed', label: 'Kesikli' },
-  { value: 'double', label: 'Çift' },
-  { value: 'shadow', label: 'Gölge' },
-  { value: 'badge', label: 'Rozet' },
-];
 
 export default function QRCodePage() {
   const [advancedMode, setAdvancedMode] = useState(false);
