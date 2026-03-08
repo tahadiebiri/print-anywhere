@@ -135,7 +135,7 @@ export default function HomePage() {
         <Card className="border-primary/30 bg-primary/5 overflow-hidden">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl overflow-hidden shrink-0">
-              <img src="/pwa-192x192.png" alt="SılaPrint" className="w-full h-full" />
+              <img src="/pwa-192x192.png" alt={appName} className="w-full h-full" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm">Uygulamayı Yükle</p>
