@@ -28,15 +28,6 @@ export function PrinterHeader() {
           <span className="text-lg font-bold tracking-tight">SılaPrint</span>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant={devMode ? 'default' : 'ghost'}
-            size="icon"
-            onClick={handleDevToggle}
-            className="h-8 w-8"
-            title="Developer Mode"
-          >
-            <Code className="h-4 w-4" />
-          </Button>
           <Button variant="ghost" size="icon" onClick={handleThemeToggle} className="h-8 w-8">
             {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
