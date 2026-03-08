@@ -431,7 +431,7 @@ export default function QRCodePage() {
         <Button variant="outline" size="lg" onClick={handleReset} className="gap-1.5">
           <RotateCcw className="h-4 w-4" />
         </Button>
-        {qrDataUrl && (
+        {previewUrl && (
           <Button variant="outline" size="lg" onClick={handleDownload} className="gap-1.5">
             <Download className="h-4 w-4" /> İndir
           </Button>
