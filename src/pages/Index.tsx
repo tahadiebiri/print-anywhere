@@ -125,6 +125,30 @@ export default function HomePage() {
           </Card>
         ))}
       </div>
+
+      {/* Install banner */}
+      {showInstall && !dismissed && (
+        <Card className="border-primary/30 bg-primary/5 overflow-hidden">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl overflow-hidden shrink-0">
+              <img src="/pwa-192x192.png" alt="SılaPrint" className="w-full h-full" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm">Uygulamayı Yükle</p>
+              <p className="text-xs text-muted-foreground">Ana ekranınıza ekleyin, çevrimdışı kullanın</p>
+            </div>
+            <Button size="sm" className="gap-1 shrink-0" onClick={() => navigate('/install')}>
+              <Download className="h-3.5 w-3.5" /> Yükle
+            </Button>
+            <button
+              onClick={() => { setDismissed(true); sessionStorage.setItem('install-dismissed', '1'); }}
+              className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
