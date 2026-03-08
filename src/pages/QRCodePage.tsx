@@ -158,9 +158,9 @@ export default function QRCodePage() {
   };
 
   const handleDownload = () => {
-    if (!qrDataUrl) return;
+    if (!previewUrl) return;
     const a = document.createElement('a');
-    a.href = qrDataUrl;
+    a.href = previewUrl;
     a.download = `qr-code-${Date.now()}.png`;
     a.click();
     toast.success('QR kod indirildi!');
