@@ -35,7 +35,7 @@ function getBatteryColor(level: number): string {
 }
 
 export default function BluetoothConnect() {
-  const { connected, deviceName, connecting, connect, disconnect, error, batteryLevel, refreshBattery } = usePrinter();
+  const { connected, deviceName, connecting, connect, disconnect, error, batteryLevel, refreshBattery, autoReconnect, setAutoReconnect, reconnecting } = usePrinter();
   const supported = isWebBluetoothSupported();
   const [showInfo, setShowInfo] = useState(false);
   const [pairedDevices, setPairedDevices] = useState<PairedDevice[]>([]);
