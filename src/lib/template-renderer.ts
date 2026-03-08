@@ -442,15 +442,15 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     ctx.fillStyle = 'white'; ctx.font = 'bold 12px "JetBrains Mono", monospace';
     ctx.fillText(d.subject || 'MATH', P + 6, P + 16);
     ctx.fillStyle = 'black';
-    ctx.font = 'bold 20px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 20);
     ctx.fillText(d.title || '', P, 68);
     // Formula box
     ctx.fillStyle = '#f0f0f0'; ctx.fillRect(P, 80, W - P * 2, 50);
     ctx.strokeStyle = 'black'; ctx.lineWidth = 1; ctx.strokeRect(P, 80, W - P * 2, 50);
-    ctx.fillStyle = 'black'; ctx.font = 'bold 26px "JetBrains Mono", monospace';
+    ctx.fillStyle = 'black'; ctx.font = getUserTitleFont(d, 26);
     ctx.textAlign = 'center'; ctx.fillText(d.formula || '', W / 2, 113); ctx.textAlign = 'left';
     if (d.note) {
-      ctx.font = '14px Inter, sans-serif'; ctx.fillStyle = '#333';
+      ctx.font = getUserBodyFont(d, 14); ctx.fillStyle = '#333';
       wrapText(ctx, d.note, P, W - P * 2, 20, 155);
     }
   },
