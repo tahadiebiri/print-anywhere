@@ -163,7 +163,140 @@ export function TemplateEditor({ template, onUpdate, onSave, onDelete, onBack }:
         </CardContent>
       </Card>
 
-      {/* Fields section */}
+      {/* Decorations section */}
+      <Card>
+        <div className="px-4 py-2.5 border-b border-border/50 bg-muted/30">
+          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <Paintbrush className="h-3.5 w-3.5" /> Dekorasyon & SVG
+          </Label>
+        </div>
+        <CardContent className="p-4 space-y-4">
+          {/* Icon type */}
+          <div className="space-y-1.5">
+            <Label className="text-xs">İkon Tipi</Label>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant={!template.icon.startsWith('svg:') ? 'default' : 'outline'}
+                size="sm"
+                className="text-xs"
+                onClick={() => onUpdate({ icon: '📄' })}
+              >
+                😀 Emoji
+              </Button>
+              <Button
+                variant={template.icon.startsWith('svg:') ? 'default' : 'outline'}
+                size="sm"
+                className="text-xs"
+                onClick={() => onUpdate({ icon: 'svg:note' })}
+              >
+                <ImageIcon className="h-3.5 w-3.5 mr-1" /> Vektörel
+              </Button>
+            </div>
+            {template.icon.startsWith('svg:') && (
+              <div className="grid grid-cols-4 gap-1.5 mt-2">
+                {Object.entries(svgIcons).map(([key, icon]) => (
+                  <button
+                    key={key}
+                    className={`p-2 rounded-md border text-center text-[10px] transition-all ${
+                      template.icon === `svg:${key}`
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border hover:border-primary/40'
+                    }`}
+                    onClick={() => onUpdate({ icon: `svg:${key}` })}
+                  >
+                    <svg viewBox={icon.viewBox} className="w-5 h-5 mx-auto mb-0.5 fill-current">
+                      <path d={icon.path} />
+                    </svg>
+                    {icon.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Border style */}
+          <div className="space-y-1.5">
+            <Label className="text-xs">Çerçeve Stili</Label>
+            <div className="grid grid-cols-3 gap-1.5">
+              {borderStyles.map(b => (
+                <button
+                  key={b.id}
+                  className={`p-2 rounded-md border text-[10px] text-center transition-all ${
+                    (template.border || 'none') === b.id
+                      ? 'border-primary bg-primary/10'
+                      : 'border-border hover:border-primary/40'
+                  }`}
+                  onClick={() => onUpdate({ border: b.id })}
+                >
+                  {b.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Divider style */}
+          <div className="space-y-1.5">
+            <Label className="text-xs">Ayırıcı Stili</Label>
+            <Select value={template.divider || 'line'} onValueChange={v => onUpdate({ divider: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {dividerStyles.map(d => <SelectItem key={d.id} value={d.id}>{d.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Custom SVG upload */}
+          <div className="space-y-1.5">
+            <Label className="text-xs">Özel SVG Yükle</Label>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 flex-1"
+                onClick={() => {
+                  const input = document.createElement('input');
+                  input.type = 'file';
+                  input.accept = '.svg,image/svg+xml';
+                  input.onchange = async (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0];
+                    if (!file) return;
+                    if (file.size > 100 * 1024) {
+                      toast.error('SVG 100KB\'dan küçük olmalı');
+                      return;
+                    }
+                    const text = await file.text();
+                    if (!text.includes('<svg')) {
+                      toast.error('Geçerli bir SVG dosyası değil');
+                      return;
+                    }
+                    const dataUrl = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(text)))}`;
+                    onUpdate({ customSvg: dataUrl });
+                    toast.success('SVG yüklendi');
+                  };
+                  input.click();
+                }}
+              >
+                <Upload className="h-3.5 w-3.5" /> SVG Dosyası Seç
+              </Button>
+              {template.customSvg && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-destructive"
+                  onClick={() => onUpdate({ customSvg: undefined })}
+                >
+                  Kaldır
+                </Button>
+              )}
+            </div>
+            {template.customSvg && (
+              <div className="flex justify-center p-3 bg-muted/30 rounded-lg border border-dashed border-border">
+                <img src={template.customSvg} alt="Custom SVG" className="h-16 w-auto" style={{ filter: 'grayscale(1)' }} />
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
       <Card>
         <div
           className="px-4 py-2.5 border-b border-border/50 bg-muted/30 flex items-center justify-between cursor-pointer"
