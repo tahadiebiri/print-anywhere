@@ -4,12 +4,14 @@ import { usePrinter } from '@/hooks/use-printer';
 import { useTheme } from '@/hooks/use-theme';
 import { useAdminCombo } from '@/hooks/use-admin-combo';
 import { isWebBluetoothSupported } from '@/lib/printer';
+import { getAppSettings } from '@/lib/app-settings';
 import logo from '@/assets/logo.svg';
 
 export function PrinterHeader() {
   const { connected, deviceName, connecting, connect, disconnect, error } = usePrinter();
   const { theme, toggleTheme } = useTheme();
   const { registerThemeClick } = useAdminCombo();
+  const settings = getAppSettings();
 
   const handleThemeToggle = () => {
     registerThemeClick();
@@ -17,13 +19,15 @@ export function PrinterHeader() {
   };
 
   const supported = isWebBluetoothSupported();
+  const displayLogo = settings.logoUrl || logo;
+  const appName = settings.appName || 'SılaPrint';
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-md">
       <div className="flex items-center justify-between px-4 py-3 max-w-2xl mx-auto">
         <div className="flex items-center gap-2">
-          <img src={logo} alt="SılaPrint" className="h-7 w-auto" />
-          <span className="text-lg font-bold tracking-tight">SılaPrint</span>
+          <img src={displayLogo} alt={appName} className="h-7 w-auto" />
+          <span className="text-lg font-bold tracking-tight">{appName}</span>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={handleThemeToggle} className="h-8 w-8">

@@ -19,9 +19,10 @@ interface AdminDashboardProps {
   onAddNew: () => void;
   onEditTemplate: (idx: number) => void;
   onLogout?: () => void;
+  onOpenSettings?: () => void;
 }
 
-export function AdminDashboard({ customTemplates, onSaveAll, onAddNew, onEditTemplate, onLogout }: AdminDashboardProps) {
+export function AdminDashboard({ customTemplates, onSaveAll, onAddNew, onEditTemplate, onLogout, onOpenSettings }: AdminDashboardProps) {
   const navigate = useNavigate();
   const [jsonMode, setJsonMode] = useState(false);
   const [jsonText, setJsonText] = useState('');
@@ -114,10 +115,17 @@ export function AdminDashboard({ customTemplates, onSaveAll, onAddNew, onEditTem
         </Card>
       </div>
 
-      {/* Primary action */}
-      <Button className="w-full gap-2 h-12 text-base" onClick={onAddNew}>
-        <Plus className="h-5 w-5" /> Yeni Şablon Oluştur
-      </Button>
+      {/* Primary actions */}
+      <div className="grid grid-cols-2 gap-3">
+        <Button className="gap-2 h-12 text-base" onClick={onAddNew}>
+          <Plus className="h-5 w-5" /> Yeni Şablon
+        </Button>
+        {onOpenSettings && (
+          <Button variant="outline" className="gap-2 h-12 text-base" onClick={onOpenSettings}>
+            <Settings className="h-5 w-5" /> Sistem Ayarları
+          </Button>
+        )}
+      </div>
 
       {/* Secondary actions */}
       <div className="grid grid-cols-3 gap-2">

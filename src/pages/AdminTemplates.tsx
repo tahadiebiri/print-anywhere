@@ -9,19 +9,22 @@ import {
 import { AdminLogin } from '@/components/admin/AdminLogin';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { TemplateEditor } from '@/components/admin/TemplateEditor';
+import { AdminSettings } from '@/components/admin/AdminSettings';
 
 export default function AdminTemplates() {
   const navigate = useNavigate();
-  const handleLogout = () => {
-    sessionStorage.removeItem('admin_auth');
-    toast.success('Çıkış yapıldı');
-    navigate('/');
-  };
   const [authenticated, setAuthenticated] = useState(() => {
     return sessionStorage.getItem('admin_auth') === '1';
   });
   const [customTemplates, setCustomTemplates] = useState<TemplateDefinition[]>([]);
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('admin_auth');
+    toast.success('Çıkış yapıldı');
+    navigate('/');
+  };
 
   useEffect(() => {
     setCustomTemplates(getCustomTemplates());
@@ -69,6 +72,10 @@ export default function AdminTemplates() {
     );
   }
 
+  if (showSettings) {
+    return <AdminSettings onBack={() => setShowSettings(false)} />;
+  }
+
   if (editingIdx !== null && customTemplates[editingIdx]) {
     return (
       <TemplateEditor
@@ -88,6 +95,7 @@ export default function AdminTemplates() {
       onAddNew={addNew}
       onEditTemplate={setEditingIdx}
       onLogout={handleLogout}
+      onOpenSettings={() => setShowSettings(true)}
     />
   );
 }
