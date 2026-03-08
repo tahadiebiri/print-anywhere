@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Type, Image, QrCode, LayoutTemplate, Bluetooth, AlertTriangle, ChevronsUp, ChevronsDown } from 'lucide-react';
+import { Type, Image, QrCode, LayoutTemplate, Bluetooth, AlertTriangle, ChevronsUp, ChevronsDown, Download, X } from 'lucide-react';
 import logo from '@/assets/logo.svg';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
