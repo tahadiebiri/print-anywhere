@@ -178,9 +178,9 @@ export default function QRCodePage() {
     setPrinting(true);
     try {
       await printCanvas(canvasRef.current);
-      toast.success('Yazdırıldı!');
+      toast.success(t('printed'));
     } catch (e: any) {
-      toast.error(e.message || 'Yazdırma hatası');
+      toast.error(e.message || t('printError'));
     } finally {
       setPrinting(false);
     }
