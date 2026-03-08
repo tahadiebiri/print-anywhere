@@ -263,7 +263,7 @@ export default function QRCodePage() {
       <div className="space-y-3 rounded-xl border border-border bg-card p-3">
         {contentType === 'url' && (
           <div className="space-y-1.5">
-            <Label className="text-xs">URL veya Metin</Label>
+            <Label className="text-xs">{t('urlOrText')}</Label>
             <Input placeholder="https://example.com" value={urlText} onChange={e => setUrlText(e.target.value)} />
           </div>
         )}
