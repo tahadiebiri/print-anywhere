@@ -10,7 +10,7 @@ import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { TemplateEditor } from '@/components/admin/TemplateEditor';
 
 export default function AdminTemplates() {
-  const [authenticated, setAuthenticated] = useState(false);
+  const [authenticated, setAuthenticated] = useState(true); // Auth handled by combo dialog
   const [customTemplates, setCustomTemplates] = useState<TemplateDefinition[]>([]);
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
 
