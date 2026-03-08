@@ -44,6 +44,7 @@ const App = () => (
                     <Route path="/templates" element={<Templates />} />
                     <Route path="/connect" element={<BluetoothConnect />} />
                     <Route path="/install" element={<InstallPage />} />
+                    <Route path="/admin" element={<AdminTemplates />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </main>
