@@ -572,11 +572,11 @@ const renderers: Record<string, (ctx: CanvasRenderingContext2D, canvas: HTMLCanv
     ctx.strokeStyle = 'black'; ctx.lineWidth = 2;
     ctx.strokeRect(4, 4, W - 8, h - 8);
     ctx.fillStyle = 'black';
-    ctx.font = 'bold 24px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.font = getUserTitleFont(d, 24); ctx.textAlign = 'center';
     ctx.fillText(d.name || 'Ürün', W / 2, 40);
-    if (d.desc) { ctx.font = '14px Inter, sans-serif'; wrapText(ctx, d.desc, P, W - P * 2, 20, 62); }
+    if (d.desc) { ctx.font = getUserBodyFont(d, 14); wrapText(ctx, d.desc, P, W - P * 2, 20, 62); }
     const priceY = 62 + descLines * 20 + 10;
-    ctx.font = 'bold 32px Inter, sans-serif';
+    ctx.font = getUserTitleFont(d, 32);
     ctx.fillText(d.price || '', W / 2, priceY);
     // Barcode
     if (d.barcode) {
