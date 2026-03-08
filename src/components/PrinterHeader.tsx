@@ -1,4 +1,4 @@
-import { Bluetooth, BluetoothOff, Loader2, Sun, Moon, Code } from 'lucide-react';
+import { Bluetooth, BluetoothOff, Loader2, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePrinter } from '@/hooks/use-printer';
 import { useTheme } from '@/hooks/use-theme';
