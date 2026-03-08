@@ -60,7 +60,11 @@ export default function Templates() {
     if (!canvasRef.current) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d')!;
-    renderTemplate(ctx, canvas, selectedTemplate!.render, formData);
+    renderTemplate(ctx, canvas, selectedTemplate!.render, formData, {
+      border: selectedTemplate!.border,
+      divider: selectedTemplate!.divider,
+      customSvg: selectedTemplate!.customSvg,
+    });
     await new Promise(r => setTimeout(r, 100));
     setPrinting(true);
     try {
