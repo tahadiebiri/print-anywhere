@@ -85,6 +85,11 @@ export function AdminDashboard({ customTemplates, onSaveAll, onAddNew, onEditTem
           </h1>
           <p className="text-xs text-muted-foreground">Şablonları oluşturun, düzenleyin ve yönetin</p>
         </div>
+        {onLogout && (
+          <Button variant="outline" size="sm" className="gap-1.5 text-destructive hover:text-destructive" onClick={onLogout}>
+            <LogOut className="h-3.5 w-3.5" /> Çıkış
+          </Button>
+        )}
       </div>
 
       {/* Stats cards */}

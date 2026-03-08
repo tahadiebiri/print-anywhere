@@ -87,6 +87,7 @@ export default function AdminTemplates() {
       onSaveAll={saveAll}
       onAddNew={addNew}
       onEditTemplate={setEditingIdx}
+      onLogout={handleLogout}
     />
   );
 }
