@@ -177,7 +177,20 @@ export async function disconnectPrinter(): Promise<void> {
   }
 }
 
+function ensureConnected(): void {
+  const printer = getPrinter();
+  const device = (printer as any).device;
+  if (!device?.gatt?.connected) {
+    throw new Error('Yazıcı bağlantısı kopmuş. Lütfen yeniden bağlanın.');
+  }
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export async function feedPaper(lines: number = 40): Promise<void> {
+  ensureConnected();
   const printer = getPrinter();
   devLog('info', `Kağıt besleme: ${lines} satır`);
   if (lines > 0) {
@@ -188,6 +201,7 @@ export async function feedPaper(lines: number = 40): Promise<void> {
 }
 
 export async function printCanvas(canvas: HTMLCanvasElement): Promise<void> {
+  ensureConnected();
   const printer = getPrinter();
   const topPad = 40;
   const bottomPad = 120;
@@ -202,16 +216,38 @@ export async function printCanvas(canvas: HTMLCanvasElement): Promise<void> {
 
   devLog('info', `Baskı: ${feedCanvas.width}x${feedCanvas.height}px (pad: ${topPad}+${bottomPad})`);
   await printer.printImage(dataUrl);
-  // Kütüphane beyaz alanı kırpıyor olabilir, ekstra feed gönder
+  // Kütüphane beyaz alanı kırpıyor, baskı bitmesini bekleyip feed gönder
+  devLog('info', 'Baskı sonrası bekleniyor (1.5s)...');
+  await delay(1500);
   devLog('info', 'Baskı sonrası kağıt besleme: 120 satır');
-  await (printer as any).feed(120);
+  try {
+    await (printer as any).feed(120);
+  } catch (e) {
+    devLog('error', `Feed hatası: ${e}`);
+    // İkinci deneme
+    await delay(1000);
+    try {
+      await (printer as any).feed(120);
+      devLog('info', 'Feed ikinci denemede başarılı');
+    } catch {
+      devLog('error', 'Feed ikinci denemede de başarısız');
+    }
+  }
   devLog('info', 'Baskı tamamlandı');
 }
 
 export async function printImageFromUrl(url: string): Promise<void> {
+  ensureConnected();
   const printer = getPrinter();
   devLog('info', `Görsel basılıyor: ${url.slice(0, 60)}...`);
   await printer.printImage(url);
+  await delay(1500);
+  try {
+    await (printer as any).feed(120);
+  } catch {
+    await delay(1000);
+    try { await (printer as any).feed(120); } catch {}
+  }
   devLog('info', 'Görsel baskı tamamlandı');
 }
 
@@ -220,6 +256,7 @@ export async function printText(text: string, options?: {
   fontWeight?: string;
   textAlign?: string;
 }): Promise<void> {
+  ensureConnected();
   const printer = getPrinter();
   devLog('info', `Metin: "${text.slice(0, 40)}..." font:${options?.fontSize || 24}`);
   await printer.printText(text, {
@@ -227,6 +264,13 @@ export async function printText(text: string, options?: {
     fontWeight: options?.fontWeight || 'normal',
     align: (options?.textAlign === 'center' ? 'center' : options?.textAlign === 'right' ? 'end' : 'start') as any,
   });
+  await delay(1500);
+  try {
+    await (printer as any).feed(120);
+  } catch {
+    await delay(1000);
+    try { await (printer as any).feed(120); } catch {}
+  }
   devLog('info', 'Metin baskı tamamlandı');
 }
 
