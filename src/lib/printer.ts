@@ -201,6 +201,7 @@ export async function feedPaper(lines: number = 40): Promise<void> {
 }
 
 export async function printCanvas(canvas: HTMLCanvasElement): Promise<void> {
+  ensureConnected();
   const printer = getPrinter();
   const topPad = 40;
   const bottomPad = 120;
@@ -215,9 +216,23 @@ export async function printCanvas(canvas: HTMLCanvasElement): Promise<void> {
 
   devLog('info', `Baskı: ${feedCanvas.width}x${feedCanvas.height}px (pad: ${topPad}+${bottomPad})`);
   await printer.printImage(dataUrl);
-  // Kütüphane beyaz alanı kırpıyor olabilir, ekstra feed gönder
+  // Kütüphane beyaz alanı kırpıyor, baskı bitmesini bekleyip feed gönder
+  devLog('info', 'Baskı sonrası bekleniyor (1.5s)...');
+  await delay(1500);
   devLog('info', 'Baskı sonrası kağıt besleme: 120 satır');
-  await (printer as any).feed(120);
+  try {
+    await (printer as any).feed(120);
+  } catch (e) {
+    devLog('error', `Feed hatası: ${e}`);
+    // İkinci deneme
+    await delay(1000);
+    try {
+      await (printer as any).feed(120);
+      devLog('info', 'Feed ikinci denemede başarılı');
+    } catch {
+      devLog('error', 'Feed ikinci denemede de başarısız');
+    }
+  }
   devLog('info', 'Baskı tamamlandı');
 }
 
