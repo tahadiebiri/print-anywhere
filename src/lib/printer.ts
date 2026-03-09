@@ -177,7 +177,20 @@ export async function disconnectPrinter(): Promise<void> {
   }
 }
 
+function ensureConnected(): void {
+  const printer = getPrinter();
+  const device = (printer as any).device;
+  if (!device?.gatt?.connected) {
+    throw new Error('Yazıcı bağlantısı kopmuş. Lütfen yeniden bağlanın.');
+  }
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export async function feedPaper(lines: number = 40): Promise<void> {
+  ensureConnected();
   const printer = getPrinter();
   devLog('info', `Kağıt besleme: ${lines} satır`);
   if (lines > 0) {
