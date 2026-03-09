@@ -237,9 +237,17 @@ export async function printCanvas(canvas: HTMLCanvasElement): Promise<void> {
 }
 
 export async function printImageFromUrl(url: string): Promise<void> {
+  ensureConnected();
   const printer = getPrinter();
   devLog('info', `Görsel basılıyor: ${url.slice(0, 60)}...`);
   await printer.printImage(url);
+  await delay(1500);
+  try {
+    await (printer as any).feed(120);
+  } catch {
+    await delay(1000);
+    try { await (printer as any).feed(120); } catch {}
+  }
   devLog('info', 'Görsel baskı tamamlandı');
 }
 
